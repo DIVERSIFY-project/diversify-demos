@@ -1,0 +1,10 @@
+**target/
+**bin/
+.DS_Store
+**.idea/
+**.iml
+**.project
+**.classpath
+**.externalToolBuilders
+**nbactions.xml
+**maven-eclipse.xml

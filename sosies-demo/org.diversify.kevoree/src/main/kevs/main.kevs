@@ -1,0 +1,13 @@
+repo "http://oss.sonatype.org/content/groups/public/"
+
+include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest
+
+include mvn:org.diversify:org.diversify.kevoree:latest
+
+
+add node0 : JavaNode
+add sync : WSGroup
+attach node0 sync
+
+add node0.sosie1 : SosieRunner
