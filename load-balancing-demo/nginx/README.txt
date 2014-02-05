@@ -1,0 +1,1 @@
+Tested with nginx on ubuntu 12.04 LTS

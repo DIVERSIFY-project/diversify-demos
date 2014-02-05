@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>DIVERSIFY Load Balancer Monitor</title>
+        <meta charset="UTF-8">
+        <script type="text/javascript" src="lib/jquery-1.9.0.js"></script>
+        <script type="text/javascript" src="lib/jquery-ui-1.9.2-min.js"></script>
+        <script type="text/javascript" src="js/jquery.jsPlumb-1.5.5.js"></script>
+
+        <style type="text/css">
+            .item {
+                position: absolute;
+                border: 1px solid black;
+                background-color: #ddddff;
+            }
+
+            #container {
+                border: 1px solid gray;
+                width: 800px;
+                height: 400px;
+            }
+            
+            #console {
+                border: 1px solid gray;
+                background-color: #dddddd;
+                width: 800px;
+                height: 100px;
+                overflow:auto;
+                font-family: monospace;
+                font-size: small;
+            }
+
+            .title {
+                padding: 10px;
+                cursor: move;
+            }
+
+            .connect {
+                width: 100%;
+                height: 0px;
+                background-color: white;
+                cursor: pointer;
+            }	
+        </style>
+    </head>
+
+    <body>
+
+
+        <div id="container"></div>
+        <div id="console"></div>
+
+        <script type="text/javascript">
+
+            jsPlumb.ready(function() {
+
+                var LBMSock = new WebSocket("ws://localhost:8099");
+
+                LBMSock.onopen = function()
+                {
+                    // Web Socket is connected, send data using send()
+                    LBMSock.send("Hello!");
+                };
+                LBMSock.onmessage = function(evt)
+                {
+                    var received_msg = evt.data;
+                    document.getElementById('console').innerHTML += "<br/>" + received_msg;
+                    //alert("Message is received...");
+                };
+                LBMSock.onclose = function()
+                {
+                    // websocket is closed.
+                };
+
+                /*
+                 var i = 0;
+                 $('#container').dblclick(function(e) {
+                 var newState = $('<div>').attr('id', 'state' + i).addClass('item');
+                 
+                 var title = $('<div>').addClass('title').text('State ' + i);
+                 var connect = $('<div>').addClass('connect');
+                 
+                 newState.css({
+                 'top': e.pageY,
+                 'left': e.pageX
+                 });
+                 
+                 jsPlumb.makeTarget(newState, {
+                 anchor: 'Continuous'
+                 });
+                 
+                 jsPlumb.makeSource(connect, {
+                 parent: newState,
+                 anchor: 'Continuous'
+                 });
+                 
+                 newState.append(title);
+                 newState.append(connect);
+                 
+                 jsPlumb.draggable(newState, {
+                 containment: 'parent'
+                 });
+                 
+                 newState.dblclick(function(e) {
+                 jsPlumb.detachAllConnections($(this));
+                 $(this).remove();
+                 e.stopPropagation();
+                 });
+                 
+                 $('#container').append(newState);
+                 
+                 i++;
+                 });
+                 */
+            });
+
+
+
+
+
+        </script>
+
+    </body>
+</html>
