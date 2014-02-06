@@ -11,6 +11,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kevoree.version>3.2.4-SNAPSHOT</kevoree.version>
+        <kevoree.library.version>3.1.6-SNAPSHOT</kevoree.library.version>
     </properties>
 
     <dependencies>
@@ -23,6 +24,11 @@
             <groupId>org.kevoree</groupId>
             <artifactId>org.kevoree.api</artifactId>
             <version>${kevoree.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kevoree.library.java</groupId>
+            <artifactId>org.kevoree.library.java.haproxy</artifactId>
+            <version>${kevoree.library.version}</version>
         </dependency>
     </dependencies>
 
