@@ -32,6 +32,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>store</td>
+	<td>javascript{ var artno = Math.floor(Math.random()*100); artno;}</td>
+	<td>artno</td>
+</tr>
+<tr>
 	<td>clickAndWait</td>
 	<td>link=Add article</td>
 	<td></td>
@@ -39,7 +44,7 @@
 <tr>
 	<td>type</td>
 	<td>id=title</td>
-	<td>MDMS Article</td>
+	<td>MDMS-Article-${artno}</td>
 </tr>
 <tr>
 	<td>type</td>
@@ -52,8 +57,13 @@
 	<td></td>
 </tr>
 <tr>
+	<td>assertText</td>
+	<td>xpath=(//h2[contains(text(),${artno})])</td>
+	<td>MDMS-Article-${artno} Delete Edit</td>
+</tr>
+<tr>
 	<td>clickAndWait</td>
-	<td>xpath=(//a[contains(text(),'Edit')])[4]</td>
+	<td>xpath=(//h2[contains(text(),${artno})]/a[text()='Edit'])</td>
 	<td></td>
 </tr>
 <tr>
@@ -67,9 +77,9 @@
 	<td></td>
 </tr>
 <tr>
-	<td>clickAndWait</td>
-	<td>xpath=(//a[contains(text(),'Delete')])[1]</td>
-	<td></td>
+	<td>assertText</td>
+	<td>xpath=(//h2[contains(text(),${artno})])</td>
+	<td>MDMS-Article-${artno} Delete Edit</td>
 </tr>
 <tr>
 	<td>clickAndWait</td>
