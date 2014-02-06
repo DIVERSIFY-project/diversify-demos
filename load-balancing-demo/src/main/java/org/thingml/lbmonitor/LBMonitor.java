@@ -6,6 +6,7 @@
 package org.thingml.lbmonitor;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import org.java_websocket.WebSocketImpl;
 
@@ -27,8 +28,18 @@ public class LBMonitor {
         
         LBWebSocketServer server = new LBWebSocketServer(port);
         server.start();
-        LogReaderSimulator simulator = new LogReaderSimulator(server);
-        simulator.startReader();
+        AbstractLogReader logreader;
+        
+        if (args.length>0 && args[0] != null && new File(args[0]).exists()) {
+            System.out.println("Using input log file: " + args[0]);
+            logreader = new LogReader(server, args[0]);
+        }
+        else {
+            System.out.println("No log file specified on te command line (or file not found). Using simulation.");
+            logreader = new LogReaderSimulator(server);
+        }
+
+        logreader.startReader();
         System.out.println("[LBWebSocketServer] Server stated on port " + server.getPort());
 
         BufferedReader sysin = new BufferedReader(new InputStreamReader(System.in));
@@ -47,6 +58,6 @@ public class LBMonitor {
                 break;
             }
         }
-        simulator.stopReader();
+        logreader.stopReader();
     }
 }

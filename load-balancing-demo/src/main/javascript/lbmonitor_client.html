@@ -14,17 +14,36 @@
                 background-color: #ddddff;
             }
 
+            .server {
+                position: absolute;
+                border: 1px solid gray;
+                background-color: #ddddff;
+                //width: 140px;
+                //height: 40px;
+                font-family: monospace;
+            }
+
+            .client {
+                position: absolute;
+                border: 1px solid gray;
+                background-color: #dddddd;
+                //width: 140px;
+                //height: 40px;
+                font-family: monospace;
+                text-align: center;
+            }
+
             #container {
                 border: 1px solid gray;
                 width: 800px;
                 height: 400px;
             }
-            
+
             #console {
                 border: 1px solid gray;
                 background-color: #dddddd;
                 width: 800px;
-                height: 100px;
+                height: 150px;
                 overflow:auto;
                 font-family: monospace;
                 font-size: small;
@@ -37,7 +56,7 @@
 
             .connect {
                 width: 100%;
-                height: 0px;
+                height: 20px;
                 background-color: white;
                 cursor: pointer;
             }	
@@ -52,6 +71,83 @@
 
         <script type="text/javascript">
 
+            var clients = {};
+            var servers = {};
+
+            function count(hash) {
+                return Object.keys(hash).length;
+            }
+            function contains(hash, value) {
+                return hash[value] == null
+            }
+
+            function add_client(src_addr, src_id) {
+
+                clients[src_addr] = 1;
+                document.getElementById('console').innerHTML += "<br/> New Client : " + src_addr + " #cli = " + count(clients);
+                // Create the client
+                var newState = $('<div>').attr('id', 'client_' + src_id).addClass('client');
+                var title = $('<div>').addClass('title').text(src_addr);
+                var connect = $('<div>').addClass('connect');
+
+                newState.css({
+                    'top': 40,
+                    'left': 20 + 150 * (count(clients) - 1)
+                });
+/*
+                jsPlumb.makeTarget(newState, {
+                    anchor: 'Continuous'
+                });
+
+                jsPlumb.makeSource(connect, {
+                    parent: newState,
+                    anchor: 'Continuous'
+                });
+*/
+                newState.append(title);
+                newState.append(connect);
+
+                jsPlumb.draggable(newState, {
+                    containment: 'parent'
+                });
+
+                $('#container').append(newState);
+            }
+
+            function add_server(srv_addr, srv_id) {
+
+                servers[srv_addr] = 1;
+                document.getElementById('console').innerHTML += "<br/> New Server : " + srv_addr + " #srv = " + count(servers);
+                // Create the client
+                var newState = $('<div>').attr('id', 'server_' + srv_id).addClass('server');
+                var title = $('<div>').addClass('title').text(srv_addr);
+                var connect = $('<div>').addClass('connect');
+
+                newState.css({
+                    'top': 300,
+                    'left': 20 + 150 * (count(servers) - 1)
+                });
+
+                jsPlumb.makeTarget(newState, {
+                    anchor: 'Continuous'
+                });
+
+                jsPlumb.makeSource(connect, {
+                    parent: newState,
+                    anchor: 'Continuous'
+                });
+
+                newState.append(title);
+                newState.append(connect);
+
+                jsPlumb.draggable(newState, {
+                    containment: 'parent'
+                });
+
+                $('#container').append(newState);
+            }
+
+
             jsPlumb.ready(function() {
 
                 var LBMSock = new WebSocket("ws://localhost:8099");
@@ -63,8 +159,43 @@
                 };
                 LBMSock.onmessage = function(evt)
                 {
-                    var received_msg = evt.data;
-                    document.getElementById('console').innerHTML += "<br/>" + received_msg;
+                    var split = evt.data.split(";");
+
+                    if (split.length < 5)
+                        return; // filter some incorrest log entries
+
+                    var time = split[0].trim();
+                    var src_addr = split[1].trim();
+                    var srv_addr = split[2].trim();
+                    var resp_time = split[3].trim();
+                    var request = split[4].trim();
+
+                    var src_id = src_addr.replace(/\./g, '_')
+                    var srv_id = srv_addr.replace(/\./g, '_').replace(/:/g, '_')
+
+                    var log = time + " " + src_addr + " => " + srv_addr + " " + request + " (" + resp_time + ")";
+
+                    if (srv_addr.length < 4)
+                        return; // filter some incomplete requests
+
+                    if (contains(clients, src_addr)) {
+                        add_client(src_addr, src_id);
+                    }
+                    else {
+                        clients[src_addr]++;
+                    }
+
+                    if (contains(servers, srv_addr)) {
+                        add_server(srv_addr, srv_id);
+                    }
+                    else {
+                        servers[srv_addr]++;
+                    }
+                    
+                    jsPlumb.detachAllConnections(document.getElementById('client_' + src_id));
+                    jsPlumb.connect({source: 'client_' + src_id, target: 'server_' + srv_id});
+
+                    document.getElementById('console').innerHTML += "<br/>" + log;
                     //alert("Message is received...");
                 };
                 LBMSock.onclose = function()
@@ -72,46 +203,46 @@
                     // websocket is closed.
                 };
 
-                /*
-                 var i = 0;
-                 $('#container').dblclick(function(e) {
-                 var newState = $('<div>').attr('id', 'state' + i).addClass('item');
-                 
-                 var title = $('<div>').addClass('title').text('State ' + i);
-                 var connect = $('<div>').addClass('connect');
-                 
-                 newState.css({
-                 'top': e.pageY,
-                 'left': e.pageX
-                 });
-                 
-                 jsPlumb.makeTarget(newState, {
-                 anchor: 'Continuous'
-                 });
-                 
-                 jsPlumb.makeSource(connect, {
-                 parent: newState,
-                 anchor: 'Continuous'
-                 });
-                 
-                 newState.append(title);
-                 newState.append(connect);
-                 
-                 jsPlumb.draggable(newState, {
-                 containment: 'parent'
-                 });
-                 
-                 newState.dblclick(function(e) {
-                 jsPlumb.detachAllConnections($(this));
-                 $(this).remove();
-                 e.stopPropagation();
-                 });
-                 
-                 $('#container').append(newState);
-                 
-                 i++;
-                 });
-                 */
+
+                var i = 0;
+                $('#container').dblclick(function(e) {
+                    var newState = $('<div>').attr('id', 'state' + i).addClass('item');
+
+                    var title = $('<div>').addClass('title').text('Server v' + i);
+                    var connect = $('<div>').addClass('connect');
+
+                    newState.css({
+                        'top': e.pageY,
+                        'left': e.pageX
+                    });
+
+                    jsPlumb.makeTarget(newState, {
+                        anchor: 'Continuous'
+                    });
+
+                    jsPlumb.makeSource(connect, {
+                        parent: newState,
+                        anchor: 'Continuous'
+                    });
+
+                    newState.append(title);
+                    newState.append(connect);
+
+                    jsPlumb.draggable(newState, {
+                        containment: 'parent'
+                    });
+
+                    newState.dblclick(function(e) {
+                        jsPlumb.detachAllConnections($(this));
+                        $(this).remove();
+                        e.stopPropagation();
+                    });
+
+                    $('#container').append(newState);
+
+                    i++;
+                });
+
             });
 
 
