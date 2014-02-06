@@ -15,30 +15,10 @@ import java.util.logging.Logger;
  *
  * @author ffl
  */
-public class LogReaderSimulator implements Runnable {
-
-    boolean stop = false;
-    LBWebSocketServer server;
-    Thread thread;
+public class LogReaderSimulator extends AbstractLogReader {
     
     public LogReaderSimulator(LBWebSocketServer server) {
-        this.server = server;
-    }
-    
-    public void startReader() {
-        stop = false;
-        thread = new Thread(this);
-        thread.start();
-    }
-    
-    public void stopReader() {
-        stop = true;
-        try {
-            thread.join();
-        } catch (InterruptedException ex) {
-            Logger.getLogger(LogReaderSimulator.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        thread = null;
+        super(server);
     }
 
     public void run() {
@@ -54,6 +34,9 @@ public class LogReaderSimulator implements Runnable {
                     if (line == null) {
                         break;
                     }
+                    
+                    
+                    
                     server.sendToAll(line);
                     int t = 250 + (int) (Math.random() * 1500);
                     Thread.sleep(t);

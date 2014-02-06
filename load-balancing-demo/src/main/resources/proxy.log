@@ -1,162 +1,59 @@
-127.0.0.1 - - [05/Feb/2014:14:12:31 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.000 msec 1391605951.619 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:12:31 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.001 msec 1391605951.811 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:12:32 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.001 msec 1391605952.003 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:12:32 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.000 msec 1391605952.211 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:12:32 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.001 msec 1391605952.404 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:12:32 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.000 msec 1391605952.592 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:12:32 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.000 msec 1391605952.783 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:12:32 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.000 msec 1391605952.995 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:12:33 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.001 msec 1391605953.201 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:12:33 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.001 msec 1391605953.411 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:12:33 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.000 msec 1391605953.603 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:12:33 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.000 msec 1391605953.793 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:12:34 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.001 msec 1391605954.052 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:12:34 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.001 msec 1391605954.851 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:12:35 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.001 msec 1391605955.012 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:12:35 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.000 msec 1391605955.391 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:12:35 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.000 msec 1391605955.572 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:12:35 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.001 msec 1391605955.840 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:12:36 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.001 msec 1391605956.037 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:12:36 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.001 msec 1391605956.292 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:12:36 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.000 msec 1391605956.467 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:12:36 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.000 msec 1391605956.787 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:12:36 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.001 msec 1391605956.963 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:12:37 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.001 msec 1391605957.238 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:12:37 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.000 msec 1391605957.424 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:12:37 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.000 msec 1391605957.648 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:12:37 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.000 msec 1391605957.840 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:12:38 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.001 msec 1391605958.067 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:12:38 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.001 msec 1391605958.260 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:12:38 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.000 msec 1391605958.386 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:24:26 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.028 msec 1391606666.757 request_time 0.028
-10.218.150.137 - - [05/Feb/2014:14:24:27 +0100]  GET /favicon.ico HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.121 msec 1391606667.057 request_time 0.121
-10.218.150.137 - - [05/Feb/2014:14:24:29 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.001 msec 1391606669.056 request_time 0.001
-10.218.150.137 - - [05/Feb/2014:14:24:29 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.001 msec 1391606669.488 request_time 0.001
-10.218.150.137 - - [05/Feb/2014:14:24:29 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.001 msec 1391606669.904 request_time 0.001
-10.218.150.137 - - [05/Feb/2014:14:24:30 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.000 msec 1391606670.208 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:24:30 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.000 msec 1391606670.576 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:24:30 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.000 msec 1391606670.832 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:24:31 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.000 msec 1391606671.264 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:24:31 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.000 msec 1391606671.778 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:24:32 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.000 msec 1391606672.112 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:24:32 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.000 msec 1391606672.560 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:24:32 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.000 msec 1391606672.897 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:24:33 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.000 msec 1391606673.346 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:24:33 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.000 msec 1391606673.746 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:24:34 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.000 msec 1391606674.193 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:24:34 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.001 msec 1391606674.450 request_time 0.001
-10.218.150.137 - - [05/Feb/2014:14:24:34 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.000 msec 1391606674.690 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:24:34 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.000 msec 1391606674.902 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:24:35 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.000 msec 1391606675.138 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:24:35 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.000 msec 1391606675.352 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:24:35 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.000 msec 1391606675.619 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:24:36 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.000 msec 1391606676.163 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:24:36 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.001 msec 1391606676.355 request_time 0.001
-10.218.150.137 - - [05/Feb/2014:14:24:36 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.000 msec 1391606676.707 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:24:36 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.000 msec 1391606676.947 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:24:37 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.001 msec 1391606677.300 request_time 0.001
-10.218.150.137 - - [05/Feb/2014:14:24:37 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.001 msec 1391606677.475 request_time 0.001
-10.218.150.137 - - [05/Feb/2014:14:24:37 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.001 msec 1391606677.764 request_time 0.001
-10.218.150.137 - - [05/Feb/2014:14:24:37 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.000 msec 1391606677.976 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:24:46 +0100]  - upstream_addr - upstream_response_time - msec 1391606686.664 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:24:48 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.001 msec 1391606688.862 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:24:49 +0100]  GET /favicon.ico HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.001 msec 1391606689.310 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:24:49 +0100]  GET /favicon.ico HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.000 msec 1391606689.311 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:24:53 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.001 msec 1391606693.184 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:24:53 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.000 msec 1391606693.854 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:24:54 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.000 msec 1391606694.221 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:24:55 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.000 msec 1391606695.180 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:24:56 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.001 msec 1391606696.432 request_time 0.001
-10.218.150.137 - - [05/Feb/2014:14:24:57 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.000 msec 1391606697.517 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:24:57 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.004 msec 1391606697.972 request_time 0.004
-10.218.150.137 - - [05/Feb/2014:14:24:58 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.000 msec 1391606698.192 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:24:59 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.000 msec 1391606699.135 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:24:59 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.001 msec 1391606699.359 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:24:59 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.000 msec 1391606699.582 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:00 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.000 msec 1391606700.161 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:00 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.000 msec 1391606700.735 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:01 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.000 msec 1391606701.026 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:01 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.001 msec 1391606701.344 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:25:01 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.000 msec 1391606701.877 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:02 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.000 msec 1391606702.083 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:02 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.001 msec 1391606702.275 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:25:02 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.001 msec 1391606702.466 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:25:02 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.001 msec 1391606702.657 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:25:02 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.000 msec 1391606702.898 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:03 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.001 msec 1391606703.363 request_time 0.001
-10.218.150.137 - - [05/Feb/2014:14:25:03 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.000 msec 1391606703.576 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:03 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.000 msec 1391606703.759 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:03 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.000 msec 1391606703.955 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:04 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.000 msec 1391606704.145 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:04 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.001 msec 1391606704.388 request_time 0.001
-10.218.150.137 - - [05/Feb/2014:14:25:04 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.000 msec 1391606704.597 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:05 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.000 msec 1391606705.072 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:05 +0100]  - upstream_addr - upstream_response_time - msec 1391606705.185 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:05 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.001 msec 1391606705.281 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:25:05 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.000 msec 1391606705.508 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:05 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.000 msec 1391606705.745 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:05 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.000 msec 1391606705.938 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:06 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.000 msec 1391606706.146 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:06 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.000 msec 1391606706.339 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:06 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.000 msec 1391606706.530 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:07 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.000 msec 1391606707.301 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:07 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.000 msec 1391606707.906 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:08 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.000 msec 1391606708.738 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:09 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.001 msec 1391606709.448 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:25:09 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.000 msec 1391606709.799 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:10 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.001 msec 1391606710.007 request_time 0.001
-10.218.150.137 - - [05/Feb/2014:14:25:10 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.000 msec 1391606710.660 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:10 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.000 msec 1391606710.851 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:11 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.001 msec 1391606711.047 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:25:11 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.000 msec 1391606711.671 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:11 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.000 msec 1391606711.895 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:12 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.000 msec 1391606712.116 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:12 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.000 msec 1391606712.325 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:12 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.000 msec 1391606712.824 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:13 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.001 msec 1391606713.014 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:25:13 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.001 msec 1391606713.638 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:25:13 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.000 msec 1391606713.852 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:14 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.001 msec 1391606714.041 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:25:14 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.000 msec 1391606714.217 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:14 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.001 msec 1391606714.681 request_time 0.001
-10.218.150.137 - - [05/Feb/2014:14:25:14 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.000 msec 1391606714.870 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:15 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.000 msec 1391606715.082 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:15 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.000 msec 1391606715.286 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:15 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.000 msec 1391606715.862 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:16 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.001 msec 1391606716.058 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:25:16 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.000 msec 1391606716.282 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:16 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.000 msec 1391606716.505 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:17 +0100]  - upstream_addr - upstream_response_time - msec 1391606717.305 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:17 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.001 msec 1391606717.369 request_time 0.001
-10.218.150.137 - - [05/Feb/2014:14:25:17 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.000 msec 1391606717.527 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:17 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.000 msec 1391606717.818 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:17 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.000 msec 1391606717.993 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:18 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.000 msec 1391606718.299 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:19 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.001 msec 1391606719.115 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:25:19 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.000 msec 1391606719.291 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:19 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.000 msec 1391606719.595 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:20 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.000 msec 1391606720.569 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:20 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.000 msec 1391606720.729 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:20 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.000 msec 1391606720.986 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:21 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.000 msec 1391606721.305 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:22 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.000 msec 1391606722.044 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:22 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.001 msec 1391606722.218 request_time 0.001
-10.218.150.137 - - [05/Feb/2014:14:25:22 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.001 msec 1391606722.558 request_time 0.001
-10.218.150.137 - - [05/Feb/2014:14:25:22 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.000 msec 1391606722.794 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:23 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.001 msec 1391606723.167 request_time 0.001
-10.218.150.137 - - [05/Feb/2014:14:25:23 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.001 msec 1391606723.536 request_time 0.001
-10.218.150.137 - - [05/Feb/2014:14:25:23 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.001 msec 1391606723.708 request_time 0.001
-10.218.150.137 - - [05/Feb/2014:14:25:24 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.000 msec 1391606724.046 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:24 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.000 msec 1391606724.668 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:25 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.001 msec 1391606725.739 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:25:26 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.000 msec 1391606726.475 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:27 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.001 msec 1391606727.309 request_time 0.001
-10.218.150.137 - - [05/Feb/2014:14:25:27 +0100]  - upstream_addr - upstream_response_time - msec 1391606727.373 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:27 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.001 msec 1391606727.729 request_time 0.001
-10.218.150.137 - - [05/Feb/2014:14:25:27 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.000 msec 1391606727.921 request_time 0.000
-10.218.150.137 - - [05/Feb/2014:14:25:28 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.000 msec 1391606728.344 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:28 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8005 upstream_response_time 0.001 msec 1391606728.976 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:25:29 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8004 upstream_response_time 0.000 msec 1391606729.214 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:29 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8003 upstream_response_time 0.001 msec 1391606729.550 request_time 0.001
-127.0.0.1 - - [05/Feb/2014:14:25:29 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8002 upstream_response_time 0.000 msec 1391606729.742 request_time 0.000
-127.0.0.1 - - [05/Feb/2014:14:25:30 +0100]  GET / HTTP/1.1 upstream_addr 127.0.0.1:8001 upstream_response_time 0.000 msec 1391606730.064 request_time 0.000
+[06/Feb/2014:11:09:57 +0100]; 127.0.0.1; 127.0.0.1:8005; 0.001; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:09:57 +0100]; 127.0.0.1; 127.0.0.1:8004; 0.000; GET /favicon.ico HTTP/1.1; -;gzipon
+[06/Feb/2014:11:09:57 +0100]; 127.0.0.1; 127.0.0.1:8003; 0.000; GET /favicon.ico HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:14 +0100]; 127.0.0.1; 127.0.0.1:8002; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:18 +0100]; 10.218.144.144; 127.0.0.1:8001; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:18 +0100]; 10.218.144.144; 127.0.0.1:8005; 0.001; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:21 +0100]; 127.0.0.1; 127.0.0.1:8004; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:21 +0100]; 127.0.0.1; 127.0.0.1:8003; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:22 +0100]; 127.0.0.1; 127.0.0.1:8002; 0.001; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:25 +0100]; 10.218.144.144; 127.0.0.1:8001; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:25 +0100]; 10.218.144.144; 127.0.0.1:8005; 0.001; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:26 +0100]; 10.218.144.144; 127.0.0.1:8004; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:26 +0100]; 10.218.144.144; 127.0.0.1:8003; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:26 +0100]; 10.218.144.144; 127.0.0.1:8002; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:28 +0100]; 127.0.0.1; 127.0.0.1:8001; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:31 +0100]; 10.218.144.144; 127.0.0.1:8005; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:32 +0100]; 127.0.0.1; 127.0.0.1:8004; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:36 +0100]; 10.218.144.144; 127.0.0.1:8003; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:37 +0100]; 10.218.144.144; 127.0.0.1:8002; 0.001; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:37 +0100]; 10.218.144.144; 127.0.0.1:8001; 0.001; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:37 +0100]; 10.218.144.144; 127.0.0.1:8005; 0.001; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:38 +0100]; 10.218.144.144; -; -; -; -;gzipon
+[06/Feb/2014:11:10:39 +0100]; 127.0.0.1; 127.0.0.1:8004; 0.001; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:40 +0100]; 127.0.0.1; 127.0.0.1:8003; 0.001; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:40 +0100]; 127.0.0.1; 127.0.0.1:8002; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:40 +0100]; 127.0.0.1; 127.0.0.1:8001; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:40 +0100]; 127.0.0.1; 127.0.0.1:8005; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:41 +0100]; 127.0.0.1; 127.0.0.1:8004; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:43 +0100]; 10.218.144.144; 127.0.0.1:8003; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:43 +0100]; 10.218.144.144; 127.0.0.1:8002; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:45 +0100]; 127.0.0.1; 127.0.0.1:8001; 0.001; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:45 +0100]; 127.0.0.1; 127.0.0.1:8005; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:47 +0100]; 10.218.144.144; 127.0.0.1:8004; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:48 +0100]; 10.218.144.144; 127.0.0.1:8003; 0.001; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:48 +0100]; 10.218.144.144; 127.0.0.1:8002; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:48 +0100]; 10.218.144.144; 127.0.0.1:8001; 0.001; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:48 +0100]; 10.218.144.144; 127.0.0.1:8005; 0.001; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:49 +0100]; 127.0.0.1; 127.0.0.1:8004; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:50 +0100]; 127.0.0.1; 127.0.0.1:8003; 0.001; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:50 +0100]; 127.0.0.1; 127.0.0.1:8002; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:50 +0100]; 127.0.0.1; 127.0.0.1:8001; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:50 +0100]; 127.0.0.1; 127.0.0.1:8005; 0.001; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:52 +0100]; 10.218.144.144; 127.0.0.1:8004; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:53 +0100]; 10.218.144.144; 127.0.0.1:8003; 0.001; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:53 +0100]; 10.218.144.144; -; -; -; -;gzipon
+[06/Feb/2014:11:10:53 +0100]; 10.218.144.144; 127.0.0.1:8002; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:54 +0100]; 127.0.0.1; 127.0.0.1:8001; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:54 +0100]; 127.0.0.1; 127.0.0.1:8005; 0.001; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:56 +0100]; 10.218.144.144; 127.0.0.1:8004; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:57 +0100]; 10.218.144.144; 127.0.0.1:8003; 0.001; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:57 +0100]; 10.218.144.144; 127.0.0.1:8002; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:57 +0100]; 10.218.144.144; 127.0.0.1:8001; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:58 +0100]; 127.0.0.1; 127.0.0.1:8005; 0.001; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:58 +0100]; 127.0.0.1; 127.0.0.1:8004; 0.001; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:59 +0100]; 127.0.0.1; 127.0.0.1:8003; 0.001; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:59 +0100]; 127.0.0.1; 127.0.0.1:8002; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:59 +0100]; 127.0.0.1; 127.0.0.1:8001; 0.000; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:10:59 +0100]; 127.0.0.1; 127.0.0.1:8005; 0.001; GET / HTTP/1.1; -;gzipon
+[06/Feb/2014:11:11:03 +0100]; 10.218.144.144; -; -; -; -;gzipon
