@@ -1,9 +1,25 @@
 package org.diversify.demo
 
+import java.io.File
 import java.util.List
-
+import java.io.FileOutputStream
+import java.io.PrintWriter
 
 class NginxXtendGenerator {
+	
+	def void deployConfig(Node master, List<Node> slaves){
+		
+		val File f = new File("/etc/nginx/sites-enabled/site-enabled")
+		if (f.exists){
+			f.delete
+		}
+		f.createNewFile
+		val FileOutputStream fo = new FileOutputStream(f)
+		val printer = new PrintWriter(fo)
+		printer.println(generateConfig(master,slaves))
+		printer.flush
+		fo.close
+	}
 	
 	
 	def String generateConfig(Node master, List<Node> slaves ){
