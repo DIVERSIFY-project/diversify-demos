@@ -1,0 +1,104 @@
+###############################################################################
+# Here are 5 dummy servers which represent 5 version of the
+# running application
+# All servers are running on different ports but on the same machine
+###############################################################################
+
+server {
+	server_name localhost;
+	listen		8001;
+	root 		/var/www/server1;
+	access_log 	/var/www/server1/logs/access.log;
+	error_log  	/var/www/server1/logs/error.log;
+
+	location / {
+		try_files $uri $uri/ /index.html;
+		autoindex on;
+	}
+}
+
+server {
+	server_name localhost;
+	listen		8002;
+	root 		/var/www/server2;
+	access_log 	/var/www/server2/logs/access.log;
+	error_log  	/var/www/server2/logs/error.log;
+
+	location / {
+		try_files $uri $uri/ /index.html;
+		autoindex on;
+	}
+}
+
+server {
+	server_name localhost;
+	listen		8003;
+	root 		/var/www/server3;
+	access_log 	/var/www/server3/logs/access.log;
+	error_log  	/var/www/server3/logs/error.log;
+
+	location / {
+		try_files $uri $uri/ /index.html;
+		autoindex on;
+	}
+}
+
+server {
+	server_name localhost;
+	listen		8004;
+	root 		/var/www/server4;
+	access_log 	/var/www/server4/logs/access.log;
+	error_log  	/var/www/server4/logs/error.log;
+
+	location / {
+		try_files $uri $uri/ /index.html;
+		autoindex on;
+	}
+}
+
+server {
+	server_name localhost;
+	listen		8005;
+	root 		/var/www/server5;
+	access_log 	/var/www/server5/logs/access.log;
+	error_log  	/var/www/server5/logs/error.log;
+
+	location / {
+		try_files $uri $uri/ /index.html;
+		autoindex on;
+	}
+}
+
+###############################################################################
+# Definition of the Load balancer backend
+# Even distribution of the requests on the different servers
+# No ip hash at this point
+# We can also define weigths for each server in order to favor one or the other
+###############################################################################
+
+	upstream backend {
+		
+		server 127.0.0.1:8001;
+		server 127.0.0.1:8002;
+		server 127.0.0.1:8003;
+		server 127.0.0.1:8004;
+		server 127.0.0.1:8005;
+	}
+
+
+###############################################################################
+# Definition of the load balancer front-end
+###############################################################################
+
+
+server {
+	listen	80;
+	server_name localhost;
+	access_log /var/www/proxy.log proxy;
+	
+	location / {
+		proxy_pass http://backend;
+	}
+}
+
+
