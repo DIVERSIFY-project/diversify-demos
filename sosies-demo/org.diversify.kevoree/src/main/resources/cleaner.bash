@@ -6,8 +6,7 @@ database="./mdms.db"
 
 ringotgz="ringojs.tgz"
 
-# TODO replace name of sosie file
-sosie="./js2.jar"
+sosie="./sosie.jar"
 
 rm -rf ${ringo_home}
 rm -rf ${mdms_home}

@@ -62,8 +62,9 @@ public class DistributedHaProxy extends HAProxy {
                         Server s = new Server();
                         s.setIp(address);
                         s.setName(instance.getName());
+                        String port = instance.getDictionary().findValuesByID("port").getValue();
 //                        s.setPort(instance.getDictionary().findValuesByID("http_port").getValue());
-                        s.setPort("8080"); // set by default because I don't how to change it in SosieRunner
+                        s.setPort(port); // set by default because I don't how to change it in SosieRunner
                         backend.getServers().add(s);
                     }
                 }

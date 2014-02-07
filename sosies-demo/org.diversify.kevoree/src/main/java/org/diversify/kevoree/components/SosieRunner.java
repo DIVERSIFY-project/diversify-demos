@@ -3,8 +3,11 @@ package org.diversify.kevoree.components;
 import org.kevoree.annotation.*;
 import org.kevoree.api.Context;
 import org.kevoree.log.Log;
+import org.kevoree.resolver.MavenResolver;
 
 import java.io.*;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * User: Erwan Daubert - erwan.daubert@gmail.com
@@ -18,7 +21,18 @@ import java.io.*;
 public class SosieRunner {
 
     @Param
-    protected String script;
+    protected String sosieRhinoMavenDefinition;
+    //mvn:groupID:artID:version[:ext]
+
+    @Param
+    protected String sosieRingoMavenDefinition;
+    //mvn:groupID:artID:version[:ext]
+
+    @Param
+    protected String mavenRepositoryUrl;
+
+    @Param(defaultValue = "8080", optional = true)
+    protected String port;
 
     @KevoreeInject
     protected Context context;
@@ -28,27 +42,42 @@ public class SosieRunner {
 
     @Start
     public void start() throws Exception {
-        directory = File.createTempFile("sosie", context.getInstanceName());
-        directory.delete();
-        directory.mkdirs();
-        String configuratorPath = copyFileFromStream(getClass().getClassLoader().getResourceAsStream("configurator.bash"), directory.getAbsolutePath(), "configurator.bash", true, true);
-        String runnerPath = copyFileFromStream(getClass().getClassLoader().getResourceAsStream("runner.bash"), directory.getAbsolutePath(), "runner.bash", true, true);
 
-        File standardOutput = File.createTempFile(context.getInstanceName(), ".log");
-        process = new ProcessBuilder().directory(directory).command("bash", configuratorPath).redirectErrorStream(true).start();
-        new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput)).start();
+        Set<String> repos = new HashSet<String>();
+        repos.add(mavenRepositoryUrl);
+        MavenResolver resolver = new MavenResolver();
+        File sosie = resolver.resolve(sosieRhinoMavenDefinition, repos);
+        File ringo = resolver.resolve(sosieRingoMavenDefinition, repos);
 
-        int exitStatus = process.waitFor();
-        if (exitStatus == 0) {
-            process = new ProcessBuilder().directory(directory).command("bash", runnerPath).redirectErrorStream(true).start();
-            new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput)).start();
-            try {
-                exitStatus = process.exitValue();
-                throw new Exception("Unable to run runner script. Exit Status: " + exitStatus + " for " + runnerPath);
-            } catch (IllegalThreadStateException ignored) {
+        if (sosie != null && sosie.exists() && ringo != null && ringo.exists()) {
+            // copy sosie on working directory with sosie.jar as file name and ringo sosie with ringojs.tgz as file name
+            directory = File.createTempFile("sosie", context.getInstanceName());
+            if (directory.delete() && directory.mkdirs() && sosie.renameTo(new File(directory, "sosie.jar")) && ringo.renameTo(new File(directory, "ringojs.tgz"))) {
+
+                String configuratorPath = copyFileFromStream(getClass().getClassLoader().getResourceAsStream("configurator.bash"), directory.getAbsolutePath(), "configurator.bash", true, true);
+                String runnerPath = copyFileFromStream(getClass().getClassLoader().getResourceAsStream("runner.bash"), directory.getAbsolutePath(), "runner.bash", true, true);
+
+                File standardOutput = File.createTempFile(context.getInstanceName(), ".log");
+                process = new ProcessBuilder().directory(directory).command("bash", configuratorPath).redirectErrorStream(true).start();
+                new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput)).start();
+
+                int exitStatus = process.waitFor();
+                if (exitStatus == 0) {
+                    process = new ProcessBuilder().directory(directory).command("bash", runnerPath, "-p" + port).redirectErrorStream(true).start();
+                    new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput)).start();
+                    try {
+                        exitStatus = process.exitValue();
+                        throw new Exception("Unable to run runner script. Exit Status: " + exitStatus + " for " + runnerPath);
+                    } catch (IllegalThreadStateException ignored) {
+                    }
+                } else {
+                    throw new Exception("Unable to run configurator script. Exit status: " + exitStatus + " for " + configuratorPath);
+                }
+            } else {
+                throw new Exception("Unable to create working directory (" + directory.getAbsolutePath() + ") or copy the sosie file (" + sosie.getAbsolutePath() + ")");
             }
         } else {
-            throw new Exception("Unable to run configurator script. Exit status: " + exitStatus + " for " + configuratorPath);
+            throw new Exception("Unable to get sosie: " + sosieRhinoMavenDefinition + " in " + mavenRepositoryUrl);
         }
     }
 

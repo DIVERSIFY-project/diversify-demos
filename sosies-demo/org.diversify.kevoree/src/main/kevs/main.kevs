@@ -10,7 +10,11 @@ add node0 : JavaNode
 add sync : WSGroup
 attach node0 sync
 
-//add node0.sosie1 : SosieRunner
+add node0.sosie1 : SosieRunner
+set node0.sosie1.sosieRhinoMavenDefinition = "mvn:"
+set node0.sosie1.sosieRingoMavenDefinition = "mvn:"
+set node0.sosie1.mavenRepositoryUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/"
+
 add node0.proxy : DistributedHaProxy
 
 set node0.proxy.typesList = "SosieRunner"

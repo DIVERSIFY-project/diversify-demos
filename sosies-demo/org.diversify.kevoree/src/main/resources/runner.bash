@@ -14,4 +14,4 @@ cp ${ringo_home}packages/ctlr-sqlite/jars/* ${ringo_home}lib/
 ${ringo_path}ringo-admin install ringo/stick
 ${ringo_path}ringo ${mdms_home}tools/initdb.js
 ${ringo_path}ringo ${mdms_home}tools/fakedb.js
-${ringo_path}ringo ${mdms_home}main.js
+${ringo_path}ringo ${mdms_home}main.js $1

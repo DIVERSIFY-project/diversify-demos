@@ -18,13 +18,15 @@ function runTest() {
 	rm ${diversifyFolder}/test_results
 	touch ${diversifyFolder}/test_results
 	
-	for sosie in `ls ${diversifyFolder}/sosies-mix/` ; do
-		cp -R ${diversifyFolder}/sosies-mix/${sosie} "./ringo"
+	for sosie in `ls ${diversifyFolder}` ; do
+		cp -R ${diversifyFolder}/${sosie} "./ringo"
 		
-		${ringo_path}ringo-admin install emilis/ctlr-sqlite
-		cp ${ringo_home}packages/ctlr-sqlite/jars/* ${ringo_home}lib/
-		${ringo_path}ringo-admin install ringo/stick
-		${ringo_path}ringo ${mdms_home}tools/initdb.js
+		#${ringo_path}ringo-admin install emilis/ctlr-sqlite
+		#cp ${ringo_home}packages/ctlr-sqlite/jars/* ${ringo_home}lib/
+		#${ringo_path}ringo-admin install ringo/stick
+		#${ringo_path}ringo ${mdms_home}tools/initdb.js
+		
+		redis-cli FLUSHDB
 		${ringo_path}ringo ${mdms_home}tools/fakedb.js
 		${ringo_path}ringo ${mdms_home}main.js &
 		
@@ -47,8 +49,7 @@ function runTest() {
 		fi
 		
 		rm -rf ${ringo_home}
-		rm -rf ./mdms.db
-		redis-cli FLUSHDB
+		#rm -rf ./mdms.db
 		
 	done
 }
