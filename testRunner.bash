@@ -28,10 +28,20 @@ function runTest() {
 		
 		redis-cli FLUSHDB
 		${ringo_path}ringo ${mdms_home}tools/fakedb.js
-		${ringo_path}ringo ${mdms_home}main.js 2>&1  1>/dev/null &
+		${ringo_path}ringo ${mdms_home}main.js &
+		
+		pid=`echo $!`
+		echo ${pid}
 		
 		cd ${mdms_home}
-		mvn test >  ../${sosie}_testResults
+		mvn test >  ../${sosie}_testResults 
+		#&
+		
+		#echo "WTF"
+		#pidTest=`echo $$`
+		
+		#while [ -e /proc/$PID ]; do sleep 0.1; done
+		
 		cd ..
 		
 		result=` cat ${sosie}_testResults | grep "BUILD SUCCESS"`
@@ -39,18 +49,12 @@ function runTest() {
 			echo "${sosie}" >> ${diversifyFolder}/test_results		
 		fi
 		
-		pid=`ps axu | grep ringo | grep java | cut -d' ' -f3`
-		
-		if [ "${pid}" != "" ] ; then
-			kill -9 ${pid} 2>&1  1>/dev/null
-		elif [ "${pid}" == "" ] ; then
-			pid=`ps axu | grep ringo | grep java | cut -d' ' -f2`
-			kill -9 ${pid} 2>&1  1>/dev/null
-		fi
+		echo ${pid}
+		kill -9 ${pid}
+		echo "TOTO"
 		
 		rm -rf ${ringo_home}
 		#rm -rf ./mdms.db
-		
 	done
 }
 
