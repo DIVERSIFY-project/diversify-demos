@@ -44,14 +44,34 @@ class NginxXtendGenerator {
 # Definition of the load balancer front-end
 ###############################################################################
 
-
 server {
-	listen	80;
-	server_name «master.name»;
-	access_log /var/www/proxy.log proxy;
+	listen 80;
+	server_name localhost;
+	access_log /var/www/proxy.log proxy; #proxy refers to the log format defined in nginx.conf
+
 	location / {
 		proxy_pass http://backend;
 	}
+
+	location /client {
+		root   /var/www;
+		autoindex on;
+
+	}
+
+	location /client/ws {
+			proxy_pass http://localhost:8099;
+		
+			# These are the option for websockets (need nginx >= v1.3.13)
+			proxy_set_header X-Real-IP $remote_addr;
+			proxy_set_header Host $host;
+			proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		
+			proxy_http_version 1.1;
+			proxy_set_header Upgrade $http_upgrade;
+			proxy_set_header Connection "upgrade";
+	}
+
 }'''
 			 return template
 	}
