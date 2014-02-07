@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function runTest() {
-	diversifyFolder=`$1`
+	diversifyFolder="$1"
 	
 	cd /tmp
 	rm -rf testsDiversify 
@@ -58,4 +58,4 @@ function runTest() {
 #deployOnMaven
 #buildRegularWithRhinoSosies
 #deployRegularOnMaven
-runTest `pwd
+runTest `pwd`
