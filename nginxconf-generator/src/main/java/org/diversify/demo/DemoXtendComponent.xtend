@@ -51,6 +51,8 @@ class DemoXtendComponent {
 	@KevoreeInject
 	private ModelService modelService;
 
+
+
 	def adaptComponent() {
 		//Get the current Model
 		var model = modelService.getCurrentModel();
