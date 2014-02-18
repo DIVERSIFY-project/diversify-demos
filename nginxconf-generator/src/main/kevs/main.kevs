@@ -1,0 +1,52 @@
+//Adds a repository (for snapshots)
+repo http://repo1.maven.org/maven2/
+repo http://oss.sonatype.org/content/repositories/releases/
+
+//Includes the libraries of types in the model
+//include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:release
+//include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:release
+//include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:release
+
+include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.toys:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.web:latest
+include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.helloworld:latest
+
+
+include mvn:org.diversify.demo:nginxconf-generator:1.0-SNAPSHOT
+
+
+
+add node0 : LightLXCNode
+
+//Here it will create a network with a bridge connected to eth1 and routed to wlan0 with ip 19.168.1.1 for eth1 (container) and 192.168.1XX for the container
+set node0.containeripbaseaddress = "192.168.1.1"
+set node0.hostitfip = "192.168.1.1"
+set node0.hostitfname = "eth0"
+set node0.routeditfname = ""
+//Create automatically the bridge
+set node0.createBridge = "false"
+set node0.bridgeName = "lxcbr0"
+
+set node0.log = "INFO"
+set node0.started = "true"
+set node0.freeze = "false"
+add node0.child : JavaNode
+add child.nginx : NginxLoadBalancerComponent
+//add child.ConsolePr25 : ConsolePrinter
+//add AsyncBroa936 : AsyncBroadcast
+add sync : WSGroup
+set sync.port/child = "9002"
+set sync.port/node0 = "9000"
+bind child.ConsolePr25.input AsyncBroa936
+bind child.TwoValueT187.tick AsyncBroa936
+attach child sync
+attach node0 sync
+
+
+
+
+

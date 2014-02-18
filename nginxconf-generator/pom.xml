@@ -9,9 +9,53 @@
 	<properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <xtend.version>2.5.0</xtend.version>
-	</properties>
+	    <kevoree.version>3.4.0</kevoree.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.kevoree</groupId>
+            <artifactId>org.kevoree.annotation.api</artifactId>
+            <version>${kevoree.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kevoree</groupId>
+            <artifactId>org.kevoree.api</artifactId>
+            <version>${kevoree.version}</version>
+        </dependency>
+        		<dependency>
+			<groupId>org.eclipse.xtend</groupId>
+			<artifactId>org.eclipse.xtend.lib</artifactId>
+			<version>${xtend.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.10</version>
+			<scope>test</scope>
+		</dependency>
+        
+    </dependencies>
+	
 	<build>
 		<plugins>
+		      <plugin>
+                <groupId>org.kevoree.tools</groupId>
+                <artifactId>org.kevoree.tools.mavenplugin</artifactId>
+                <version>${kevoree.version}</version>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <nodename>node0</nodename>
+                    <model>src/main/kevs/main.kevs</model>
+                </configuration>
+            </plugin>
 			<plugin>
 				<groupId>org.eclipse.xtend</groupId>
 				<artifactId>xtend-maven-plugin</artifactId>
@@ -37,17 +81,4 @@
 			</plugin>
 		</plugins>
 	</build>
-	<dependencies>
-		<dependency>
-			<groupId>org.eclipse.xtend</groupId>
-			<artifactId>org.eclipse.xtend.lib</artifactId>
-			<version>${xtend.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.10</version>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
 </project>
