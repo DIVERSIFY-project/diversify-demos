@@ -61,7 +61,6 @@ server {
 	location /client {
 		root   /tmp/loadbalancerclient;
 		autoindex on;
-
 	}
 
 	location /client/ws {
@@ -82,7 +81,7 @@ server {
 	}
 	
 	def boolean restartNginx() {
-		   val command5 = #["/etc/init.d/nginx","restart"]
+		   val command5 = #["sudo", "/etc/init.d/nginx","restart"]
            val process5 = Runtime.getRuntime().exec(command5)
            var Thread readerOUTthread = new Thread(new Reader(process5.getInputStream(),  false))
              var Thread       readerERRthread = new Thread(new Reader(process5.getErrorStream(), true))

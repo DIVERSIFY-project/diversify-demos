@@ -1,18 +1,20 @@
 package org.diversify.kevoree.loadBalancer;
 
+import java.io.File;
+import java.io.IOException;
+
 import org.java_websocket.WebSocketImpl;
 import org.kevoree.annotation.ComponentType;
+import org.kevoree.annotation.KevoreeInject;
 import org.kevoree.annotation.Param;
 import org.kevoree.annotation.Start;
 import org.kevoree.annotation.Stop;
+import org.kevoree.api.ModelService;
 import org.kevoree.api.handler.ModelListenerAdapter;
 import org.kevoree.log.Log;
 import org.thingml.lbmonitor.AbstractLogReader;
 import org.thingml.lbmonitor.LBWebSocketServer;
 import org.thingml.lbmonitor.LogReader;
-
-import java.io.File;
-import java.io.IOException;
 
 /**
  * User: Erwan Daubert - erwan.daubert@gmail.com
@@ -31,6 +33,10 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
     private String serverName;
     
     
+    @KevoreeInject
+    ModelService modelservice;
+    
+    
     @Param(optional = true, defaultValue = "/tmp/loadbalancerclient/proxy.log")
     private String logFile;
     @Param(optional = true, defaultValue = "/tmp/loadbalancerclient/")
@@ -41,8 +47,11 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
     private LBWebSocketServer server;
     private AbstractLogReader logReader;
 
+    
     @Start
     public void start() throws IOException {
+    	modelservice.registerModelListener(this);
+    	
         File folderWhereExtract = new File(pathWhereExtract);
         if (!folderWhereExtract.exists()) {
             folderWhereExtract.mkdirs();
@@ -52,9 +61,11 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
         	KevoreeLBMonitorWebContentExtractor.getInstance().replaceFileString("localhost",serverName,folderWhereExtract.getAbsolutePath());
         
         WebSocketImpl.DEBUG = false;
+
         server = new LBWebSocketServer(port);
         server.start();
-
+        //logReader = new LogReader(server, logFile);
+        //logReader.startReader();
         Log.info("[LBWebSocketServer] Server started on port {}", server.getPort());
     }
 
@@ -67,6 +78,7 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
 
     @Override
     public void modelUpdated() {
+    	//System.out.println("pass par là start log reader" );
         logReader = new LogReader(server, logFile);
 
         logReader.startReader();

@@ -2,11 +2,6 @@
 repo "http://repo1.maven.org/maven2/"
 repo "http://oss.sonatype.org/content/repositories/releases/"
 
-//Includes the libraries of types in the model
-//include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:release
-//include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:release
-//include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:release
-
 include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:latest
 include mvn:org.kevoree.library.java:org.kevoree.library.java.toys:latest
 include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest
@@ -17,7 +12,6 @@ include mvn:org.kevoree.library.java:org.kevoree.library.java.helloworld:latest
 
 include mvn:org.diversify.demo:nginxconf-generator:1.0-SNAPSHOT
 include mvn:org.diversify.demo:kevoree-utils-xtend:1.0-SNAPSHOT
-
 include mvn:org.diversify:org.diversify.kevoree.sosie:latest
 
 

@@ -34,6 +34,7 @@ class NginxLoadBalancerComponent {
 		println(context.nodeName)
 		master.ip = getNodeIp(modelService.pendingModel.findNodesByID(context.nodeName))
 		generator.deployConfig(master,this.generateNginxConfig,serverNameDNS)
+		generator.restartNginx
 		
 	}
 

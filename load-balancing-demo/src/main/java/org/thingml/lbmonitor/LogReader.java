@@ -6,6 +6,7 @@
 package org.thingml.lbmonitor;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
