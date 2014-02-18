@@ -2,17 +2,13 @@ package org.diversify.kevoree.components;
 
 import org.kevoree.annotation.*;
 import org.kevoree.api.Context;
-import org.kevoree.log.Log;
-import org.kevoree.resolver.MavenResolver;
 
 import java.io.*;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * User: Erwan Daubert - erwan.daubert@gmail.com
- * Date: 05/02/14
- * Time: 15:10
+ * Date: 18/02/14
+ * Time: 11:41
  *
  * @author Erwan Daubert
  * @version 1.0
@@ -20,88 +16,64 @@ import java.util.Set;
 @ComponentType
 public class SosieRunner {
 
-    @Param
-    protected String sosieRhinoMavenDefinition;
-    //mvn:groupID:artID:version[:ext]
-
-    @Param
-    protected String sosieRingoMavenDefinition;
-    //mvn:groupID:artID:version[:ext]
-
-    @Param
-    protected String mavenRepositoryUrl;
-
-    @Param(defaultValue = "8080", optional = true)
-    protected String port;
-
+    @Param(optional = true, defaultValue = "8080")
+    protected int port;
+    @Param(optional = false)
+    protected String sosieUrl;
+    @Param(optional = false)
+    protected String sosieName;
     @KevoreeInject
     protected Context context;
 
     private Process process;
     private File directory;
+    private String runnerPath;
+    private File standardOutput;
 
     @Start
     public void start() throws Exception {
+        directory = File.createTempFile("sosie", context.getInstanceName());
+        if (directory.delete() && directory.mkdirs()) {
+            runnerPath = copyFileFromStream(this.getClass().getClassLoader().getResourceAsStream("runner.bash"), directory.getAbsolutePath(), "runner.bash", true, true);
 
-        Set<String> repos = new HashSet<String>();
-        repos.add(mavenRepositoryUrl);
-        MavenResolver resolver = new MavenResolver();
-        File sosie = resolver.resolve(sosieRhinoMavenDefinition, repos);
-        File ringo = resolver.resolve(sosieRingoMavenDefinition, repos);
+            standardOutput = new File(directory.getAbsolutePath() + File.separator + context.getInstanceName() + ".log");
+            standardOutput.createNewFile();
+            process = new ProcessBuilder().directory(directory).command("bash", runnerPath, "get", sosieUrl, directory.getAbsolutePath()).redirectErrorStream(true).start();
+            new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput)).start();
 
-        if (sosie != null && sosie.exists() && ringo != null && ringo.exists()) {
-            // copy sosie on working directory with sosie.jar as file name and ringo sosie with ringojs.tgz as file name
-            directory = File.createTempFile("sosie", context.getInstanceName());
-            if (directory.delete() && directory.mkdirs() && sosie.renameTo(new File(directory, "sosie.jar")) && ringo.renameTo(new File(directory, "ringojs.tgz"))) {
-
-                String configuratorPath = copyFileFromStream(getClass().getClassLoader().getResourceAsStream("configurator.bash"), directory.getAbsolutePath(), "configurator.bash", true, true);
-                String runnerPath = copyFileFromStream(getClass().getClassLoader().getResourceAsStream("runner.bash"), directory.getAbsolutePath(), "runner.bash", true, true);
-
-                File standardOutput = File.createTempFile(context.getInstanceName(), ".log");
-                process = new ProcessBuilder().directory(directory).command("bash", configuratorPath).redirectErrorStream(true).start();
+            int exitStatus = process.waitFor();
+            if (exitStatus == 0) {
+                process = new ProcessBuilder().directory(directory).command("bash", runnerPath, "run", directory.getAbsolutePath() + File.separator + sosieName, port + "").redirectErrorStream(true).start();
                 new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput)).start();
-
-                int exitStatus = process.waitFor();
-                if (exitStatus == 0) {
-                    process = new ProcessBuilder().directory(directory).command("bash", runnerPath, "-p" + port).redirectErrorStream(true).start();
-                    new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput)).start();
-                    try {
-                        exitStatus = process.exitValue();
-                        throw new Exception("Unable to run runner script. Exit Status: " + exitStatus + " for " + runnerPath);
-                    } catch (IllegalThreadStateException ignored) {
-                    }
-                } else {
-                    throw new Exception("Unable to run configurator script. Exit status: " + exitStatus + " for " + configuratorPath);
+                try {
+                    exitStatus = process.exitValue();
+                    process = null;
+                    throw new Exception("Unable to run runner script. Exit Status: " + exitStatus + " for '" + runnerPath + " run " + directory.getAbsolutePath() + " " + port +"'");
+                } catch (IllegalThreadStateException ignored) {
                 }
             } else {
-                throw new Exception("Unable to create working directory (" + directory.getAbsolutePath() + ") or copy the sosie file (" + sosie.getAbsolutePath() + ")");
+                throw new Exception("Unable to download sosie. Exit status: " + exitStatus + " for 'bash " + runnerPath + " get " + sosieUrl + "'");
             }
-        } else {
-            throw new Exception("Unable to get sosie: " + sosieRhinoMavenDefinition + " in " + mavenRepositoryUrl);
         }
     }
 
     @Stop
     public void stop() throws IOException, InterruptedException {
-        try {
-            process.exitValue();
-        } catch (IllegalThreadStateException ignored) {
-            process.destroy();
-        }
-
-        String cleanerPath = copyFileFromStream(getClass().getClassLoader().getResourceAsStream("cleaner.bash"), directory.getAbsolutePath(), "cleaner.bash", true, true);
-        File standardOutput = File.createTempFile(context.getInstanceName(), ".log");
-        process = new ProcessBuilder().directory(directory).command("bash", cleanerPath).redirectErrorStream(true).start();
-        new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput)).start();
-
-        int exitStatus = process.waitFor();
-        if (exitStatus != 0 && directory.delete()) {
-            Log.warn("Unable to clean configuration: " + directory.getAbsolutePath());
+        if (process != null) {
+            process = new ProcessBuilder().directory(directory).command("bash", runnerPath, "kill", port + "").redirectErrorStream(true).start();
+            new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput)).start();
+            if (process.waitFor() == 0) {
+                process = new ProcessBuilder().directory(directory).command("bash", runnerPath, "clean", directory.getAbsolutePath()).redirectErrorStream(true).start();
+                new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput)).start();
+                if (process.waitFor() == 0) {
+                    process = null;
+                    standardOutput.delete();
+                }
+            }
         }
     }
 
     public static String copyFileFromStream(InputStream inputStream, String path, String targetName, boolean replace, boolean executable) throws IOException {
-
         if (inputStream != null) {
             File copy = new File(path + File.separator + targetName);
             copy.mkdirs();
