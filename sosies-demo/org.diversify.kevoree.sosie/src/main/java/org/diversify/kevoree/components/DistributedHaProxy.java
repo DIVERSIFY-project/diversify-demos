@@ -1,3 +1,4 @@
+/*
 package org.diversify.kevoree.components;
 
 import org.kevoree.*;
@@ -18,6 +19,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+*/
 /**
  * User: Erwan Daubert - erwan.daubert@gmail.com
  * Date: 05/02/14
@@ -25,7 +27,8 @@ import java.util.List;
  *
  * @author Erwan Daubert
  * @version 1.0
- */
+ *//*
+
 @ComponentType
 public class DistributedHaProxy extends HAProxy {
 
@@ -116,3 +119,4 @@ public class DistributedHaProxy extends HAProxy {
         super.afterLocalUpdate(null, modelService.getCurrentModel().getModel());
     }
 }
+*/

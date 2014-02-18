@@ -22,6 +22,10 @@ public class SosieRunner {
     protected String sosieUrl;
     @Param(optional = false)
     protected String sosieName;
+    @Param(optional = true, defaultValue = "localhost")
+    private String redisServer;
+    @Param(optional = true, defaultValue = "6379")
+    private int redisServerPort;
     @KevoreeInject
     protected Context context;
 
@@ -43,12 +47,12 @@ public class SosieRunner {
 
             int exitStatus = process.waitFor();
             if (exitStatus == 0) {
-                process = new ProcessBuilder().directory(directory).command("bash", runnerPath, "run", directory.getAbsolutePath() + File.separator + sosieName, port + "").redirectErrorStream(true).start();
+                process = new ProcessBuilder().directory(directory).command("bash", runnerPath, "run", directory.getAbsolutePath() + File.separator + sosieName, port + "", redisServer, redisServerPort + "").redirectErrorStream(true).start();
                 new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput)).start();
                 try {
                     exitStatus = process.exitValue();
                     process = null;
-                    throw new Exception("Unable to run runner script. Exit Status: " + exitStatus + " for '" + runnerPath + " run " + directory.getAbsolutePath() + " " + port +"'");
+                    throw new Exception("Unable to run runner script. Exit Status: " + exitStatus + " for '" + runnerPath + " run " + directory.getAbsolutePath() + " " + port + " " + redisServer + " " + redisServerPort + "'");
                 } catch (IllegalThreadStateException ignored) {
                 }
             } else {
