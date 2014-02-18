@@ -36,24 +36,18 @@ function run() { # folder of the sosie
 	${ringo_path}ringo ${mdms_home}main.js
 }
 
-
-RETVAL=0
-   case "$1" in
-   	  get)
-   	  	getSosie "$2" "$3"
-   	  	;;
-      getAll)
-         getSosies "$2" "$3"
-         ;;
-      run)
-      	run "$2"
-      	;;
-#      runAll)
-#      	runAll "$2"
-#      	;;
-	  *)
-         echo "Usage: $0 {get <sosie url> <output folder> | getAll <file listing sosies urls> <output folder> |run <sosie folder>}"
-         exit 1
-         ;;
-      esac
-   exit $RETVAL
+case "$1" in
+    get)
+        getSosie "$2" "$3"
+    ;;
+    getAll)
+        getSosies "$2" "$3"
+    ;;
+    run)
+        run "$2"
+    ;;
+    *)
+        echo "Usage: $0 {getAll <file containing sosie urls> <output folder> | get <sosie url> <output folder> | run <sosie folder>}"
+        exit 1
+    ;;
+esac
