@@ -10,6 +10,9 @@
 
     <modules>
         <module>sosies-demo</module>
+        <module>kevoree-utils-xtend</module>
+        <module>nginxconf-generator</module>
+        <module>load-balancing-demo</module>
     </modules>
 
 </project>
