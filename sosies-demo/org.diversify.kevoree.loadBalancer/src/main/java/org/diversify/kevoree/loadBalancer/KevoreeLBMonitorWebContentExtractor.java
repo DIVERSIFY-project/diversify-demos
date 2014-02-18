@@ -1,8 +1,16 @@
 package org.diversify.kevoree.loadBalancer;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import org.apache.commons.io.IOUtils;
 
 /**
  * User: Erwan Daubert - erwan.daubert@gmail.com
@@ -14,11 +22,11 @@ import java.util.zip.ZipInputStream;
  */
 public class KevoreeLBMonitorWebContentExtractor {
 
-    public static void extractConfiguration(String folderPath, boolean deleteOnExit) throws IOException {
+    public void extractConfiguration(String folderPath, boolean deleteOnExit) throws IOException {
         unzip(KevoreeLBMonitorWebContentExtractor.class.getClassLoader().getResourceAsStream("webContent.zip"), folderPath, deleteOnExit);
     }
 
-    public static void unzip(InputStream zipStream, String destDirectory, boolean deleteOnExit) throws IOException {
+    public void unzip(InputStream zipStream, String destDirectory, boolean deleteOnExit) throws IOException {
         File destDir = new File(destDirectory);
         if (!destDir.exists()) {
             destDir.mkdir();
@@ -47,8 +55,20 @@ public class KevoreeLBMonitorWebContentExtractor {
         }
         zipIn.close();
     }
-
-    private static void extractFile(ZipInputStream zipIn, String filePath, boolean deleteOnExit) throws IOException {
+    
+    public void replaceFileString(String old, String _new, String destDirectory) throws IOException {
+        String fileName = destDirectory + File.separator + "client"+ File.separator +"lbmonitor_client.html";
+        FileInputStream fis = new FileInputStream(fileName);
+        String content = IOUtils.toString(fis, Charset.defaultCharset());
+        content = content.replaceAll(old, _new);
+        FileOutputStream fos = new FileOutputStream(fileName);
+        IOUtils.write(content, new FileOutputStream(fileName), Charset.defaultCharset());
+        fis.close();
+        fos.close();
+    }
+    
+    
+    private void extractFile(ZipInputStream zipIn, String filePath, boolean deleteOnExit) throws IOException {
         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
         byte[] bytesIn = new byte[2048];
         int read;
@@ -57,4 +77,17 @@ public class KevoreeLBMonitorWebContentExtractor {
         }
         bos.close();
     }
+
+    
+    private KevoreeLBMonitorWebContentExtractor() {
+	}
+    
+    private static KevoreeLBMonitorWebContentExtractor instance;
+	public static KevoreeLBMonitorWebContentExtractor getInstance() {
+		if (instance==null){
+			instance = new KevoreeLBMonitorWebContentExtractor();
+		}
+		// TODO Auto-generated method stub
+		return instance;
+	}
 }

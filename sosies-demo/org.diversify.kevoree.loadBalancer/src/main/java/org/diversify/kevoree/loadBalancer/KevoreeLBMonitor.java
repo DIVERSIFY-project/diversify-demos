@@ -27,11 +27,17 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
 
     @Param(optional = true, defaultValue = "8099")
     private int port;
+    @Param(optional = true, defaultValue = "localhost")
+    private String serverName;
+    
+    
     @Param(optional = true, defaultValue = "/tmp/loadbalancerclient/proxy.log")
     private String logFile;
     @Param(optional = true, defaultValue = "/tmp/loadbalancerclient/")
     private String pathWhereExtract;
 
+    
+    
     private LBWebSocketServer server;
     private AbstractLogReader logReader;
 
@@ -41,7 +47,10 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
         if (!folderWhereExtract.exists()) {
             folderWhereExtract.mkdirs();
         }
-        KevoreeLBMonitorWebContentExtractor.extractConfiguration(folderWhereExtract.getAbsolutePath(), true);
+        KevoreeLBMonitorWebContentExtractor.getInstance().extractConfiguration(folderWhereExtract.getAbsolutePath(), true);
+        if (!"localhost".equals(serverName))
+        	KevoreeLBMonitorWebContentExtractor.getInstance().replaceFileString("localhost",serverName,folderWhereExtract.getAbsolutePath());
+        
         WebSocketImpl.DEBUG = false;
         server = new LBWebSocketServer(port);
         server.start();
