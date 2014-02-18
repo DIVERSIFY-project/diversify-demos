@@ -11,7 +11,12 @@ import java.util.List
 
 class NginxXtendGenerator {
 	
-	def void deployConfig(Node master, List<Node> slaves){
+	def void deployConfig(Node master, List<Node> slaves,String serverNameDNS){
+		
+		var File f1 = new File("/tmp/loadbalancerclient/")
+		if (!f1.exists){
+			f1.mkdirs
+		}
 		
 		val File f = new File("/etc/nginx/sites-enabled/site-enabled")
 		if (f.exists){
@@ -20,13 +25,13 @@ class NginxXtendGenerator {
 		f.createNewFile
 		val FileOutputStream fo = new FileOutputStream(f)
 		val printer = new PrintWriter(fo)
-		printer.println(generateConfig(master,slaves))
+		printer.println(generateConfig(master,slaves,serverNameDNS))
 		printer.flush
 		fo.close
 	}
 	
 	
-	def String generateConfig(Node master, List<Node> slaves ){
+	def String generateConfig(Node master, List<Node> slaves,String serverNameDNS ){
 		 val template = ''' 
 ###############################################################################
 # Definition of the Load balancer backend
@@ -45,16 +50,16 @@ class NginxXtendGenerator {
 ###############################################################################
 
 server {
-	listen 80;
-	server_name localhost;
-	access_log /var/www/proxy.log proxy; #proxy refers to the log format defined in nginx.conf
+	listen «master.port»;
+	server_name «serverNameDNS»;
+	access_log /tmp/loadbalancerclient/proxy.log proxy; #proxy refers to the log format defined in nginx.conf
 
 	location / {
 		proxy_pass http://backend;
 	}
 
 	location /client {
-		root   /var/www;
+		root   /tmp/loadbalancerclient;
 		autoindex on;
 
 	}

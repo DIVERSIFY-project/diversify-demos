@@ -33,7 +33,7 @@ class NginxLoadBalancerComponent {
 		println(context.nodeName)
 		println(context.nodeName)
 		master.ip = getNodeIp(modelService.pendingModel.findNodesByID(context.nodeName))
-		generator.deployConfig(master,this.generateNginxConfig)
+		generator.deployConfig(master,this.generateNginxConfig,serverNameDNS)
 		
 	}
 
@@ -49,6 +49,8 @@ class NginxLoadBalancerComponent {
 	@Output(optional=false)
 	private Port outputPort;
 
+	@Param(optional=true, defaultValue="localhost")
+	private String serverNameDNS
 
 	@KevoreeInject
 	private ModelService modelService;
