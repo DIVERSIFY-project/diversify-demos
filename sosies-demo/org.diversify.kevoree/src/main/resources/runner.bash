@@ -25,7 +25,7 @@ function run() { # folder of the sosie
 }
 
 function killProcess() { # <network port>
-    kill -9 `ps axu | grep "java -Xbootclasspath/p:" | grep "run.jar" | grep "mdms/main.js" | grep "$1"| awk '{ print $2 }'`
+    kill -9 `ps axu | grep "java -Xbootclasspath/p:" | grep "run.jar" | grep "mdms/main.js" | grep " -p $1"| awk '{ print $2 }'`
 }
 
 function clean() { # sosie folder

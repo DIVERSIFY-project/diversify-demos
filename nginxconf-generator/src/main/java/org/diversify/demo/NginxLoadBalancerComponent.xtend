@@ -30,7 +30,9 @@ class NginxLoadBalancerComponent {
 		var master = new Node
 		master.port=""+this.port
 		master.name = context.instanceName
-		master.ip = getNodeIp(modelService.getCurrentModel().model.findNodesByID(context.nodeName))
+		println(context.nodeName)
+		println(context.nodeName)
+		master.ip = getNodeIp(modelService.pendingModel.findNodesByID(context.nodeName))
 		generator.deployConfig(master,this.generateNginxConfig)
 		
 	}
@@ -67,12 +69,13 @@ class NginxLoadBalancerComponent {
 		var nodeName = context.nodeName
 
 		//Get the current Model
-		var model = modelService.getCurrentModel();
+		var model = modelService.pendingModel;
  
-		//var node = modelService.currentModel.model.findNodesByID(nodeName)
-		for (MBinding b : model.model.findNodesByID(context.nodeName).findComponentsByID(context.instanceName).required.
+		//var node = modelService.pendingModel.findNodesByID(nodeName)
+		for (MBinding b : model.findNodesByID(context.nodeName).findComponentsByID(context.instanceName).required.
 			get(0).bindings) {
 			for (MBinding b1 : b.hub.bindings) {
+			if (b1 != b) {
 
 				for (DictionaryValue value : (b1.port.eContainer as ComponentInstance).dictionary.values) {
 					if ("port".equals(value.name)) {
@@ -86,7 +89,7 @@ class NginxLoadBalancerComponent {
 						
 					}
 				}
-
+}
 			}
 
 		}

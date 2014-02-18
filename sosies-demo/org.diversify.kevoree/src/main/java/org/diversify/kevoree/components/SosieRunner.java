@@ -73,6 +73,9 @@ public class SosieRunner {
         }
     }
 
+    @Input
+    public void useless() {}
+
     public static String copyFileFromStream(InputStream inputStream, String path, String targetName, boolean replace, boolean executable) throws IOException {
         if (inputStream != null) {
             File copy = new File(path + File.separator + targetName);
