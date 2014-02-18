@@ -12,12 +12,12 @@ import org.kevoree.annotation.ComponentType
 import org.kevoree.annotation.Input
 import org.kevoree.annotation.KevoreeInject
 import org.kevoree.annotation.Output
+import org.kevoree.annotation.Param
 import org.kevoree.annotation.Start
 import org.kevoree.annotation.Stop
 import org.kevoree.api.Context
 import org.kevoree.api.ModelService
 import org.kevoree.api.Port
-import org.kevoree.annotation.Param
 
 @ComponentType
 class NginxLoadBalancerComponent {
