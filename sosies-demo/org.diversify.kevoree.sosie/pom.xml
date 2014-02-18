@@ -15,7 +15,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <kevoree.version>3.2.4-SNAPSHOT</kevoree.version>
+        <kevoree.version>3.4.0</kevoree.version>
         <kevoree.library.version>3.1.6-SNAPSHOT</kevoree.library.version>
         <basic.resolver.version>16</basic.resolver.version>
     </properties>
