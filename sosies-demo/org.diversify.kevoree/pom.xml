@@ -36,6 +36,11 @@
             <artifactId>org.kevoree.maven.resolver</artifactId>
             <version>${basic.resolver.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.kevoree</groupId>
+            <artifactId>org.kevoree.kevscript</artifactId>
+            <version>${kevoree.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
