@@ -14,58 +14,34 @@ import org.kevoree.api.Port
 import org.kevoree.cloner.DefaultModelCloner
 
 @ComponentType
-class DemoXtendComponent {
+class AptgetRemoverComponent {
+
+@Param(optional=false)
+	String packageName
+
+	@Param(optional=true)
+	String preScript
+
+	@Param(optional=true)
+	String postScript
+	
+	CommandExecutor exec = new CommandExecutor
 
 	@Start
 	public def startComponent() {
-		println("Start");
+		
+		if (preScript!=null)	
+			exec.execute(preScript.split(";"))
+		val command = #["/usr/bin/apt-get","remove","-f", "-y",packageName]
+		exec.execute(command);
+		if (postScript!=null)	
+			exec.execute(postScript.split(";"))
 	}
 
 	@Stop
 	public def stopComponent() {
-		println("Stop");
-	}
-
-	@Input
-	public def consumeHello(Object o) {
-		println("Received " + o.toString());
-		if (o instanceof String) {
-			var msg = o as String;
-			println("HelloConsumer received: " + msg);
-		}
-	}
-
-	@Output
-	private Port simplePort;
-
-	@Param(defaultValue="2000")
-	@Property
-	private int myparameter = 2000;
-
-	//Init the variables (from inside a component)
-	var cloner = new DefaultModelCloner();
-
-	@KevoreeInject
-	private KevScriptService kevScriptService;
-
-	@KevoreeInject
-	private ModelService modelService;
-
-
-
-	def adaptComponent() {
-		//Get the current Model
-		var model = modelService.getCurrentModel();
-		// Clone the model to make it changeable
-		var ContainerRoot localModel = cloner.clone(model.getModel()) as ContainerRoot
-		
-		
-		// Apply the script on the current model, to get a new configuration
-		kevScriptService.execute("//kevscripttoapply", localModel)
-
-		//Ask the platform to apply the new model; register an optional callback to know when the adaptation is finised.
-		modelService.update(localModel, [e | println("ok")])
 		
 	}
+
 
 }
