@@ -59,7 +59,7 @@ server {
 	}
 
 	location /client {
-		root   /tmp/loadbalancerclient;
+		root   /tmp/loadbalancerclient/client;
 		autoindex on;
 
 	}
