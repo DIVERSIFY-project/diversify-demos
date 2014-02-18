@@ -55,10 +55,12 @@ fun buildNodeScript(nodesConfigurationFile: String, scriptBuilder: StringBuilder
     scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest\n")
     scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lxc:latest\n")
     scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:latest\n")
+    scriptBuilder.append("include mvn:org.diversify.demo:kevoree-utils-xtend:latest\n")
     scriptBuilder.append("include mvn:org.diversify.demo:nginxconf-generator:latest\n")
     scriptBuilder.append("include mvn:org.diversify:org.diversify.kevoree.loadBalancer:latest\n");
 
     scriptBuilder.append("add ").append("sync : WSGroup\n")
+    scriptBuilder.append("add channel : UselessChannel\n")
 
 
     val reader = BufferedReader(FileReader(File(nodesConfigurationFile)))
@@ -79,7 +81,6 @@ fun buildNodeScript(nodesConfigurationFile: String, scriptBuilder: StringBuilder
 
         if (configuration.size == 5) {
             scriptBuilder.append("add ").append(configuration[0]).append("Child0").append(".nginx : NginxLoadBalancerComponent\n")
-            scriptBuilder.append("add channel : UselessChannel\n")
             scriptBuilder.append("bind ").append(configuration[0]).append("Child0").append(".nginx.outputPort channel\n")
 
             scriptBuilder.append("add ").append(configuration[0]).append("Child0").append(".lbMonitor : KevoreeLBMonitor\n")
