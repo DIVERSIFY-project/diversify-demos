@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <link rel="shortcut icon" href="favicon.ico" />
+
         <title>DIVERSIFY Load Balancer Monitor</title>
         <meta charset="UTF-8">
         <script type="text/javascript" src="lib/jquery-1.9.0.js"></script>
@@ -8,57 +10,78 @@
         <script type="text/javascript" src="js/jquery.jsPlumb-1.5.5.js"></script>
 
         <style type="text/css">
-            .item {
-                position: absolute;
-                border: 1px solid black;
-                background-color: #ddddff;
-            }
-
-            .server {
-                position: absolute;
-                border: 1px solid gray;
-                background-color: #ddddff;
-                //width: 140px;
-                //height: 40px;
-                font-family: monospace;
-            }
-
-            .client {
-                position: absolute;
-                border: 1px solid gray;
-                background-color: #dddddd;
-                //width: 140px;
-                //height: 40px;
-                font-family: monospace;
-                text-align: center;
-            }
 
             #container {
                 border: 1px solid gray;
+                background-color: #eeeeee;
+                background-image: url(img/diversify-logo-25_800.png);
+                background-repeat:no-repeat;
+                background-position:center center;
+                background-size: 100% auto;
+
                 width: 800px;
                 height: 400px;
             }
 
             #console {
                 border: 1px solid gray;
-                background-color: #dddddd;
+                background-color: #555555;
+                color: #00CC22;
                 width: 800px;
-                height: 150px;
+                height: 100px;
                 overflow:auto;
                 font-family: monospace;
                 font-size: small;
+
+                -webkit-animation: console_fading 6s infinite;
+            }
+
+            @-webkit-keyframes console_fading {
+                0%   { background: #555555; }               
+                50%  { background: #666666; }
+                100% { background:  #555555; }
+            }
+
+            .server {
+                position: absolute;
+                border: 2px solid #ee7777;
+                background-color: #dddddd;
+                //width: 140px;
+                //height: 40px;
+                font-family: monospace;
+
+               // -webkit-animation: server_blink 3s;
+            }
+
+            @-webkit-keyframes server_blink {
+                0%   { background: #dddddd; }               
+                5%  { background: #ee6666; }
+                30%  { background: #ee6666; }
+                100% { background:  #dddddd; }
+            }
+
+            .client {
+                position: absolute;
+                border: 2px solid #7777ee;
+                background-color: #bbbbee;
+                //width: 140px;
+                //height: 40px;
+                font-family: monospace;
+
             }
 
             .title {
-                padding: 10px;
+                padding: 5px;
                 cursor: move;
+                text-align: center;
+                font-size: small;
             }
 
-            .connect {
+            .bottom {
                 width: 100%;
-                height: 20px;
-                background-color: white;
-                cursor: pointer;
+                padding: 5px;
+                font-size: medium;
+
             }	
         </style>
     </head>
@@ -86,32 +109,32 @@
                 clients[src_addr] = 1;
                 //document.getElementById('console').innerHTML += "<br/> New Client : " + src_addr + " #cli = " + count(clients);
                 // Create the client
-                var newState = $('<div>').attr('id', 'client_' + src_id).addClass('client');
+                var newNode = $('<div>').attr('id', 'client_' + src_id).addClass('client');
                 var title = $('<div>').addClass('title').text(src_addr);
-                var connect = $('<div>').addClass('connect');
+                var bottom = $('<div>').attr('id', 'client_' + src_id + '_bottom').addClass('bottom').text("#Req = " + clients[src_addr]);
 
-                newState.css({
+                newNode.css({
                     'top': 40,
                     'left': 20 + 150 * (count(clients) - 1)
                 });
-/*
-                jsPlumb.makeTarget(newState, {
-                    anchor: 'Continuous'
-                });
+                /*
+                 jsPlumb.makeTarget(newNode, {
+                 anchor: 'Continuous'
+                 });
+                 
+                 jsPlumb.makeSource(connect, {
+                 parent: newNode,
+                 anchor: 'Continuous'
+                 });
+                 */
+                newNode.append(title);
+                newNode.append(bottom);
 
-                jsPlumb.makeSource(connect, {
-                    parent: newState,
-                    anchor: 'Continuous'
-                });
-*/
-                newState.append(title);
-                newState.append(connect);
-
-                jsPlumb.draggable(newState, {
+                jsPlumb.draggable(newNode, {
                     containment: 'parent'
                 });
 
-                $('#container').append(newState);
+                $('#container').append(newNode);
             }
 
             function add_server(srv_addr, srv_id) {
@@ -119,32 +142,36 @@
                 servers[srv_addr] = 1;
                 //document.getElementById('console').innerHTML += "<br/> New Server : " + srv_addr + " #srv = " + count(servers);
                 // Create the client
-                var newState = $('<div>').attr('id', 'server_' + srv_id).addClass('server');
+                var newNode = $('<div>').attr('id', 'server_' + srv_id).addClass('server');
                 var title = $('<div>').addClass('title').text(srv_addr);
-                var connect = $('<div>').addClass('connect');
+                var bottom = $('<div>').attr('id', 'server_' + srv_id + "_bottom").addClass('bottom').text("#Req = " + servers[srv_addr]);
 
-                newState.css({
+                newNode.css({
                     'top': 300,
                     'left': 20 + 150 * (count(servers) - 1)
                 });
+/*
+                newNode.bind('animationend', function() {
+                    newNode.style.webkitAnimationName = '';
+                    jsPlumb.detachAllConnections(newNode);
+                    alert("hello!");
+                }, false);
+*/
+                newNode.append(title);
+                newNode.append(bottom);
 
-                jsPlumb.makeTarget(newState, {
-                    anchor: 'Continuous'
-                });
-
-                jsPlumb.makeSource(connect, {
-                    parent: newState,
-                    anchor: 'Continuous'
-                });
-
-                newState.append(title);
-                newState.append(connect);
-
-                jsPlumb.draggable(newState, {
+                jsPlumb.draggable(newNode, {
                     containment: 'parent'
                 });
 
-                $('#container').append(newState);
+                $('#container').append(newNode);
+                    
+                document.getElementById('server_' + srv_id).addEventListener('webkitAnimationEnd', function() {
+                    this.style.webkitAnimationName = '';
+                    jsPlumb.detachAllConnections(this);
+                    //alert("animationend!");
+                }, false);
+
             }
 
 
@@ -183,6 +210,7 @@
                     }
                     else {
                         clients[src_addr]++;
+                        document.getElementById('client_' + src_id + '_bottom').innerHTML = ("#Req = " + clients[src_addr]);
                     }
 
                     if (contains(servers, srv_addr)) {
@@ -190,12 +218,25 @@
                     }
                     else {
                         servers[srv_addr]++;
+                        document.getElementById('server_' + srv_id + '_bottom').innerHTML = ("#Req = " + servers[srv_addr]);
                     }
-                    
-                    jsPlumb.detachAllConnections(document.getElementById('client_' + src_id));
-                    jsPlumb.connect({source: 'client_' + src_id, target: 'server_' + srv_id});
 
-                    document.getElementById('console').innerHTML =  (log + "<br/>" + document.getElementById('console').innerHTML).substr(0, 2000);
+
+                    jsPlumb.detachAllConnections(document.getElementById('client_' + src_id));
+                    jsPlumb.connect({
+                        source: 'client_' + src_id,
+                        target: 'server_' + srv_id,
+                        paintStyle: {lineWidth: 5, strokeStyle: 'rgb(150,150,150)'},
+                        endpointStyle: {radius: 8},
+                        anchors: ["Bottom", "Top"],
+                        connector: "Straight"
+
+                    });
+
+                    document.getElementById('server_' + srv_id).style.webkitAnimationName = 'server_blink';
+                    document.getElementById('server_' + srv_id).style.webkitAnimationDuration = '3s';
+
+                    document.getElementById('console').innerHTML = (log + "<br/>" + document.getElementById('console').innerHTML).substr(0, 2000);
                     //alert("Message is received...");
                 };
                 LBMSock.onclose = function()
