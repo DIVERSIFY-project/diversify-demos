@@ -57,10 +57,13 @@ fun buildNodeScript(nodesConfigurationFile: String, scriptBuilder: StringBuilder
     scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:latest\n")
     scriptBuilder.append("include mvn:org.diversify.demo:kevoree-utils-xtend:latest\n")
     scriptBuilder.append("include mvn:org.diversify.demo:nginxconf-generator:latest\n")
-    scriptBuilder.append("include mvn:org.diversify:org.diversify.kevoree.loadBalancer:latest\n");
+    scriptBuilder.append("include mvn:org.diversify:org.diversify.kevoree.loadBalancer:latest\n")
+    scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.hazelcast:latest\n")
 
     scriptBuilder.append("add ").append("sync : WSGroup\n")
-    scriptBuilder.append("add channel : UselessChannel\n")
+    scriptBuilder.append("add nginxChannel : UselessChannel\n")
+    scriptBuilder.append("add lbMonitorChannelGetNbSosieCalled : DistributedBroadcast\n")
+    scriptBuilder.append("add lbMonitorChannelReceiveNbSosieCalled : DistributedBroadcast\n")
 
 
     val reader = BufferedReader(FileReader(File(nodesConfigurationFile)))
@@ -85,6 +88,9 @@ fun buildNodeScript(nodesConfigurationFile: String, scriptBuilder: StringBuilder
 
             scriptBuilder.append("add ").append(configuration[0]).append("Child0").append(".lbMonitor : KevoreeLBMonitor\n")
             // here we can specify the port and logFile for lbMonitor
+            scriptBuilder.append("bind ").append(configuration[0]).append("Child0").append(".lbMonitor.getNbSosieCalled lbMonitorChannelGetNbSosieCalled\n")
+            scriptBuilder.append("bind ").append(configuration[0]).append("Child0").append(".lbMonitor.receiveNbSosieCalled lbMonitorChannelReceiveNbSosieCalled\n")
+
         }
 
         line = reader.readLine()
@@ -136,8 +142,8 @@ fun appendSosieConfiguration(nodesConfigurationFile: String, sosiesUrlFile: Stri
                 sosieName = line!!.substring(line!!.indexOf("ringo-") + "ringo-".length, line!!.length - ".zip".length)
                 sosieName = sosieName!!.substring(sosieName!!.indexOf("-") + 1)
             }
-            scriptBuilder.append("add ").append(nodeName).append(".").append(sosieName).append(" : SosieRunner\n")
-            scriptBuilder.append("set ").append(nodeName).append(".").append(sosieName).append(".sosieUrl = '").append(line).append("'\n")
+            scriptBuilder.append("add ").append(nodeName).append(".").append(sosieName).append(nodeName).append(i).append(" : SosieRunner\n")
+            scriptBuilder.append("set ").append(nodeName).append(".").append(sosieName).append(nodeName).append(i).append(".sosieUrl = '").append(line).append("'\n")
 
             if (portMap.get(nodeName) == null) {
                 portMap.put(nodeName, 8080)
@@ -145,9 +151,11 @@ fun appendSosieConfiguration(nodesConfigurationFile: String, sosiesUrlFile: Stri
                 portMap.put(nodeName, portMap.remove(nodeName)!! + 1)
             }
 
-            scriptBuilder.append("set ").append(nodeName).append(".").append(sosieName).append(".port = '").append(portMap.get(nodeName)).append("'\n")
+            scriptBuilder.append("set ").append(nodeName).append(".").append(sosieName).append(nodeName).append(i).append(".port = '").append(portMap.get(nodeName)).append("'\n")
 
-            scriptBuilder.append("bind ").append(nodeName).append(".").append(sosieName).append(".useless channel\n")
+            scriptBuilder.append("bind ").append(nodeName).append(".").append(sosieName).append(nodeName).append(i).append(".useless channel\n")
+            scriptBuilder.append("bind ").append(nodeName).append(".").append(sosieName).append(nodeName).append(i).append(".getNbSosieCalled lbMonitorChannelGetNbSosieCalled\n")
+            scriptBuilder.append("bind ").append(nodeName).append(".").append(sosieName).append(nodeName).append(i).append(".sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled\n")
 
             if (i < nodesList.size - 1) {
                 i++

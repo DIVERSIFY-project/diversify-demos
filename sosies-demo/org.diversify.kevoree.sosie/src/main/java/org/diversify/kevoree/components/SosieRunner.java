@@ -1,7 +1,13 @@
 package org.diversify.kevoree.components;
 
+import org.kevoree.ContainerNode;
+import org.kevoree.NetworkInfo;
+import org.kevoree.NetworkProperty;
 import org.kevoree.annotation.*;
 import org.kevoree.api.Context;
+import org.kevoree.api.ModelService;
+import org.kevoree.api.Port;
+import org.kevoree.log.Log;
 
 import java.io.*;
 
@@ -20,15 +26,18 @@ public class SosieRunner {
     protected int port;
     @Param(optional = false)
     protected String sosieUrl;
-    /*@Param(optional = false)*/
-    protected String sosieName;
     @Param(optional = true, defaultValue = "localhost")
     private String redisServer;
     @Param(optional = true, defaultValue = "6379")
     private int redisServerPort;
+    @Output
+    private Port sendNbSosieCalled;
     @KevoreeInject
     protected Context context;
+    @KevoreeInject
+    protected ModelService modelService;
 
+    protected String sosieName;
     private Process process;
     private File directory;
     private String runnerPath;
@@ -71,6 +80,7 @@ public class SosieRunner {
     @Stop
     public void stop() throws IOException, InterruptedException {
         if (process != null) {
+            Log.info("Stoppting {} on {}", context.getInstanceName(), context.getNodeName());
             process = new ProcessBuilder().directory(directory).command("bash", runnerPath, "kill", port + "").redirectErrorStream(true).start();
             new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput)).start();
             if (process.waitFor() == 0) {
@@ -85,7 +95,56 @@ public class SosieRunner {
     }
 
     @Input
-    public void useless() {}
+    public void useless() {
+    }
+
+    private boolean isHostFromLocalNode(String host) {
+        ContainerNode node = modelService.getCurrentModel().getModel().findNodesByID(context.getNodeName());
+        for (NetworkInfo networkInfo : node.getNetworkInformation()) {
+            for (NetworkProperty networkProperty : networkInfo.getValues()) {
+                if (host.equals(networkProperty.getValue())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Input
+    public void getNbSosieCalled(Object host) {
+        if (host instanceof String) {
+            String[] ipNPort = ((String) host).split(":");
+            if (ipNPort.length == 2) {
+                // check if port is the one of this component
+                if (Integer.parseInt(ipNPort[1]) == port) {
+                    // check if ip is the one of the localNode
+                    if (isHostFromLocalNode(ipNPort[0])) {
+                        BufferedReader reader = null;
+                        int result = -1;
+                        try {
+                            reader = new BufferedReader(new FileReader(new File(directory.getAbsolutePath() + File.separator + "count")));
+                            result = Integer.parseInt(reader.readLine());
+                        } catch (FileNotFoundException e) {
+                            Log.error("Unable to read the log file: {}", directory.getAbsolutePath() + File.separator + "count");
+                        } catch (IOException e) {
+                            Log.error("Unable to read the content of the file: {}", directory.getAbsolutePath() + File.separator + "count");
+                        } catch (NumberFormatException e) {
+                            Log.error("Unable to parse the number stored in the file: {}", directory.getAbsolutePath() + File.separator + "count");
+                        } finally {
+                            try {
+                                if (reader != null) {
+                                    reader.close();
+                                }
+                            } catch (IOException ignored) {
+                            }
+                        }
+                        System.err.println("Sending response for the nbSosieCalled");
+                        sendNbSosieCalled.send(result);
+                    }
+                }
+            }
+        }
+    }
 
     public static String copyFileFromStream(InputStream inputStream, String path, String targetName, boolean replace, boolean executable) throws IOException {
         if (inputStream != null) {
