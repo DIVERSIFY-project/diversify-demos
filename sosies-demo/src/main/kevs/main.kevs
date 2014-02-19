@@ -34,21 +34,20 @@ set node0.sosie1.port = '8282'
 
 
 add node0.sosie2 : SosieRunner
-set node0.sosie2.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino1.zip"
+set node0.sosie2.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino5/composed-sosie-1-indirection_on_Streamrhino5.zip"
 set node0.sosie2.port = '8284'
 
 add node0.sosie3 : SosieRunner
-set node0.sosie3.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino2.zip"
+set node0.sosie3.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino4/composed-sosie-1-indirection_on_Streamrhino4.zip"
 set node0.sosie3.port = '8286'
 
 add node0.sosie4 : SosieRunner
-set node0.sosie4.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino3.zip"
+set node0.sosie4.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino8/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino8.zip"
 set node0.sosie4.port = '8288'
 
 add node0.sosie5 : SosieRunner
-set node0.sosie5.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino4.zip"
+set node0.sosie5.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino5/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino5.zip"
 set node0.sosie5.port = '8290'
-
 
 
 add channel : UselessChannel
@@ -61,5 +60,22 @@ bind node0.nginx.outputPort channel
 
 add node0.lbMonitor : KevoreeLBMonitor
 
+include mvn:org.kevoree.library.java:org.kevoree.library.java.hazelcast:latest
+
+add lbMonitorChannelGetNbSosieCalled : DistributedBroadcast
+bind node0.sosie1.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind node0.sosie2.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind node0.sosie3.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind node0.sosie4.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind node0.sosie5.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind node0.lbMonitor.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+
+add lbMonitorChannelReceiveNbSosieCalled : DistributedBroadcast
+bind node0.sosie1.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+bind node0.sosie2.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+bind node0.sosie3.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+bind node0.sosie4.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+bind node0.sosie5.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+bind node0.lbMonitor.receiveNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
 
 
