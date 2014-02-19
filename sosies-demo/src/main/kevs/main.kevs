@@ -17,7 +17,7 @@ include mvn:org.diversify:org.diversify.kevoree.loadBalancer:1.0.0-SNAPSHOT
 
 
 add node0 : JavaNode
-set node0.log = "trace"
+set node0.log = "info"
 set node0.started = "true"
 
 add sync : WSGroup
@@ -79,3 +79,29 @@ bind node0.sosie5.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
 bind node0.lbMonitor.receiveNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
 
 
+include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:latest
+include mvn:org.kevoree.komponents:http-webbit:latest
+include mvn:org.diversify:org.diversify.kevoree.restarter:latest
+
+add node0.webserver : WebbitHTTPServer
+set node0.webserver.port = '7999'
+
+add node0.restarter : DemoRestarter
+set node0.restarter.componentType = 'SosieRunner'
+
+
+add node0.favicon : FaviconHandler
+set node0.favicon.urlPattern = "/favicon.*"
+set node0.favicon.favicon = "favicon.png"
+
+add request : AsyncBroadcast
+add response : AsyncBroadcast
+
+bind node0.webserver.request request
+bind node0.webserver.response response
+
+bind node0.favicon.request request
+bind node0.favicon.content response
+
+bind node0.restarter.request request
+bind node0.restarter.content response

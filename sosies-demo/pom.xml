@@ -18,6 +18,7 @@
         <module>org.diversify.kevoree.sosie</module>
         <module>org.diversify.kevoree.loadBalancer</module>
         <module>org.diversify.kevore.generator</module>
+        <module>org.diversify.kevoree.restarter</module>
     </modules>
 
     <dependencies>
