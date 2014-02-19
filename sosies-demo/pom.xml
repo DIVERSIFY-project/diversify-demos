@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.diversify</groupId>
@@ -12,11 +13,12 @@
         <kevoree.version>3.4.0</kevoree.version>
         <kevoree.library.version>3.1.6-SNAPSHOT</kevoree.library.version>
     </properties>
-    
+
     <modules>
-    	<module>org.diversify.kevoree.sosie</module>
+        <module>org.diversify.kevoree.sosie</module>
         <module>org.diversify.kevoree.loadBalancer</module>
         <module>org.diversify.kevore.generator</module>
+        <module>org.diversify.kevoree.restarter</module>
     </modules>
 
     <dependencies>
@@ -59,5 +61,16 @@
             </plugin>
         </plugins>
     </build>
-    
-    </project>
+
+
+    <distributionManagement>
+        <repository>
+            <id>diversify</id>
+            <url>http://sd-35000.dedibox.fr:8080/archiva/repository/internal/</url>
+        </repository>
+        <snapshotRepository>
+            <id>diversify</id>
+            <url>http://sd-35000.dedibox.fr:8080/archiva/repository/internal/</url>
+        </snapshotRepository>
+    </distributionManagement>
+</project>

@@ -8,12 +8,12 @@ function getSosie() { # <url of the sosie> <folder to store the sosie>
 	rm -rf /tmp/sosie.zip
 }
 
-function run() { # <folder of the sosie> <mdms port> <redis server host> <redis server port>
-	cd /tmp
+function run() { # <output folder> <folder of the sosie> <mdms port> <redis server host> <redis server port>
+	cd "$1"
 	rm -rf mdms
 	git clone https://github.com/maxleiko/mdms-ringojs.git mdms
 
-	ringo_home="$1/"
+	ringo_home="$2/"
 	mdms_home="$PWD/mdms/"
 
 	ringo_path="${ringo_home}/bin/"
@@ -21,15 +21,15 @@ function run() { # <folder of the sosie> <mdms port> <redis server host> <redis 
 rm "${mdms_home}/config.json"
 cat > "${mdms_home}/config.json" << EOF
 {
-    "redis-server": "$3",
-    "redis-port":   $4
+    "redis-server": "$4",
+    "redis-port":   $5
 }
 EOF
 
 	redis-cli FLUSHDB
 	${ringo_path}ringo-admin install ringo/stick
 	${ringo_path}ringo ${mdms_home}tools/fakedb.js
-	${ringo_path}ringo ${mdms_home}main.js -p "$2"
+	${ringo_path}ringo ${mdms_home}main.js -p "$3"
 }
 
 function killProcess() { # <network port>
@@ -46,7 +46,7 @@ case "$1" in
         getSosie "$2" "$3"
     ;;
     run)
-        run "$2" "$3" "$4" "$5"
+        run "$2" "$3" "$4" "$5" "$6"
     ;;
     kill)
         killProcess "$2"
@@ -55,7 +55,7 @@ case "$1" in
         clean "$2"
     ;;
     *)
-        echo "Usage: $0 {get <sosie url> <output folder> | run <sosie folder> <network port> <redis server host> <redis server port> | kill <network port>| clean <sosie folder>}"
+        echo "Usage: $0 {get <sosie url> <output folder> | run <output folder> <sosie folder> <network port> <redis server host> <redis server port> | kill <network port>| clean <sosie folder>}"
         exit 1
     ;;
 esac

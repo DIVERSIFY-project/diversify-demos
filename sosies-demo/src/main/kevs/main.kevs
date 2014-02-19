@@ -1,4 +1,5 @@
 repo "http://oss.sonatype.org/content/groups/public/"
+repo "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/"
 
 include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:latest
 include mvn:org.kevoree.library.java:org.kevoree.library.java.toys:latest
@@ -11,8 +12,8 @@ include mvn:org.kevoree.library.java:org.kevoree.library.java.helloworld:latest
 include mvn:org.diversify.demo:nginxconf-generator:1.0-SNAPSHOT
 include mvn:org.diversify.demo:kevoree-utils-xtend:1.0-SNAPSHOT
 
-include mvn:org.diversify:org.diversify.kevoree.sosie:latest
-include mvn:org.diversify:org.diversify.kevoree.loadBalancer:latest
+include mvn:org.diversify:org.diversify.kevoree.sosie:1.0.0-SNAPSHOT
+include mvn:org.diversify:org.diversify.kevoree.loadBalancer:1.0.0-SNAPSHOT
 
 
 add node0 : JavaNode
@@ -29,30 +30,24 @@ network node0.ip.lan 127.0.0.1
 
 add node0.sosie1 : SosieRunner
 set node0.sosie1.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip"
-set node0.sosie1.sosieName = "indirection_on_Streamrhino8"
 set node0.sosie1.port = '8282'
 
 
 add node0.sosie2 : SosieRunner
-set node0.sosie2.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip"
-set node0.sosie2.sosieName = "indirection_on_Streamrhino1"
+set node0.sosie2.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino5/composed-sosie-1-indirection_on_Streamrhino5.zip"
 set node0.sosie2.port = '8284'
 
 add node0.sosie3 : SosieRunner
-set node0.sosie3.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip"
-set node0.sosie3.sosieName = "indirection_on_Streamrhino2"
+set node0.sosie3.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino4/composed-sosie-1-indirection_on_Streamrhino4.zip"
 set node0.sosie3.port = '8286'
 
 add node0.sosie4 : SosieRunner
-set node0.sosie4.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip"
-set node0.sosie4.sosieName = "indirection_on_Streamrhino3"
+set node0.sosie4.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino8/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino8.zip"
 set node0.sosie4.port = '8288'
 
 add node0.sosie5 : SosieRunner
-set node0.sosie5.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip"
-set node0.sosie5.sosieName = "indirection_on_Streamrhino4"
+set node0.sosie5.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino5/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino5.zip"
 set node0.sosie5.port = '8290'
-
 
 
 add channel : UselessChannel
@@ -65,5 +60,48 @@ bind node0.nginx.outputPort channel
 
 add node0.lbMonitor : KevoreeLBMonitor
 
+include mvn:org.kevoree.library.java:org.kevoree.library.java.hazelcast:latest
+
+add lbMonitorChannelGetNbSosieCalled : DistributedBroadcast
+bind node0.sosie1.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind node0.sosie2.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind node0.sosie3.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind node0.sosie4.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind node0.sosie5.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind node0.lbMonitor.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+
+add lbMonitorChannelReceiveNbSosieCalled : DistributedBroadcast
+bind node0.sosie1.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+bind node0.sosie2.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+bind node0.sosie3.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+bind node0.sosie4.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+bind node0.sosie5.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+bind node0.lbMonitor.receiveNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
 
 
+include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:latest
+include mvn:org.kevoree.komponents:http-webbit:latest
+include mvn:org.diversify:org.diversify.kevoree.restarter:latest
+
+add node0.webserver : WebbitHTTPServer
+set node0.webserver.port = '7999'
+
+add node0.restarter : DemoRestarter
+set node0.restarter.componentType = 'SosieRunner'
+
+
+add node0.favicon : FaviconHandler
+set node0.favicon.urlPattern = "/favicon.*"
+set node0.favicon.favicon = "favicon.png"
+
+add request : AsyncBroadcast
+add response : AsyncBroadcast
+
+bind node0.webserver.request request
+bind node0.webserver.response response
+
+bind node0.favicon.request request
+bind node0.favicon.content response
+
+bind node0.restarter.request request
+bind node0.restarter.content response

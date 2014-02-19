@@ -9,4 +9,6 @@
 **nbactions.xml
 **maven-eclipse.xml
 archive/
-/.metadata/
+**.metadata/
+**.settings/
+**src/main/generated-sources
