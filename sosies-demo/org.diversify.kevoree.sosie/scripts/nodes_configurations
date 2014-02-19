@@ -2,9 +2,3 @@ node0;LXCNode;192.168.1.100;3;master
 node1;LXCNode;192.168.1.101;3
 node2;LXCNode;192.168.1.102;2
 node3;LXCNode;192.168.1.103;7
-node4;LXCNode;192.168.1.104;2
-node5;LXCNode;192.168.1.105;4
-node6;LXCNode;192.168.1.106;4
-node7;LXCNode;192.168.1.107;5
-node8;LXCNode;192.168.1.108;9
-node9;LXCNode;192.168.1.109;1

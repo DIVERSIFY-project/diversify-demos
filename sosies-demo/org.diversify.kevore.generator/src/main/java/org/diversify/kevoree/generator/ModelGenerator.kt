@@ -132,10 +132,12 @@ fun appendSosieConfiguration(nodesConfigurationFile: String, sosiesUrlFile: Stri
             if (line!!.contains("composed-sosie-")) {
                 sosieName = line!!.substring(line!!.indexOf("composed-sosie-") + "composed-sosie-".length, line!!.length - ".zip".length)
                 sosieName = sosieName!!.substring(sosieName!!.indexOf("-") + 1)
+            } else if (line!!.contains("ringo-")) {
+                sosieName = line!!.substring(line!!.indexOf("ringo-") + "ringo-".length, line!!.length - ".zip".length)
+                sosieName = sosieName!!.substring(sosieName!!.indexOf("-") + 1)
             }
             scriptBuilder.append("add ").append(nodeName).append(".").append(sosieName).append(" : SosieRunner\n")
             scriptBuilder.append("set ").append(nodeName).append(".").append(sosieName).append(".sosieUrl = '").append(line).append("'\n")
-            scriptBuilder.append("set ").append(nodeName).append(".").append(sosieName).append(".sosieName = '").append(sosieName).append("'\n")
 
             if (portMap.get(nodeName) == null) {
                 portMap.put(nodeName, 8080)

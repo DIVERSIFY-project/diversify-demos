@@ -20,7 +20,7 @@ public class SosieRunner {
     protected int port;
     @Param(optional = false)
     protected String sosieUrl;
-    @Param(optional = false)
+    /*@Param(optional = false)*/
     protected String sosieName;
     @Param(optional = true, defaultValue = "localhost")
     private String redisServer;
@@ -36,6 +36,13 @@ public class SosieRunner {
 
     @Start
     public void start() throws Exception {
+        if (sosieUrl.contains("composed-sosie-")) {
+            sosieName = sosieUrl.substring(sosieUrl.indexOf("composed-sosie-") + "composed-sosie-".length(), sosieUrl.length() - ".zip".length());
+            sosieName = sosieName.substring(sosieName.indexOf("-") + 1);
+        } else if (sosieUrl.contains("ringo-")) {
+            sosieName = sosieUrl.substring(sosieUrl.indexOf("ringo-") + "ringo-".length(), sosieUrl.length() - ".zip".length());
+            sosieName = sosieName.substring(sosieName.indexOf("-") + 1);
+        }
         directory = File.createTempFile("sosie", context.getInstanceName());
         if (directory.delete() && directory.mkdirs()) {
             runnerPath = copyFileFromStream(this.getClass().getClassLoader().getResourceAsStream("runner.bash"), directory.getAbsolutePath(), "runner.bash", true, true);
@@ -47,12 +54,12 @@ public class SosieRunner {
 
             int exitStatus = process.waitFor();
             if (exitStatus == 0) {
-                process = new ProcessBuilder().directory(directory).command("bash", runnerPath, "run", directory.getAbsolutePath() + File.separator + sosieName, port + "", redisServer, redisServerPort + "").redirectErrorStream(true).start();
+                process = new ProcessBuilder().directory(directory).command("bash", runnerPath, "run", directory.getAbsolutePath(), directory.getAbsolutePath() + File.separator + sosieName, port + "", redisServer, redisServerPort + "").redirectErrorStream(true).start();
                 new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput)).start();
                 try {
                     exitStatus = process.exitValue();
                     process = null;
-                    throw new Exception("Unable to run runner script. Exit Status: " + exitStatus + " for '" + runnerPath + " run " + directory.getAbsolutePath() + " " + port + " " + redisServer + " " + redisServerPort + "'");
+                    throw new Exception("Unable to run runner script. Exit Status: " + exitStatus + " for '" + runnerPath + " run " + directory.getAbsolutePath() + " " + directory.getAbsolutePath() + File.separator + sosieName + " " + port + " " + redisServer + " " + redisServerPort + "'");
                 } catch (IllegalThreadStateException ignored) {
                 }
             } else {

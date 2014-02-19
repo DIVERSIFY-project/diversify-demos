@@ -81,4 +81,15 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <distributionManagement>
+        <repository>
+            <id>diversify</id>
+            <url>http://sd-35000.dedibox.fr:8080/archiva/repository/internal/</url>
+        </repository>
+        <snapshotRepository>
+            <id>diversify</id>
+            <url>http://sd-35000.dedibox.fr:8080/archiva/repository/internal/</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>
