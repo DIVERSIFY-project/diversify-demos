@@ -27,7 +27,7 @@ public class ProcessStreamFileLogger implements Runnable {
             FileWriter outputStream = null;
             BufferedReader readerIn = null;
             try {
-                outputStream = new FileWriter(file);
+                outputStream = new FileWriter(file, true);
                 readerIn = new BufferedReader(new InputStreamReader(inputStream));
                 if (!file.exists()) {
                     file.createNewFile();
