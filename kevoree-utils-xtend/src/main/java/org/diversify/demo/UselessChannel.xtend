@@ -14,8 +14,7 @@ public class UselessChannel implements ChannelDispatch {
     @KevoreeInject
     ChannelContext channelContext;
 	
-	def override  ^dispatch(Object arg0, Callback arg1) {
-
+	def override  ^dispatch(Object payload, Callback callback) {
 	}
 
 }
