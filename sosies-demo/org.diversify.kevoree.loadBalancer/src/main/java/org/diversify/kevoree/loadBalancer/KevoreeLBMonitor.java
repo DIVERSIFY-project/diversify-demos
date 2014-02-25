@@ -65,13 +65,18 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
 
     @Stop
     public void stop() throws IOException, InterruptedException {
-        logReader.stopReader();
-        server.stop();
+        if (logReader != null) {
+            logReader.stopReader();
+        }
+        if (server != null) {
+            server.stop();
+        }
     }
 
 
     @Override
     public void modelUpdated() {
+        modelservice.unregisterModelListener(this);
         logReader = new LogReader(server, logFile);
         callback = new GetNbRequestCallback();
         logReader.startReader();
@@ -80,7 +85,7 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
     @Input
     public void receiveNbSosieCalled(Object result) {
         if (result instanceof Integer) {
-            callback.receive((Integer)result);
+            callback.receive((Integer) result);
         }
     }
 
@@ -102,14 +107,14 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
                     while (reader.ready()) {
                         String content = reader.readLine();
                         if (!content.split(";")[2].trim().equals("-")) {
-                        String[] hosts = content.split(";")[2].trim().split(",");
-                        for (String host : hosts) {
-                            callback.initialize();
-                            getNbSosieCalled.send(host);
-                            String toSend = content.replace(content.split(";")[2], host) + "; " + callback.getNbSosieCalled();
-                            System.err.println("toSend: " + toSend);
-                            server.sendToAll(toSend);
-                        }
+                            String[] hosts = content.split(";")[2].trim().split(",");
+                            for (String host : hosts) {
+                                callback.initialize();
+                                getNbSosieCalled.send(host);
+                                String toSend = content.replace(content.split(";")[2], host) + "; " + callback.getNbSosieCalled();
+                                System.err.println("toSend: " + toSend);
+                                server.sendToAll(toSend);
+                            }
                         }
                     }
                 }
@@ -131,7 +136,7 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
         }
 
         synchronized void receive(int nbSosieCalled) {
-           this.nbSosieCalled = nbSosieCalled;
+            this.nbSosieCalled = nbSosieCalled;
             received = true;
             this.notify();
         }
