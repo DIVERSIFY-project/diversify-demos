@@ -52,19 +52,19 @@ public class SosieRunner {
             sosieName = sosieUrl.substring(sosieUrl.indexOf("ringo-") + "ringo-".length(), sosieUrl.length() - ".zip".length());
             sosieName = sosieName.substring(sosieName.indexOf("-") + 1);
         }
-        directory = new File(System.getProperty("java.io.tmpdir") + File.separator + context.getInstanceName());//File.createTempFile("sosie", context.getInstanceName());
+        directory = new File(System.getProperty("java.io.tmpdir") + File.separator + context.getInstanceName());
         if ((directory.isFile() && directory.delete() && directory.mkdirs()) || (!directory.exists() && directory.mkdirs()) || (directory.isDirectory())) {
             runnerPath = copyFileFromStream(this.getClass().getClassLoader().getResourceAsStream("runner.bash"), directory.getAbsolutePath(), "runner.bash", true, true);
 
             standardOutput = new File(directory.getAbsolutePath() + File.separator + context.getInstanceName() + ".log");
             standardOutput.createNewFile();
             process = new ProcessBuilder().directory(directory).command("bash", runnerPath, "get", sosieUrl, directory.getAbsolutePath()).redirectErrorStream(true).start();
-            new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput)).start();
+            new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput, true)).start();
 
             int exitStatus = process.waitFor();
             if (exitStatus == 0) {
                 process = new ProcessBuilder().directory(directory).command("bash", runnerPath, "run", directory.getAbsolutePath(), directory.getAbsolutePath() + File.separator + sosieName, port + "", redisServer, redisServerPort + "").redirectErrorStream(true).start();
-                new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput)).start();
+                new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput, true)).start();
                 try {
                     exitStatus = process.exitValue();
                     process = null;
@@ -84,10 +84,10 @@ public class SosieRunner {
     public void stop() throws Exception {
         Log.info("Stoppting {} on {}", context.getInstanceName(), context.getNodeName());
         process = new ProcessBuilder().directory(directory).command("bash", runnerPath, "kill", port + "").redirectErrorStream(true).start();
-        new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput)).start();
+        new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput, true)).start();
         if (process.waitFor() == 0) {
             process = new ProcessBuilder().directory(directory).command("bash", runnerPath, "clean", directory.getAbsolutePath()).redirectErrorStream(true).start();
-            new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput)).start();
+            new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput, true)).start();
             if (process.waitFor() == 0) {
                 process = null;
                 standardOutput.delete();

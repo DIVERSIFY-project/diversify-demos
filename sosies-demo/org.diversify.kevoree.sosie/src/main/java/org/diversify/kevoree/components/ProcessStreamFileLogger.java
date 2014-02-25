@@ -15,10 +15,12 @@ public class ProcessStreamFileLogger implements Runnable {
 
     private InputStream inputStream;
     private File file;
+    private boolean append;
 
-    public ProcessStreamFileLogger(InputStream inputStream, File file) {
+    public ProcessStreamFileLogger(InputStream inputStream, File file, boolean append) {
         this.file = file;
         this.inputStream = inputStream;
+        this.append = append;
     }
 
     @Override
@@ -27,7 +29,7 @@ public class ProcessStreamFileLogger implements Runnable {
             FileWriter outputStream = null;
             BufferedReader readerIn = null;
             try {
-                outputStream = new FileWriter(file, true);
+                outputStream = new FileWriter(file, append);
                 readerIn = new BufferedReader(new InputStreamReader(inputStream));
                 if (!file.exists()) {
                     file.createNewFile();
