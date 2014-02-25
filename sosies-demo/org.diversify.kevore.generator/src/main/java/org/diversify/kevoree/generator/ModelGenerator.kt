@@ -54,8 +54,6 @@ fun buildNodeScript(nodesConfigurationFile: String, scriptBuilder: StringBuilder
 
     scriptBuilder.append("repo 'http://oss.sonatype.org/content/groups/public/'\n")
     scriptBuilder.append("repo 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/'\n")
-    scriptBuilder.append("repo 'http://maven.reacloud.com/repository/reacloud/release/'\n")
-    scriptBuilder.append("repo 'http://maven.reacloud.com/repository/reacloud/snapshots/'\n")
 
     scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest\n")
     scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lxc:latest\n")
