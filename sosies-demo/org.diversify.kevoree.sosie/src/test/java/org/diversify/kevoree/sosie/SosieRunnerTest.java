@@ -51,7 +51,7 @@ public class SosieRunnerTest extends KevoreeTestCase {
 
         waitLog("node0", "^node0/[\\:/0-9]* INFO: Sosie 'sosie1' is started$", 5000);
         File directory = new File(System.getProperty("java.io.tmpdir") + File.separator + "sosie1");
-        Assert.assertTrue(directory.exists());
+        Assert.assertTrue("Even if the execution of the script succeeded, the SosieRunner is not well started", directory.exists());
 
         try {
             exec("node0", "set node0.sosie1.started = 'false'");
