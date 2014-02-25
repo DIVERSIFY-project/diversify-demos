@@ -1,9 +1,10 @@
 repo "http://oss.sonatype.org/content/groups/public/"
+repo "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/"
 
 include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:latest
 include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest
 
-include mvn:org.diversify:org.diversify.kevoree:latest
+include mvn:org.diversify:org.diversify.kevoree.sosie:latest
 
 
 add node0 : JavaNode
