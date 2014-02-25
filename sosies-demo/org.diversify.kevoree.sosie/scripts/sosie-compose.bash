@@ -6,10 +6,10 @@ function listConfigurations() { # <ringo sosies folder> <rhino sosies folder>
 	touch configurations
 	touch mvnconfigurations
 	for ringo in `ls -d $1/*` ; do
-		ringo_basename=`basename $ringo`
+		ringo_basename=`basename ${ringo}`
 
 		for rhino in `ls -d $2/*` ; do
-			rhino_basename=`basename $rhino`
+			rhino_basename=`basename ${rhino}`
 			echo "mvn:org.diversify:composed-sosie:1-${ringo_basename}${rhino_basename}" >> mvnconfigurations
 			echo "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-${ringo_basename}${rhino_basename}/composed-sosie-1-${ringo_basename}${rhino_basename}.zip" >> configurations
 		done
@@ -28,7 +28,7 @@ function buildRegularWithRhinoSosies() { # <rhino sosies folder> <output folder>
 	ringo="${workingDirectory}/ringo"
 	
 	for rhino in `ls -d $1/*` ; do
-		rhino_basename=`basename $rhino`
+		rhino_basename=`basename ${rhino}`
 		folder="${workingDirectory}REGULAR${rhino_basename}"
 		mkdir ${folder}
 		cp -R ${ringo}/* $folder
@@ -47,10 +47,10 @@ function composeSosies() { # <ringo sosies folder> <rhino sosies folder> <output
 	workingDirectory="$3"
 	mkdir ${workingDirectory}
 	for ringo in `ls -d $1/*` ; do
-		ringo_basename=`basename $ringo`
+		ringo_basename=`basename ${ringo}`
 	
 		for rhino in `ls -d $2/*` ; do
-			rhino_basename=`basename $rhino`
+			rhino_basename=`basename ${rhino}`
 			folder="${workingDirectory}${ringo_basename}${rhino_basename}"
 			mkdir ${folder}
 			cp -R ${ringo}/* $folder
@@ -66,8 +66,8 @@ function composeSosies() { # <ringo sosies folder> <rhino sosies folder> <output
 function deployOnMaven() { # <sosies folder> <artifactId>
 	cd $1
 	for sosie in `ls -d $1/*` ; do
-		sosie_basename=`basename $sosie`
-		tar -zcvpf /tmp/sosie.tgz $sosie_basename
+		sosie_basename=`basename ${sosie}`
+		tar -zcvpf /tmp/sosie.tgz ${sosie_basename}
 		sosie="/tmp/sosie.tgz"
 		mvn deploy:deploy-file -Dfile=${sosie} -DgroupId=org.diversify -DartifactId=$2 -Dversion=1-${sosie_basename} -Dpackaging=zip -DrepositoryId=diversify -Durl=http://sd-35000.dedibox.fr:8080/archiva/repository/internal/
 	
@@ -133,10 +133,9 @@ function runTest() { # <sosies folder>
 	done
 }
 
-RETVAL=0
    case "$1" in
       list)
-         listConfigurations "$2" "$3" "$4"
+         listConfigurations "$2" "$3"
          ;;
       composeRegular)
       	buildRegularWithRhinoSosies "$2" "$3"
@@ -150,17 +149,22 @@ RETVAL=0
         composeSosies "$2" "$3" "$4"
          ;;
       deploy)
-#         deployRegularOnMaven
+         deployRegularOnMaven
          deployOnMaven "$2" "ringo"
-#         deployOnMaven "$3" "rhino"
-#         deployOnMaven "$4" "composed-sosie"
+         deployOnMaven "$3" "rhino"
+         deployOnMaven "$4" "composed-sosie"
          ;;
       runTest)
          runTest "$2"
          ;;
       *)
-         echo "Usage: $0 {list <ringo sosies folder> <rhino sosies folder> |composeRegular <rhino sosies folder> <outputFolder>|compose <ringo sosies folder> <rhino sosies folder> <output folder>|deploy <ringo sosies folder> <rhino sosies folder> <sosies folder>|runTest <sosies folder>}"
+         echo "Usage: $0 <operation> <parameters>"
+         echo "Possible operations (with their parameters):"
+         echo "    list <ringo sosies folder> <rhino sosies folder>"
+         echo "    composeRegular <rhino sosies folder> <outputFolder>"
+         echo "    compose <ringo sosies folder> <rhino sosies folder> <output folder>"
+         echo "    deploy <ringo sosies folder> <rhino sosies folder> <sosies folder>"
+         echo "    runTest <sosies folder>}"
          exit 1
          ;;
       esac
-   exit $RETVAL
