@@ -52,8 +52,8 @@ public class SosieRunner {
             sosieName = sosieUrl.substring(sosieUrl.indexOf("ringo-") + "ringo-".length(), sosieUrl.length() - ".zip".length());
             sosieName = sosieName.substring(sosieName.indexOf("-") + 1);
         }
-        directory = File.createTempFile("sosie", context.getInstanceName());
-        if (directory.delete() && directory.mkdirs()) {
+        directory = new File(System.getProperty("java.io.tmpdir") + File.separator + context.getInstanceName());//File.createTempFile("sosie", context.getInstanceName());
+        if ((directory.isFile() && directory.delete() && directory.mkdirs()) || (!directory.exists() && directory.mkdirs()) || (directory.isDirectory())) {
             runnerPath = copyFileFromStream(this.getClass().getClassLoader().getResourceAsStream("runner.bash"), directory.getAbsolutePath(), "runner.bash", true, true);
 
             standardOutput = new File(directory.getAbsolutePath() + File.separator + context.getInstanceName() + ".log");
@@ -70,27 +70,32 @@ public class SosieRunner {
                     process = null;
                     throw new Exception("Unable to run runner script. Exit Status: " + exitStatus + " for '" + runnerPath + " run " + directory.getAbsolutePath() + " " + directory.getAbsolutePath() + File.separator + sosieName + " " + port + " " + redisServer + " " + redisServerPort + "'");
                 } catch (IllegalThreadStateException ignored) {
+                    Log.info("Sosie '{}' is started", context.getInstanceName());
                 }
             } else {
                 throw new Exception("Unable to download sosie. Exit status: " + exitStatus + " for 'bash " + runnerPath + " get " + sosieUrl + "'");
             }
+        } else {
+            throw new Exception("Unable to create the temporary folder to store sosie content");
         }
     }
 
     @Stop
-    public void stop() throws IOException, InterruptedException {
-        if (process != null) {
-            Log.info("Stoppting {} on {}", context.getInstanceName(), context.getNodeName());
-            process = new ProcessBuilder().directory(directory).command("bash", runnerPath, "kill", port + "").redirectErrorStream(true).start();
+    public void stop() throws Exception {
+        Log.info("Stoppting {} on {}", context.getInstanceName(), context.getNodeName());
+        process = new ProcessBuilder().directory(directory).command("bash", runnerPath, "kill", port + "").redirectErrorStream(true).start();
+        new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput)).start();
+        if (process.waitFor() == 0) {
+            process = new ProcessBuilder().directory(directory).command("bash", runnerPath, "clean", directory.getAbsolutePath()).redirectErrorStream(true).start();
             new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput)).start();
             if (process.waitFor() == 0) {
-                process = new ProcessBuilder().directory(directory).command("bash", runnerPath, "clean", directory.getAbsolutePath()).redirectErrorStream(true).start();
-                new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput)).start();
-                if (process.waitFor() == 0) {
-                    process = null;
-                    standardOutput.delete();
-                }
+                process = null;
+                standardOutput.delete();
+            } else {
+                throw new Exception("Unable to clean temporary folder for " + context.getInstanceName() + " on " + context.getNodeName());
             }
+        } else {
+            throw new Exception("Unable to stop " + context.getInstanceName() + " on " + context.getNodeName());
         }
     }
 
