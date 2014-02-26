@@ -88,9 +88,9 @@ fun buildNodeScript(nodesConfigurationFile: String, scriptBuilder: StringBuilder
 
         var i = Integer.parseInt(configuration[3])
 
-        while (i >= 0) {
-            scriptBuilder.append("add ").append(configuration[0]).append(".").append(configuration[0]).append("Child").append(i).append(" : JavaNode\n")
+        while (i > 0) {
             i--
+            scriptBuilder.append("add ").append(configuration[0]).append(".").append(configuration[0]).append("Child").append(i).append(" : JavaNode\n")
         }
 
         if (configuration.size == 5) {
@@ -150,9 +150,9 @@ fun appendSosieConfiguration(nodesConfigurationFile: String, sosiesUrlFile: Stri
     while (line != null) {
         val configuration = line!!.split(";")
         var i = Integer.parseInt(configuration[3])
-        while (i >= 0) {
-            nodesList.add(configuration[0] + "Child" + i)
+        while (i > 0) {
             i--
+            nodesList.add(configuration[0] + "Child" + i)
         }
         if (configuration.size == 5) {
             nodesList.remove(configuration[0] + "Child0")
