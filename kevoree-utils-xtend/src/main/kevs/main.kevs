@@ -1,6 +1,7 @@
 //Adds a repository (for snapshots)
 repo "http://repo1.maven.org/maven2/"
 repo "http://oss.sonatype.org/content/repositories/releases/"
+repo "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/"
 
 //Includes the libraries of types in the model
 //include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:release
