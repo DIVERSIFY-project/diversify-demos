@@ -61,7 +61,7 @@ fun buildNodeScript(nodesConfigurationFile: String, scriptBuilder: StringBuilder
     scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.hazelcast:latest\n")
     scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:latest\n")
 
-    scriptBuilder.append("include mvn:org.kevoree.komponents:http-webbit:latest\n")
+    scriptBuilder.append("include mvn:org.kevoree.komponents:http-netty:latest\n")
 
     scriptBuilder.append("include mvn:org.diversify.demo:kevoree-utils-xtend:latest\n")
     scriptBuilder.append("include mvn:org.diversify.demo:nginxconf-generator:latest\n")
@@ -104,7 +104,7 @@ fun buildNodeScript(nodesConfigurationFile: String, scriptBuilder: StringBuilder
 
 
 
-            scriptBuilder.append("add ").append(configuration[0]).append("Child0").append(".webserver : WebbitHTTPServer\n")
+            scriptBuilder.append("add ").append(configuration[0]).append("Child0").append(".webserver : NettyHTTPServer\n")
             scriptBuilder.append("set ").append(configuration[0]).append("Child0").append(".webserver.port = '7999'\n")
 
             scriptBuilder.append("add ").append(configuration[0]).append("Child0").append(".restarter : DemoRestarter\n")

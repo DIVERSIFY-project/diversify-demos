@@ -9,11 +9,11 @@ include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:latest
 include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:latest
 include mvn:org.kevoree.library.java:org.kevoree.library.java.helloworld:latest
 
-include mvn:org.diversify.demo:nginxconf-generator:1.0-SNAPSHOT
-include mvn:org.diversify.demo:kevoree-utils-xtend:1.0-SNAPSHOT
+include mvn:org.diversify.demo:nginxconf-generator:latest
+include mvn:org.diversify.demo:kevoree-utils-xtend:latest
 
-include mvn:org.diversify:org.diversify.kevoree.sosie:1.0.0-SNAPSHOT
-include mvn:org.diversify:org.diversify.kevoree.loadBalancer:1.0.0-SNAPSHOT
+include mvn:org.diversify:org.diversify.kevoree.sosie:latest
+include mvn:org.diversify:org.diversify.kevoree.loadBalancer:latest
 
 
 add node0 : JavaNode
@@ -80,10 +80,10 @@ bind node0.lbMonitor.receiveNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
 
 
 include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:latest
-include mvn:org.kevoree.komponents:http-webbit:latest
+include mvn:org.kevoree.komponents:http-netty:latest
 include mvn:org.diversify:org.diversify.kevoree.restarter:latest
 
-add node0.webserver : WebbitHTTPServer
+add node0.webserver : NettyHTTPServer
 set node0.webserver.port = '7999'
 
 add node0.restarter : DemoRestarter
