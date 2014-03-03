@@ -23,15 +23,14 @@ function buildRegularWithRhinoSosies() { # <rhino sosies folder> <output folder>
 	
 	wget "http://ringojs.org/downloads/ringojs-0.10.tar.gz" --content-disposition -O ${workingDirectory}/ringojs.tgz
 	tar -xvpzf ringojs.tgz
-	mv ringojs-0.10 ringo
 	
-	ringo="${workingDirectory}/ringo"
+	ringo="${workingDirectory}/ringo-0.10"
 	
 	for rhino in `ls -d $1/*` ; do
 		rhino_basename=`basename ${rhino}`
 		folder="${workingDirectory}REGULAR${rhino_basename}"
 		mkdir ${folder}
-		cp -R ${ringo}/* $folder
+		cp -R ${ringo}/* ${folder}
 		sosie=`ls ${rhino}/*.jar`
 		rm -rf ${folder}/lib/ivy/rhino-1.7R5-SNAPSHOT.jar
 		cp  ${sosie} ${folder}/lib/ivy/rhino-1.7R5-SNAPSHOT.jar
@@ -53,7 +52,7 @@ function composeSosies() { # <ringo sosies folder> <rhino sosies folder> <output
 			rhino_basename=`basename ${rhino}`
 			folder="${workingDirectory}${ringo_basename}${rhino_basename}"
 			mkdir ${folder}
-			cp -R ${ringo}/* $folder
+			cp -R ${ringo}/* ${folder}
 
 			sosie=`ls ${rhino}/*.jar`
 
@@ -63,29 +62,29 @@ function composeSosies() { # <ringo sosies folder> <rhino sosies folder> <output
 	done
 }
 
-function deployOnMaven() { # <sosies folder> <artifactId>
+function deployOnMaven() { # <sosies folder> <artifactId> #<version prefix>
 	cd $1
 	for sosie in `ls -d $1/*` ; do
 		sosie_basename=`basename ${sosie}`
 		tar -zcvpf /tmp/sosie.tgz ${sosie_basename}
 		sosie="/tmp/sosie.tgz"
-		mvn deploy:deploy-file -Dfile=${sosie} -DgroupId=org.diversify -DartifactId=$2 -Dversion=1-${sosie_basename} -Dpackaging=zip -DrepositoryId=diversify -Durl=http://sd-35000.dedibox.fr:8080/archiva/repository/internal/
+		mvn deploy:deploy-file -Dfile=${sosie} -DgroupId=org.diversify -DartifactId=$2 -Dversion="$3"-${sosie_basename} -Dpackaging=zip -DrepositoryId=diversify -Durl=http://sd-35000.dedibox.fr:8080/archiva/repository/internal/
 	
 		rm -rf /tmp/sosie.tgz
 	done
 }
 
-function deployRegularOnMaven() {
+function deployRegularOnMaven() { #<version prefix>
 	cd /tmp
 	git clone https://github.com/mozilla/rhino.git
 	cd rhino/
 	ant jar
-	mvn deploy:deploy-file -Dfile=build/rhino1_7R5pre/js.jar -DgroupId=org.diversify -DartifactId=rhino -Dversion=1-REGULAR -Dpackaging=jar -DrepositoryId=diversify -Durl=http://sd-35000.dedibox.fr:8080/archiva/repository/internal/
+	mvn deploy:deploy-file -Dfile=build/rhino1_7R5pre/js.jar -DgroupId=org.diversify -DartifactId=rhino -Dversion="$1"-REGULAR -Dpackaging=jar -DrepositoryId=diversify -Durl=http://sd-35000.dedibox.fr:8080/archiva/repository/internal/
 	cd ..
 	rm -rf rhino
 
 	wget "http://ringojs.org/downloads/ringojs-0.10.tar.gz" --content-disposition -O /tmp/ringo.tgz
-	mvn deploy:deploy-file -Dfile=/tmp/ringo.tgz -DgroupId=org.diversify -DartifactId=ringo -Dversion=1-REGULAR -Dpackaging=zip -DrepositoryId=diversify -Durl=http://sd-35000.dedibox.fr:8080/archiva/repository/internal/
+	mvn deploy:deploy-file -Dfile=/tmp/ringo.tgz -DgroupId=org.diversify -DartifactId=ringo -Dversion="$1"-REGULAR -Dpackaging=zip -DrepositoryId=diversify -Durl=http://sd-35000.dedibox.fr:8080/archiva/repository/internal/
 }
 
 function runTest() { # <sosies folder>
@@ -145,14 +144,14 @@ function runTest() { # <sosies folder>
 		echo "Are you ok ? (Ctrl - C if not)"
 		read  
 		rm -rf ${workingDirectory}                   
-		buildRegularWithRhinoSosies "$2" "$4"
+		buildRegularWithRhinoSosies "$2" "$3"
         composeSosies "$2" "$3" "$4"
          ;;
       deploy)
-         deployRegularOnMaven
-         deployOnMaven "$2" "ringo"
-         deployOnMaven "$3" "rhino"
-         deployOnMaven "$4" "composed-sosie"
+         deployRegularOnMaven "$5"
+         deployOnMaven "$2" "ringo" "$5"
+         deployOnMaven "$3" "rhino" "$5"
+         deployOnMaven "$4" "composed-sosie" "$5"
          ;;
       runTest)
          runTest "$2"
@@ -163,7 +162,7 @@ function runTest() { # <sosies folder>
          echo "    list <ringo sosies folder> <rhino sosies folder>"
          echo "    composeRegular <rhino sosies folder> <outputFolder>"
          echo "    compose <ringo sosies folder> <rhino sosies folder> <output folder>"
-         echo "    deploy <ringo sosies folder> <rhino sosies folder> <sosies folder>"
+         echo "    deploy <ringo sosies folder> <rhino sosies folder> <sosies folder> <version prefix>"
          echo "    runTest <sosies folder>}"
          exit 1
          ;;
