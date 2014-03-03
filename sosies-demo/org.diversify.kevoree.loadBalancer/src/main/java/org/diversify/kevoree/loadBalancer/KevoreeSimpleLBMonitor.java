@@ -48,15 +48,12 @@ public class KevoreeSimpleLBMonitor extends ModelListenerAdapter {
             folderWhereExtract.mkdirs();
         }
         KevoreeLBMonitorWebContentExtractor.getInstance().extractConfiguration(folderWhereExtract.getAbsolutePath(), true);
-       // if (!"localhost".equals(serverName))
-       KevoreeLBMonitorWebContentExtractor.getInstance().replaceFileString("localhost:8099", serverName+":80/client/ws", folderWhereExtract.getAbsolutePath());
+         KevoreeLBMonitorWebContentExtractor.getInstance().replaceFileString("localhost:8099", serverName+":80/client/ws", folderWhereExtract.getAbsolutePath());
 
         WebSocketImpl.DEBUG = false;
 
         server = new LBWebSocketServer(port);
         server.start();
-        //logReader = new LogReader(server, logFile);
-        //logReader.startReader();
         Log.info("[LBWebSocketServer] Server started on port {}", server.getPort());
     }
 
@@ -96,8 +93,7 @@ public class KevoreeSimpleLBMonitor extends ModelListenerAdapter {
                 BufferedReader reader = new BufferedReader(new FileReader(new File(logFilePath)));
 
                 while (!stop) {
-                	System.err.println("titi ");
-                    while (reader.ready()) {
+                	while (reader.ready()) {
                         String content = reader.readLine();
                         server.sendToAll(content);
                     }

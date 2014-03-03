@@ -31,7 +31,7 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
     @Param(optional = true, defaultValue = "/tmp/loadbalancerclient/")
     private String pathWhereExtract;
 
-    @Output
+    @Output(optional=false)
     private Port getNbSosieCalled;
 
     @KevoreeInject
@@ -51,15 +51,12 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
             folderWhereExtract.mkdirs();
         }
         KevoreeLBMonitorWebContentExtractor.getInstance().extractConfiguration(folderWhereExtract.getAbsolutePath(), true);
-       // if (!"localhost".equals(serverName))
        KevoreeLBMonitorWebContentExtractor.getInstance().replaceFileString("localhost:8099", serverName+":80/client/ws", folderWhereExtract.getAbsolutePath());
 
         WebSocketImpl.DEBUG = false;
 
         server = new LBWebSocketServer(port);
         server.start();
-        //logReader = new LogReader(server, logFile);
-        //logReader.startReader();
         Log.info("[LBWebSocketServer] Server started on port {}", server.getPort());
     }
 
@@ -84,7 +81,7 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
         logReader.startReader();
     }
 
-    @Input
+    @Input(optional=false)
     public void receiveNbSosieCalled(Object result) {
         if (result instanceof Integer) {
             callback.receive((Integer) result);
