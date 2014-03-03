@@ -13,6 +13,8 @@ include mvn:org.kevoree.library.java:org.kevoree.library.java.helloworld:latest
 include mvn:org.diversify.demo:nginxconf-generator:1.0-SNAPSHOT
 include mvn:org.diversify.demo:kevoree-utils-xtend:1.0-SNAPSHOT
 include mvn:org.diversify:org.diversify.kevoree.sosie:latest
+include mvn:org.diversify:org.diversify.kevoree.loadBalancer:1.0.0-SNAPSHOT
+
 
 
 add node0 : JavaNode
@@ -29,11 +31,29 @@ network node0.ip.lan 127.0.0.1
 
 add node0.sosie1 : SosieRunner
 set node0.sosie1.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip"
-set node0.sosie1.sosieName = "indirection_on_Streamrhino8"
 set node0.sosie1.port = '8282'
+
+add node0.sosie2 : SosieRunner
+set node0.sosie2.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip"
+set node0.sosie2.port = '8284'
+
+add node0.sosie3 : SosieRunner
+set node0.sosie3.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip"
+set node0.sosie3.port = '8286'
+
+add node0.sosie4 : SosieRunner
+set node0.sosie4.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip"
+set node0.sosie4.port = '8288'
+
+add node0.monitor : KevoreeSimpleLBMonitor
+//set node0.monitor.serverName = '127.0.0.1'
+
 
 add channel : UselessChannel
 bind node0.sosie1.useless channel
+bind node0.sosie2.useless channel
+bind node0.sosie3.useless channel
+bind node0.sosie4.useless channel
 bind node0.nginx.outputPort channel
 
 

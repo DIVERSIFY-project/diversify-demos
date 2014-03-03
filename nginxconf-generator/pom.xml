@@ -6,23 +6,23 @@
 	<artifactId>nginxconf-generator</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <xtend.version>2.5.0</xtend.version>
-	    <kevoree.version>3.4.2-SNAPSHOT</kevoree.version>
-    </properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<xtend.version>2.5.2</xtend.version>
+		<kevoree.version>3.4.2-SNAPSHOT</kevoree.version>
+	</properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.kevoree</groupId>
-            <artifactId>org.kevoree.annotation.api</artifactId>
-            <version>${kevoree.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.kevoree</groupId>
-            <artifactId>org.kevoree.api</artifactId>
-            <version>${kevoree.version}</version>
-        </dependency>
-        		<dependency>
+	<dependencies>
+		<dependency>
+			<groupId>org.kevoree</groupId>
+			<artifactId>org.kevoree.annotation.api</artifactId>
+			<version>${kevoree.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.kevoree</groupId>
+			<artifactId>org.kevoree.api</artifactId>
+			<version>${kevoree.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.eclipse.xtend</groupId>
 			<artifactId>org.eclipse.xtend.lib</artifactId>
 			<version>${xtend.version}</version>
@@ -33,28 +33,28 @@
 			<version>4.10</version>
 			<scope>test</scope>
 		</dependency>
-        
-    </dependencies>
-	
+
+	</dependencies>
+
 	<build>
 		<plugins>
-		      <plugin>
-                <groupId>org.kevoree.tools</groupId>
-                <artifactId>org.kevoree.tools.mavenplugin</artifactId>
-                <version>${kevoree.version}</version>
-                <extensions>true</extensions>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <nodename>node0</nodename>
-                    <model>src/main/kevs/main.kevs</model>
-                </configuration>
-            </plugin>
+			<plugin>
+				<groupId>org.kevoree.tools</groupId>
+				<artifactId>org.kevoree.tools.mavenplugin</artifactId>
+				<version>${kevoree.version}</version>
+				<extensions>true</extensions>
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<nodename>node0</nodename>
+					<model>src/main/kevs/main.kevs</model>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.eclipse.xtend</groupId>
 				<artifactId>xtend-maven-plugin</artifactId>
@@ -81,14 +81,33 @@
 		</plugins>
 	</build>
 
-    <distributionManagement>
-        <repository>
-            <id>diversify</id>
-            <url>http://sd-35000.dedibox.fr:8080/archiva/repository/internal/</url>
-        </repository>
-        <snapshotRepository>
-            <id>diversify</id>
-            <url>http://sd-35000.dedibox.fr:8080/archiva/repository/internal/</url>
-        </snapshotRepository>
-    </distributionManagement>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>snap</id>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<url>http://oss.sonatype.org/content/groups/public/</url>
+		</pluginRepository>
+	</pluginRepositories>
+	<repositories>
+		<repository>
+			<id>snap1</id>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<url>http://oss.sonatype.org/content/groups/public/</url>
+		</repository>
+	</repositories>
+
+	<distributionManagement>
+		<repository>
+			<id>diversify</id>
+			<url>http://sd-35000.dedibox.fr:8080/archiva/repository/internal/</url>
+		</repository>
+		<snapshotRepository>
+			<id>diversify</id>
+			<url>http://sd-35000.dedibox.fr:8080/archiva/repository/internal/</url>
+		</snapshotRepository>
+	</distributionManagement>
 </project>

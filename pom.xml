@@ -26,4 +26,20 @@
         </snapshotRepository>
     </distributionManagement>
 
+<pluginRepositories>
+<pluginRepository>
+<id>snap</id>
+<snapshots><enabled>true</enabled></snapshots>
+<url>http://oss.sonatype.org/content/groups/public/</url>
+</pluginRepository>
+</pluginRepositories>
+<repositories>
+<repository>
+<id>snap1</id>
+<snapshots><enabled>true</enabled></snapshots>
+<url>http://oss.sonatype.org/content/groups/public/</url>
+
+</repository>
+</repositories>
+
 </project>

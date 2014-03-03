@@ -6,7 +6,6 @@
 package org.thingml.lbmonitor;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,6 +25,9 @@ public class LogReader extends AbstractLogReader {
 
     public void run() {
 
+    	
+    	
+    	
         BufferedInputStream reader;
         StringBuilder buffer = new StringBuilder();
         

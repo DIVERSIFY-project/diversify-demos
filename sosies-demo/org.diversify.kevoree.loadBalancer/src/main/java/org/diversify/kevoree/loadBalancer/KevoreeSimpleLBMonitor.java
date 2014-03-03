@@ -20,7 +20,7 @@ import java.io.*;
  * @version 1.0
  */
 @ComponentType
-public class KevoreeLBMonitor extends ModelListenerAdapter {
+public class KevoreeSimpleLBMonitor extends ModelListenerAdapter {
 
     @Param(optional = true, defaultValue = "8099")
     private int port;
@@ -31,15 +31,12 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
     @Param(optional = true, defaultValue = "/tmp/loadbalancerclient/")
     private String pathWhereExtract;
 
-    @Output
-    private Port getNbSosieCalled;
 
     @KevoreeInject
     ModelService modelservice;
 
     private LBWebSocketServer server;
     private AbstractLogReader logReader;
-    private GetNbRequestCallback callback;
 
 
     @Start
@@ -80,16 +77,9 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
     	
     	modelservice.unregisterModelListener(this);
         logReader = new LogReader(server, logFile);
-        callback = new GetNbRequestCallback();
         logReader.startReader();
     }
 
-    @Input
-    public void receiveNbSosieCalled(Object result) {
-        if (result instanceof Integer) {
-            callback.receive((Integer) result);
-        }
-    }
 
     private class LogReader extends AbstractLogReader {
 
@@ -102,7 +92,6 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
 
         @Override
         public void run() {
-        	System.err.println("toto ");
             try {
                 BufferedReader reader = new BufferedReader(new FileReader(new File(logFilePath)));
 
@@ -110,17 +99,7 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
                 	System.err.println("titi ");
                     while (reader.ready()) {
                         String content = reader.readLine();
-                        System.err.println("toto " + content);
-                        if (!content.split(";")[2].trim().equals("-")) {
-                            String[] hosts = content.split(";")[2].trim().split(",");
-                            for (String host : hosts) {
-                                callback.initialize();
-                                getNbSosieCalled.send(host);
-                                String toSend = content.replace(content.split(";")[2], host) + "; " + callback.getNbSosieCalled();
-                                System.err.println("toSend: " + toSend);
-                                server.sendToAll(toSend);
-                            }
-                        }
+                        server.sendToAll(content);
                     }
                 }
                 reader.close();
@@ -130,32 +109,5 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
                 ignored.printStackTrace();
             }
         }
-    }
-
-    private class GetNbRequestCallback {
-        int nbSosieCalled;
-        boolean received;
-
-        synchronized void initialize() {
-            received = false;
-        }
-
-        synchronized void receive(int nbSosieCalled) {
-            this.nbSosieCalled = nbSosieCalled;
-            received = true;
-            this.notify();
-        }
-
-        synchronized int getNbSosieCalled() {
-            if (!received) {
-                try {
-                    this.wait();
-                } catch (InterruptedException ignored) {
-                    ignored.printStackTrace();
-                }
-            }
-            return nbSosieCalled;
-
-        }
-    }
+    }   
 }
