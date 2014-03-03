@@ -70,9 +70,7 @@ public class KevoreeSimpleLBMonitor extends ModelListenerAdapter {
 
     @Override
     public void modelUpdated() {
-        System.err.println("OK pass par la");
-    	
-    	modelservice.unregisterModelListener(this);
+        modelservice.unregisterModelListener(this);
         logReader = new LogReader(server, logFile);
         logReader.startReader();
     }
