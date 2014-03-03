@@ -1,4 +1,4 @@
-package org.diversify.kevoree.generator
+package org.diversify.kevoree.generator.new
 
 import org.kevoree.impl.DefaultKevoreeFactory
 import java.io.BufferedReader
@@ -64,7 +64,7 @@ fun buildNodeScript(nodesConfigurationFile: String, scriptBuilder: StringBuilder
     scriptBuilder.append("include mvn:org.kevoree.komponents:http-netty:latest\n")
 
     scriptBuilder.append("include mvn:org.diversify.demo:kevoree-utils-xtend:latest\n")
-    scriptBuilder.append("include mvn:org.diversify.demo:nginxconf-generator:latest\n")
+    scriptBuilder.append("include mvn:org.diversify:org.diversify.kevoree.nginx:1.0.0-SNAPSHOT\n") // latest must be used but doesn't work. I think the index on sd-35000 repository is not efficient
     scriptBuilder.append("include mvn:org.diversify:org.diversify.kevoree.loadBalancer:latest\n")
 
     scriptBuilder.append("include mvn:org.diversify:org.diversify.kevoree.restarter:latest\n")
@@ -98,8 +98,34 @@ fun buildNodeScript(nodesConfigurationFile: String, scriptBuilder: StringBuilder
         }
 
         if (configuration.size == 5) {
-            scriptBuilder.append("add ").append(configuration[0]).append("Child0").append(".nginx : NginxLoadBalancerComponent\n")
-            scriptBuilder.append("bind ").append(configuration[0]).append("Child0").append(".nginx.outputPort nginxChannel\n")
+            scriptBuilder.append("add ").append(configuration[0]).append("Child0").append(".nginx : NginxConfigurator\n")
+            scriptBuilder.append("bind ").append(configuration[0]).append("Child0").append(".nginx.useless nginxChannel\n")
+
+            scriptBuilder.append("set ").append(configuration[0]).append("Child0").append(".nginx.servers = '###############################################################################\n" +
+            "# Definition of the load balancer front-end\n" +
+            "###############################################################################\n" +
+            "server {\n" +
+            "   listen 80;\n" +
+            "   server_name " + ";\n" +
+            "   access_log /tmp/loadbalancerclient/proxy.log proxy; #proxy refers to the log format defined in nginx.conf\n" +
+            "   location / {\n" +
+            "       proxy_pass http://backend;\n" +
+            "   }\n" +
+            "   location /client {\n" +
+            "       root /tmp/loadbalancerclient;\n" +
+            "       autoindex on;\n" +
+            "   }\n" +
+            "   location /client/ws {\n" +
+            "       proxy_pass http://localhost:8099;\n" +
+            "       # These are the option for websockets (need nginx >= v1.3.13)\n" +
+            "       proxy_set_header X-Real-IP \$remote_addr;\n" +
+            "       proxy_set_header Host \$host;\n" +
+            "       proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;\n" +
+            "       proxy_http_version 1.1;\n" +
+            "       proxy_set_header Upgrade \$http_upgrade;\n" +
+            "       proxy_set_header Connection \"upgrade\";\n" +
+            "   }\n" +
+            "}'\n")
 
             scriptBuilder.append("add ").append(configuration[0]).append("Child0").append(".lbMonitor : KevoreeLBMonitor\n")
             // here we can specify the port and logFile for lbMonitor

@@ -6,6 +6,7 @@
         <artifactId>sosies-demo</artifactId>
         <groupId>org.diversify</groupId>
         <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -18,5 +19,20 @@
             <version>${kevoree.version}</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.kevoree.tools</groupId>
+                <artifactId>org.kevoree.tools.mavenplugin</artifactId>
+                <version>${kevoree.version}</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <model>${project.basedir}/target/newscript.kevs</model>
+                    <nodename>node0</nodename>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

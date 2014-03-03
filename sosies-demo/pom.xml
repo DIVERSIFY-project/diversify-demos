@@ -19,6 +19,7 @@
         <module>org.diversify.kevoree.loadBalancer</module>
         <module>org.diversify.kevoree.generator</module>
         <module>org.diversify.kevoree.restarter</module>
+        <module>org.diversify.kevoree.nginx</module>
     </modules>
 
     <dependencies>
@@ -79,14 +80,16 @@
             <id>kevoree.oss.snapshots</id>
             <name>kevoree-snapshots</name>
             <url>http://oss.sonatype.org/content/groups/public/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
         </repository>
     </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>kevoree.oss.snapshots</id>
+            <name>kevoree-snapshots</name>
+            <url>http://oss.sonatype.org/content/groups/public/</url>
+        </pluginRepository>
+    </pluginRepositories>
 
     <distributionManagement>
         <repository>
