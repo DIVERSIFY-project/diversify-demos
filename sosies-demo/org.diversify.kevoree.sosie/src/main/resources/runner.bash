@@ -11,6 +11,7 @@ function getSosie() { # <url of the sosie> <folder to store the sosie>
 function run() { # <output folder> <folder of the sosie> <mdms port> <redis server host> <redis server port>
 	cd "$1"
 	rm -rf mdms
+	git config --system http.sslVerify false
 	git clone https://github.com/maxleiko/mdms-ringojs.git mdms
 
 	ringo_home="$2/"
@@ -26,7 +27,6 @@ cat > "${mdms_home}/config.json" << EOF
 }
 EOF
 
-	redis-cli FLUSHDB
 	${ringo_path}ringo-admin install ringo/stick
 	${ringo_path}ringo ${mdms_home}tools/fakedb.js
 	${ringo_path}ringo ${mdms_home}main.js -p "$3"
