@@ -7,6 +7,7 @@ import org.kevoree.api.Context;
 import org.kevoree.api.ModelService;
 import org.kevoree.api.Port;
 import org.kevoree.api.handler.ModelListenerAdapter;
+import org.kevoree.komponents.helpers.ProcessStreamFileLogger;
 import org.kevoree.log.Log;
 
 import java.io.File;
@@ -28,10 +29,6 @@ import java.util.Map;
 @ComponentType
 public class NginxConfigurator extends ModelListenerAdapter {
 
-    /*@Param(defaultValue = "80")
-    Integer port;
-    @Param(optional = true, defaultValue = "localhost")
-    private String serverNameDNS;*/
     @Param(optional = true, defaultValue = "localhost")
     private String servers;
 

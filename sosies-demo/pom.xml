@@ -12,6 +12,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kevoree.version>3.4.2-SNAPSHOT</kevoree.version>
         <kevoree.library.version>3.4.2-SNAPSHOT</kevoree.library.version>
+        <komponents.version>1.1.0-SNAPSHOT</komponents.version>
     </properties>
 
     <modules>
