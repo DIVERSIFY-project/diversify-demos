@@ -12,3 +12,4 @@ archive/
 **.metadata/
 **.settings/
 **src/main/generated-sources
+**src/main/xtend-gen
