@@ -3,9 +3,9 @@
 # $1 path to store sosie $1 : url to the sosie
 
 function getSosie() { # <url of the sosie> <folder to store the sosie>
-	wget "$1" --content-disposition -O /tmp/sosie.zip
-	tar -xvf /tmp/sosie.zip -C "$2/"
-	rm -rf /tmp/sosie.zip
+	wget "$1" --content-disposition -O "/$2/sosie.zip"
+	tar -xvf "/$2/sosie.zip" -C "$2/"
+	rm -rf "/$2/sosie.zip"
 }
 
 function run() { # <output folder> <folder of the sosie> <mdms port> <redis server host> <redis server port>
