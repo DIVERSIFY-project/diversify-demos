@@ -59,6 +59,13 @@
 <script type="text/javascript">
 
         /**********************************************************************
+        * CONFIGURATION OF THE WEB SOCKET SERVER
+        **********************************************************************/
+        // CHANGE THIS TO THE LOAD BALANCER IP:
+        var ws_host = "localhost";
+        var ws_port = "8099";
+
+        /**********************************************************************
          * Data structures for lists of clients and servers
          **********************************************************************/
         var clients = {};
@@ -273,7 +280,7 @@
         * Initialization code and web socket communication
         **********************************************************************/
         jsPlumb.ready(function() {
-            var LBMSock = new WebSocket("ws://localhost:8099");
+                var LBMSock = new WebSocket("ws://" + ws_host + ":" + ws_port);
 
                 LBMSock.onopen = function()
                 {
