@@ -1,0 +1,6 @@
+Ubuntu 12.04 LTS Build 3289
+Oracle JDK 6 JAVA
+Ringo Sosie 225
+Rino Sosie 3369
+MDMS
+Database version 20
