@@ -3,7 +3,6 @@ package org.diversify.kevoree.loadBalancer;
 import org.java_websocket.WebSocketImpl;
 import org.kevoree.annotation.*;
 import org.kevoree.api.ModelService;
-import org.kevoree.api.Port;
 import org.kevoree.api.handler.ModelListenerAdapter;
 import org.kevoree.log.Log;
 import org.thingml.lbmonitor.AbstractLogReader;
@@ -48,7 +47,7 @@ public class KevoreeSimpleLBMonitor extends ModelListenerAdapter {
             folderWhereExtract.mkdirs();
         }
         KevoreeLBMonitorWebContentExtractor.getInstance().extractConfiguration(folderWhereExtract.getAbsolutePath(), true);
-         KevoreeLBMonitorWebContentExtractor.getInstance().replaceFileString("localhost:8099", serverName+":80/client/ws", folderWhereExtract.getAbsolutePath());
+        KevoreeLBMonitorWebContentExtractor.getInstance().replaceFileString("localhost:8099", serverName + ":80/client/ws", folderWhereExtract.getAbsolutePath());
 
         WebSocketImpl.DEBUG = false;
 
@@ -87,21 +86,32 @@ public class KevoreeSimpleLBMonitor extends ModelListenerAdapter {
 
         @Override
         public void run() {
-            try {
-                BufferedReader reader = new BufferedReader(new FileReader(new File(logFilePath)));
+            BufferedReader reader = null;
+            while (reader == null) {
+                try {
+                    reader = new BufferedReader(new FileReader(new File(logFilePath)));
+                } catch (FileNotFoundException ignored) {
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException ignored1) {
+                    }
+                }
+            }
 
-                while (!stop) {
-                	while (reader.ready()) {
+            while (!stop) {
+                try {
+                    while (reader.ready()) {
                         String content = reader.readLine();
                         server.sendToAll(content);
                     }
+                } catch (IOException ignored) {
+                    ignored.printStackTrace();
                 }
+            }
+            try {
                 reader.close();
-            } catch (FileNotFoundException ignored) {
-                ignored.printStackTrace();
             } catch (IOException ignored) {
-                ignored.printStackTrace();
             }
         }
-    }   
+    }
 }

@@ -31,7 +31,7 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
     @Param(optional = true, defaultValue = "/tmp/loadbalancerclient/")
     private String pathWhereExtract;
 
-    @Output(optional=false)
+    @Output(optional = false)
     private Port getNbSosieCalled;
 
     @KevoreeInject
@@ -51,7 +51,7 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
             folderWhereExtract.mkdirs();
         }
         KevoreeLBMonitorWebContentExtractor.getInstance().extractConfiguration(folderWhereExtract.getAbsolutePath(), true);
-       KevoreeLBMonitorWebContentExtractor.getInstance().replaceFileString("localhost:8099", serverName+":80/client/ws", folderWhereExtract.getAbsolutePath());
+        KevoreeLBMonitorWebContentExtractor.getInstance().replaceFileString("localhost:8099", serverName + ":80/client/ws", folderWhereExtract.getAbsolutePath());
 
         WebSocketImpl.DEBUG = false;
 
@@ -79,7 +79,7 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
         logReader.startReader();
     }
 
-    @Input(optional=false)
+    @Input(optional = false)
     public void receiveNbSosieCalled(Object result) {
         if (result instanceof Integer) {
             callback.receive((Integer) result);
@@ -97,32 +97,40 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
 
         @Override
         public void run() {
-        	System.err.println("toto ");
-            try {
-                BufferedReader reader = new BufferedReader(new FileReader(new File(logFilePath)));
+            BufferedReader reader = null;
+            while (reader == null) {
+                try {
+                    reader = new BufferedReader(new FileReader(new File(logFilePath)));
+                } catch (FileNotFoundException ignored) {
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException ignored1) {
+                    }
+                }
+            }
 
-                while (!stop) {
-                	System.err.println("titi ");
+            while (!stop) {
+                try {
                     while (reader.ready()) {
                         String content = reader.readLine();
-                        System.err.println("toto " + content);
                         if (!content.split(";")[2].trim().equals("-")) {
                             String[] hosts = content.split(";")[2].trim().split(",");
                             for (String host : hosts) {
                                 callback.initialize();
                                 getNbSosieCalled.send(host);
                                 String toSend = content.replace(content.split(";")[2], host) + "; " + callback.getNbSosieCalled();
-                                System.err.println("toSend: " + toSend);
+                                Log.warn(toSend);
                                 server.sendToAll(toSend);
                             }
                         }
                     }
+                } catch (IOException ignored) {
+                    ignored.printStackTrace();
                 }
+            }
+            try {
                 reader.close();
-            } catch (FileNotFoundException ignored) {
-                ignored.printStackTrace();
             } catch (IOException ignored) {
-                ignored.printStackTrace();
             }
         }
     }
@@ -144,7 +152,7 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
         synchronized int getNbSosieCalled() {
             if (!received) {
                 try {
-                    this.wait();
+                    this.wait(5000);
                 } catch (InterruptedException ignored) {
                     ignored.printStackTrace();
                 }
