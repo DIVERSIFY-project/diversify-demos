@@ -128,9 +128,9 @@ fun buildNodeScript(nodesConfigurationFile: String, scriptBuilder: StringBuilder
             "   }\n" +
             "}'\n")
 
-            scriptBuilder.append("add ").append(configuration[0]).append("Child0").append(".softwareInstaller : MultipleLinesScriptRunner\n")
+            scriptBuilder.append("add ").append(configuration[0]).append("Child0").append(".softwareInstaller : ScriptRunner\n")
             scriptBuilder.append("set ").append(configuration[0]).append("Child0").append(".softwareInstaller.startScript = 'apt-get update\n" +
-            "apt-get install nginx redis-server --no-install-recommends -y\n" +
+            "apt-get install nginx redis-server git --no-install-recommends -y\n" +
             "cat /etc/nginx/nginx.conf | sed \"s/error_log \\\\/var\\\\/log\\\\/nginx\\\\/error.log;/error_log \\\\/var\\\\/log\\\\/nginx\\\\/error.log;\\\\nlog_format proxy \\'[\\\\\$time_local]; \\\\\$remote_addr; \\\\\$upstream_addr; \\\\\$upstream_response_time; \\\\\$request; \\\\\$remote_user;\\'/g\" > /tmp/nginx.conf\n" +
             "cp /tmp/nginx.conf /etc/nginx/nginx.conf\n" +
             "rm -rf /tmp/nginx.conf\n" +
