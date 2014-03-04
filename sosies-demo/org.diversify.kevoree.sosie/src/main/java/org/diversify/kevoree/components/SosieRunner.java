@@ -7,6 +7,7 @@ import org.kevoree.annotation.*;
 import org.kevoree.api.Context;
 import org.kevoree.api.ModelService;
 import org.kevoree.api.Port;
+import org.kevoree.komponents.helpers.ProcessStreamFileLogger;
 import org.kevoree.log.Log;
 
 import java.io.*;
@@ -82,7 +83,7 @@ public class SosieRunner {
 
     @Stop
     public void stop() throws Exception {
-        Log.info("Stoppting {} on {}", context.getInstanceName(), context.getNodeName());
+        Log.info("Stopping {} on {}", context.getInstanceName(), context.getNodeName());
         process = new ProcessBuilder().directory(directory).command("bash", runnerPath, "kill", port + "").redirectErrorStream(true).start();
         new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput, true)).start();
         if (process.waitFor() == 0) {
@@ -104,13 +105,21 @@ public class SosieRunner {
     }
 
     private boolean isHostFromLocalNode(String host) {
-        ContainerNode node = modelService.getCurrentModel().getModel().findNodesByID(context.getNodeName());
-        for (NetworkInfo networkInfo : node.getNetworkInformation()) {
-            for (NetworkProperty networkProperty : networkInfo.getValues()) {
-                if (host.equals(networkProperty.getValue())) {
-                    return true;
+        if (modelService.getCurrentModel() != null && modelService.getCurrentModel().getModel() != null) {
+            ContainerNode node = modelService.getCurrentModel().getModel().findNodesByID(context.getNodeName());
+            if (node != null) {
+                for (NetworkInfo networkInfo : node.getNetworkInformation()) {
+                    for (NetworkProperty networkProperty : networkInfo.getValues()) {
+                        if (host.equals(networkProperty.getValue())) {
+                            return true;
+                        }
+                    }
                 }
+            } else {
+                Log.warn("{}: Unable to find the current node in current model", context.getInstanceName());
             }
+        } else {
+            Log.warn("{}: Unable to get current model from ModelService", context.getInstanceName());
         }
         return false;
     }
@@ -143,7 +152,6 @@ public class SosieRunner {
                             } catch (IOException ignored) {
                             }
                         }
-                        System.err.println("Sending response for the nbSosieCalled");
                         sendNbSosieCalled.send(result);
                     }
                 }
