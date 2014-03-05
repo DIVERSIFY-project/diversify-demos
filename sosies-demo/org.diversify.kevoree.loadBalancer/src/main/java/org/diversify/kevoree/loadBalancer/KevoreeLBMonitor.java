@@ -52,6 +52,7 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
         }
         KevoreeLBMonitorWebContentExtractor.getInstance().extractConfiguration(folderWhereExtract.getAbsolutePath(), true);
         KevoreeLBMonitorWebContentExtractor.getInstance().replaceFileString("localhost:8099", serverName + ":80/client/ws", folderWhereExtract.getAbsolutePath());
+        KevoreeLBMonitorWebContentExtractor.getInstance().replaceServerAndPortString("localhost", serverName , "8099", "80/client/ws", folderWhereExtract.getAbsolutePath());
 
         WebSocketImpl.DEBUG = false;
 

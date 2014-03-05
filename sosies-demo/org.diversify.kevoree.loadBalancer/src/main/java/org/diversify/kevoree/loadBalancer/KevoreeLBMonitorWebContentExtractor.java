@@ -59,9 +59,21 @@ public class KevoreeLBMonitorWebContentExtractor {
         FileOutputStream fos = new FileOutputStream(fileName);
         IOUtils.write(content, new FileOutputStream(fileName), Charset.defaultCharset());
         fis.close();
-        fos.close();
+        fos.close();    
     }
-    
+
+    public void replaceServerAndPortString(String oldserver, String newServer, String oldPort, String newPort, String destDirectory) throws IOException {
+        String fileName = destDirectory + File.separator + "client"+ File.separator +"lbmonitor_client_v2.html";
+        FileInputStream fis = new FileInputStream(fileName);
+        String content = IOUtils.toString(fis, Charset.defaultCharset());
+        content = content.replaceAll("\"" + oldserver + "\"", "\"" + newServer + "\"");
+        content = content.replaceAll("\"" + oldPort + "\"", "\"" + newPort + "\"");
+        FileOutputStream fos = new FileOutputStream(fileName);
+        IOUtils.write(content, new FileOutputStream(fileName), Charset.defaultCharset());
+        fis.close();
+        fos.close();    
+    }
+
     
     private void extractFile(ZipInputStream zipIn, String filePath, boolean deleteOnExit) throws IOException {
         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
