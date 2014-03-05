@@ -4,6 +4,7 @@ import java.util.ArrayList
 import java.util.List
 import org.kevoree.ComponentInstance
 import org.kevoree.ContainerNode
+import org.kevoree.ContainerRoot
 import org.kevoree.DictionaryValue
 import org.kevoree.MBinding
 import org.kevoree.NetworkInfo
@@ -18,9 +19,10 @@ import org.kevoree.annotation.Stop
 import org.kevoree.api.Context
 import org.kevoree.api.ModelService
 import org.kevoree.api.Port
+import org.kevoree.api.handler.ModelListenerAdapter
 
 @ComponentType
-class NginxLoadBalancerComponent {
+class NginxLoadBalancerComponent extends ModelListenerAdapter{
 
 	@Param(defaultValue="80")
 	Integer port;
@@ -30,17 +32,18 @@ class NginxLoadBalancerComponent {
 		var master = new Node
 		master.port=""+this.port
 		master.name = context.instanceName
-		println(context.nodeName)
-		println(context.nodeName)
 		master.ip = getNodeIp(modelService.pendingModel.findNodesByID(context.nodeName))
-		generator.deployConfig(master,this.generateNginxConfig,serverNameDNS)
+		generator.deployConfig(master,this.generateNginxConfig(modelService.pendingModel),serverNameDNS)
 		generator.restartNginx
+		modelService.registerModelListener(this)
+		
 		
 	}
+	
 
 	@Stop
 	public def stopComponent() {
-		
+		modelService.unregisterModelListener(this)
 	}
 
 	@Input(optional=true)
@@ -63,7 +66,7 @@ class NginxLoadBalancerComponent {
 	
 	NginxXtendGenerator generator = new NginxXtendGenerator()
 
-	def List<Node> generateNginxConfig() {
+	def List<Node> generateNginxConfig(ContainerRoot model) {
 		var nods = new ArrayList<Node>()
 
 		//var fact = new DefaultKevoreeFactory()
@@ -72,8 +75,7 @@ class NginxLoadBalancerComponent {
 		var nodeName = context.nodeName
 
 		//Get the current Model
-		var model = modelService.pendingModel;
- 
+		
 		//var node = modelService.pendingModel.findNodesByID(nodeName)
 		for (MBinding b : model.findNodesByID(context.nodeName).findComponentsByID(context.instanceName).required.
 			get(0).bindings) {
@@ -128,6 +130,15 @@ class NginxLoadBalancerComponent {
 
 		}
 		return null;
+	}
+	
+	override modelUpdated() {
+		var master = new Node
+		master.port=""+this.port
+		master.name = context.instanceName
+		master.ip = getNodeIp(modelService.currentModel.model.findNodesByID(context.nodeName))
+		generator.deployConfig(master,this.generateNginxConfig(modelService.currentModel.model),serverNameDNS)
+		generator.restartNginx 
 	}
 
 	/*def Node getNodeNameAndPort(ContainerNode n) {
