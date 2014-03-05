@@ -299,65 +299,76 @@
                     var resp_time = split[3].trim();
                     var request = split[4].trim();
 
-                    var cli_id = src_addr.replace(/\./g, '_')
-                    var srv_id = srv_addr.replace(/\./g, '_').replace(/:/g, '_')
+                    var srv_addr_list = srv_addr.split(",");
+                    var resp_time_list = resp_time.split(",");
 
-                    var log = time + " " + src_addr + " => " + srv_addr + " " + request + " (" + resp_time + ")";
-
-                    var created = false;
-
-                    if (srv_addr.length < 4)
-                        return; // filter some incomplete requests
-
-                    if (contains(clients, cli_id)) {
-                        add_client(src_addr, cli_id);
-                        created = true;
-                    }
-                    else {
-                        clients[cli_id]++;
-                        cli_counter_text(cli_id, clients[cli_id]);
-                        cli_blink_activity_led(cli_id);
+                    for (i=0; i<srv_addr_list.length; i++) {
+                        handle_server_hit(time, src_addr,srv_addr_list[i].trim(), resp_time_list[i].trim(), request );
                     }
 
-                    if (contains(servers, srv_id)) {
-                        add_server(srv_addr, srv_id);
-                        created = true;
-                    }
-                    else {
-                        servers[srv_id]++;
-                        srv_blink_activity_led(srv_id);
-
-                    }
-
-
-                    //jsPlumb.detachAllConnections(document.getElementById('client_' + cli_id));
-
-                    if (created == false) {
-
-                        var conn = jsPlumb.connect({
-                            source: 'client_' + cli_id,
-                            target: 'server_' + srv_id,
-                            paintStyle: {lineWidth: 5, strokeStyle: 'rgb(150,150,150)'},
-                            endpointStyle: {radius: 8},
-                            anchors: ["Bottom", "Top"],
-                            connector: "Straight"
-
-                        });
-
-                        setTimeout(function() {
-                            //jsPlumb.detachAllConnections(document.getElementById('client_' + cli_id));
-                            jsPlumb.detach(conn);
-                        }, 2000);
-
-                    }
-
-                    log_to_console(log);
                 };
                 LBMSock.onclose = function()
                 {
                     log_to_console("Websocket closed!");
                 };
         });
+
+        function handle_server_hit(time, src_addr, srv_addr, resp_time, request) {
+
+            var cli_id = src_addr.replace(/\./g, '_')
+            var srv_id = srv_addr.replace(/\./g, '_').replace(/:/g, '_')
+
+            var log = time + " " + src_addr + " => " + srv_addr + " " + request + " (" + resp_time + ")";
+
+            var created = false;
+
+            if (srv_addr.length < 4)
+                return; // filter some incomplete requests
+
+            if (contains(clients, cli_id)) {
+                add_client(src_addr, cli_id);
+                created = true;
+            }
+            else {
+                clients[cli_id]++;
+                cli_counter_text(cli_id, clients[cli_id]);
+                cli_blink_activity_led(cli_id);
+            }
+
+            if (contains(servers, srv_id)) {
+                add_server(srv_addr, srv_id);
+                created = true;
+            }
+            else {
+                servers[srv_id]++;
+                srv_blink_activity_led(srv_id);
+
+            }
+
+
+            //jsPlumb.detachAllConnections(document.getElementById('client_' + cli_id));
+
+            if (created == false) {
+
+                var conn = jsPlumb.connect({
+                    source: 'client_' + cli_id,
+                    target: 'server_' + srv_id,
+                    paintStyle: {lineWidth: 5, strokeStyle: 'rgb(150,150,150)'},
+                    endpointStyle: {radius: 8},
+                    anchors: ["Bottom", "Top"],
+                    connector: "Straight"
+
+                });
+
+                setTimeout(function() {
+                    //jsPlumb.detachAllConnections(document.getElementById('client_' + cli_id));
+                    jsPlumb.detach(conn);
+                }, 2000);
+
+            }
+
+            log_to_console(log);
+        }
 
 
 </script>
