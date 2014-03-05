@@ -5,13 +5,14 @@
     <meta charset="utf-8"/>
     <link rel="shortcut icon" type="image/png" href="/favicon.png"/>
     <meta name="viewport" content="width=1274, user-scalable=yes"/>
-    <title>Demo Restart</title>
+    <title>Demo Configure</title>
     <script src="jquery.min.js"></script>
     <style>
         body {
             width: 100%;
             height: 100%;
         }
+
         input.round {
             position: fixed;
             left: 45%;
@@ -49,17 +50,18 @@
     </style>
     <script type="text/javascript">
         jQuery(document).ready(function () {
-            jQuery('#restart').click(function () {
-                jQuery.get("{pattern}restartSosie", function (data) {
+            jQuery('#configure').click(function () {
+                jQuery.get("{pattern}configureSystem", function (data) {
                     if(data != 'done') {
-                        alert("Unable to restart the demo");
+                        alert("Unable to configure the system");
                     }
                 });
             });
+
         });
     </script>
 </head>
 <body>
-<input class="round" id="restart" type="submit" value="Restart"/>
+<input class="round" id="configure" type="submit" value="Configure"/>
 </body>
 </html>

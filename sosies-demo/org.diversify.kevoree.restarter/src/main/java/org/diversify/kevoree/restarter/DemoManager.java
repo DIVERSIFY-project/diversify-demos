@@ -27,20 +27,24 @@ import java.util.List;
  * @version 1.0
  */
 @ComponentType
-public class DemoRestarter extends SimpleTemplatingStaticFileHandler implements ModelListener {
+public class DemoManager extends SimpleTemplatingStaticFileHandler implements ModelListener {
 
     @Param(optional = true, defaultValue = "SosieRunner")
     private String componentType;
+    @Param(optional = true, defaultValue = "nginx,softwareInstaller")
+    private String configuratorComponents;
     @KevoreeInject
     private ModelService modelService;
 
     private List<String> componentPaths;
+    private List<String> configuratorPaths;
 
     @Start
     public void start() throws Exception {
         setTemplates("pattern=" + urlPattern);
         super.start();
         componentPaths = new ArrayList<String>();
+        configuratorPaths = new ArrayList<String>();
         modelService.registerModelListener(this);
     }
 
@@ -52,11 +56,15 @@ public class DemoRestarter extends SimpleTemplatingStaticFileHandler implements 
             componentPaths.clear();
             componentPaths = null;
         }
+        if (configuratorPaths != null) {
+            configuratorPaths.clear();
+            configuratorPaths = null;
+        }
     }
 
     @Override
     protected synchronized void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (req.getRequestURI().toLowerCase().endsWith("restart") || req.getRequestURI().toLowerCase().endsWith("restart/")) {
+        if (req.getRequestURI().toLowerCase().endsWith("restartsosie") || req.getRequestURI().toLowerCase().endsWith("restartsosie/")) {
             final StringBuilder stopScriptBuilder = new StringBuilder();
             final StringBuilder startScriptBuilder = new StringBuilder();
             for (String componentPath : componentPaths) {
@@ -77,7 +85,37 @@ public class DemoRestarter extends SimpleTemplatingStaticFileHandler implements 
                         modelService.submitScript(startScriptBuilder.toString(), new UpdateCallback() {
                             @Override
                             public void run(Boolean aBoolean) {
-                                modelService.registerModelListener(DemoRestarter.this);
+                                modelService.registerModelListener(DemoManager.this);
+                            }
+                        });
+                    }
+                }
+            });
+            PrintWriter writer = resp.getWriter();
+            writer.write("done");
+            writer.flush();
+        } else if (req.getRequestURI().toLowerCase().endsWith("configuresystem") || req.getRequestURI().toLowerCase().endsWith("configuresystem/")) {
+            final StringBuilder stopScriptBuilder = new StringBuilder();
+            final StringBuilder startScriptBuilder = new StringBuilder();
+            for (String componentPath : configuratorPaths) {
+                KMFContainer component = modelService.getCurrentModel().getModel().findByPath(componentPath);
+                if (component != null && component instanceof ComponentInstance) {
+                    stopScriptBuilder.append("set ").append(((ContainerNode) component.eContainer()).getName()).append(".").append(((ComponentInstance) component).getName()).append(".started = 'false'\n");
+                    startScriptBuilder.append("set ").append(((ContainerNode) component.eContainer()).getName()).append(".").append(((ComponentInstance) component).getName()).append(".started = 'true'\n");
+                }
+            }
+
+            System.err.println(stopScriptBuilder.toString());
+            modelService.unregisterModelListener(this);
+            modelService.submitScript(stopScriptBuilder.toString(), new UpdateCallback() {
+                @Override
+                public void run(Boolean aBoolean) {
+                    if (aBoolean) {
+                        System.err.println(startScriptBuilder.toString());
+                        modelService.submitScript(startScriptBuilder.toString(), new UpdateCallback() {
+                            @Override
+                            public void run(Boolean aBoolean) {
+                                modelService.registerModelListener(DemoManager.this);
                             }
                         });
                     }
@@ -114,6 +152,9 @@ public class DemoRestarter extends SimpleTemplatingStaticFileHandler implements 
             for (ComponentInstance component : node.getComponents()) {
                 if (componentType.equals(component.getTypeDefinition().getName())) {
                     componentPaths.add(component.path());
+                }
+                if (configuratorComponents.contains(component.getName())) {
+                    configuratorPaths.add(component.path());
                 }
             }
         }
