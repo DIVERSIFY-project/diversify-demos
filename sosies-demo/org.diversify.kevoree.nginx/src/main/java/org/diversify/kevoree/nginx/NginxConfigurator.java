@@ -7,6 +7,7 @@ import org.kevoree.api.Context;
 import org.kevoree.api.ModelService;
 import org.kevoree.api.Port;
 import org.kevoree.api.handler.ModelListenerAdapter;
+import org.kevoree.komponents.helpers.ProcessStreamFileLogger;
 import org.kevoree.log.Log;
 
 import java.io.File;
@@ -28,10 +29,6 @@ import java.util.Map;
 @ComponentType
 public class NginxConfigurator extends ModelListenerAdapter {
 
-    /*@Param(defaultValue = "80")
-    Integer port;
-    @Param(optional = true, defaultValue = "localhost")
-    private String serverNameDNS;*/
     @Param(optional = true, defaultValue = "localhost")
     private String servers;
 
@@ -42,10 +39,6 @@ public class NginxConfigurator extends ModelListenerAdapter {
     private ModelService modelService;
     @KevoreeInject
     protected Context context;
-
-//    List<String> componentPaths;
-//    List<String> nodePaths;
-//    List<String> unresolvedNodeIpPaths;
 
     private static final String commentUpstreamBackend = "###############################################################################\n" +
             "# Definition of the Load balancer backend\n" +
@@ -68,14 +61,7 @@ public class NginxConfigurator extends ModelListenerAdapter {
 
     @Override
     public void modelUpdated() {
-//        List<String> newComponentPaths = new ArrayList<String>();
-//        List<String> newNodePaths = new ArrayList<String>();
-//        List<String> newUnresolvedNodeIpPaths = new ArrayList<String>();
-
         Map<String, List<String>> ipsForNodes = new HashMap<String, List<String>>();
-
-        boolean needUpdateForComponents = false;
-        boolean needUpdateForNodes = false;
 
         ComponentInstance instance = modelService.getCurrentModel().getModel().findNodesByID(context.getNodeName()).findComponentsByID(context.getInstanceName());
 
@@ -149,10 +135,14 @@ public class NginxConfigurator extends ModelListenerAdapter {
     }
 
     private void reloadNginxConfiguration() throws Exception {
-        Process p = Runtime.getRuntime().exec("/etc/init.d/nginx", new String[]{"reload"});
-        p.waitFor();
-        if (p.exitValue() != 0) {
+        File standardOutput = new File(System.getProperty("java.io.tmpdir") + File.separator + context.getInstanceName() + ".nginx.log");
+        // using restart because reload seems to not start nginx if it is not started
+        Process process = new ProcessBuilder().command("/etc/init.d/nginx", "restart").redirectErrorStream(true).start();
+        new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput, false)).start();
+        process.waitFor();
+        if (process.exitValue() != 0) {
             throw new Exception("Unable to reload the nginx configuration");
         }
+        standardOutput.delete();
     }
 }

@@ -58,6 +58,7 @@ fun buildNodeScript(nodesConfigurationFile: String, scriptBuilder: StringBuilder
     scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest\n")
     scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lxc:latest\n")
     scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:latest\n")
+    scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.system:latest\n")
     scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.hazelcast:latest\n")
     scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:latest\n")
 
@@ -106,7 +107,7 @@ fun buildNodeScript(nodesConfigurationFile: String, scriptBuilder: StringBuilder
             "###############################################################################\n" +
             "server {\n" +
             "   listen 80;\n" +
-            "   server_name " + ";\n" +
+            "   server_name localhost;\n" +
             "   access_log /tmp/loadbalancerclient/proxy.log proxy; #proxy refers to the log format defined in nginx.conf\n" +
             "   location / {\n" +
             "       proxy_pass http://backend;\n" +
@@ -126,6 +127,64 @@ fun buildNodeScript(nodesConfigurationFile: String, scriptBuilder: StringBuilder
             "       proxy_set_header Connection \"upgrade\";\n" +
             "   }\n" +
             "}'\n")
+
+            scriptBuilder.append("add ").append(configuration[0]).append("Child0").append(".softwareInstaller : ScriptRunner\n")
+            scriptBuilder.append("set ").append(configuration[0]).append("Child0").append(".softwareInstaller.startScript = 'apt-get update\n" +
+            "apt-get install nginx redis-server git --no-install-recommends -y\n" +
+            "cat /etc/nginx/nginx.conf | sed \"s/error_log \\\\/var\\\\/log\\\\/nginx\\\\/error.log;/error_log \\\\/var\\\\/log\\\\/nginx\\\\/error.log;\\\\nlog_format proxy \\'[\\\\\$time_local]; \\\\\$remote_addr; \\\\\$upstream_addr; \\\\\$upstream_response_time; \\\\\$request; \\\\\$remote_user;\\'/g\" > /tmp/nginx.conf\n" +
+            "cp /tmp/nginx.conf /etc/nginx/nginx.conf\n" +
+            "rm -rf /tmp/nginx.conf\n" +
+            "rm -rf /etc/nginx/sites-enabled/default\n" +
+            "cat > \\'/etc/redis/redis.conf\\' << EOF\n" +
+            "daemonize yes\n" +
+            "pidfile /var/run/redis/redis-server.pid\n" +
+            "port 6379\n" +
+            "# If you want you can bind a single interface, if the bind option is not\n" +
+            "# specified all the interfaces will listen for incoming connections.\n" +
+            "#\n" +
+            "#bind <ip>\n" +
+            "timeout 0\n" +
+            "tcp-keepalive 60\n" +
+            "loglevel notice\n" +
+            "logfile /var/log/redis/redis-server.log\n" +
+            "databases 16\n" +
+            "save 900 1\n" +
+            "save 300 10\n" +
+            "save 60 10000\n" +
+            "stop-writes-on-bgsave-error yes\n" +
+            "rdbcompression yes\n" +
+            "rdbchecksum yes\n" +
+            "dbfilename dump.rdb\n" +
+            "dir /var/lib/redis\n" +
+            "slave-serve-stale-data yes\n" +
+            "slave-read-only yes\n" +
+            "repl-disable-tcp-nodelay no\n" +
+            "slave-priority 100\n" +
+            "maxclients 10000\n" +
+            "appendonly no\n" +
+            "appendfsync everysec\n" +
+            "no-appendfsync-on-rewrite no\n" +
+            "auto-aof-rewrite-percentage 100\n" +
+            "auto-aof-rewrite-min-size 64mb\n" +
+            "lua-time-limit 5000\n" +
+            "slowlog-log-slower-than 10000\n" +
+            "slowlog-max-len 128\n" +
+            "hash-max-ziplist-entries 512\n" +
+            "hash-max-ziplist-value 64\n" +
+            "list-max-ziplist-entries 512\n" +
+            "list-max-ziplist-value 64\n" +
+            "set-max-intset-entries 512\n" +
+            "zset-max-ziplist-entries 128\n" +
+            "zset-max-ziplist-value 64\n" +
+            "activerehashing yes\n" +
+            "client-output-buffer-limit normal 0 0 0\n" +
+            "client-output-buffer-limit slave 256mb 64mb 60\n" +
+            "client-output-buffer-limit pubsub 32mb 8mb 60\n" +
+            "hz 50\n" +
+            "aof-rewrite-incremental-fsync yes\n" +
+            "EOF\n" +
+            "/etc/init.d/redis-server restart\n" +
+            "'\n")
 
             scriptBuilder.append("add ").append(configuration[0]).append("Child0").append(".lbMonitor : KevoreeLBMonitor\n")
             // here we can specify the port and logFile for lbMonitor
@@ -154,7 +213,6 @@ fun buildNodeScript(nodesConfigurationFile: String, scriptBuilder: StringBuilder
 
             scriptBuilder.append("bind ").append(configuration[0]).append("Child0").append(".restarter.request request\n")
             scriptBuilder.append("bind ").append(configuration[0]).append("Child0").append(".restarter.content response\n")
-
         }
 
         line = reader.readLine()

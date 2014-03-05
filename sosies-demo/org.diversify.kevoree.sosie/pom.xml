@@ -18,17 +18,10 @@
     </properties>
 
     <dependencies>
-        <!--<dependency>
-            <groupId>org.kevoree.library.java</groupId>
-            <artifactId>org.kevoree.library.java.haproxy</artifactId>
-            <version>${kevoree.library.version}</version>
-        </dependency>-->
-        <!--<dependency>
-            <groupId>org.kevoree</groupId>
-            <artifactId>org.kevoree.maven.resolver</artifactId>
-            <version>${basic.resolver.version}</version>
-        </dependency>-->
+        <dependency>
+            <groupId>org.kevoree.komponents</groupId>
+            <artifactId>helpers</artifactId>
+            <version>${komponents.version}</version>
+        </dependency>
     </dependencies>
-
-
 </project>

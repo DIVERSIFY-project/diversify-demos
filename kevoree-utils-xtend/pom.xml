@@ -81,25 +81,27 @@
 		</plugins>
 	</build>
 
-	<pluginRepositories>
-		<pluginRepository>
-			<id>snap</id>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<url>http://oss.sonatype.org/content/groups/public/</url>
-		</pluginRepository>
-	</pluginRepositories>
-	<repositories>
-		<repository>
-			<id>snap1</id>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<url>http://oss.sonatype.org/content/groups/public/</url>
+    <repositories>
+        <repository>
+            <id>kevoree.oss.snapshots</id>
+            <name>kevoree-snapshots</name>
+            <url>http://oss.sonatype.org/content/groups/public/</url>
+        </repository>
+    </repositories>
 
-		</repository>
-	</repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>kevoree.oss.snapshots</id>
+            <name>kevoree-snapshots</name>
+            <url>http://oss.sonatype.org/content/groups/public/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 
 	<distributionManagement>
 		<repository>
