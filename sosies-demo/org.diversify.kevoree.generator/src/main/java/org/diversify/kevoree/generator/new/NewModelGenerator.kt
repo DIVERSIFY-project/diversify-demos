@@ -56,6 +56,7 @@ fun buildNodeScript(nodesConfigurationFile: String, scriptBuilder: StringBuilder
     scriptBuilder.append("repo 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/'\n")
 
     scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest\n")
+    scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.hazelcast:latest\n")
     scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lxc:latest\n")
     scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:latest\n")
     scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.system:latest\n")
@@ -71,6 +72,8 @@ fun buildNodeScript(nodesConfigurationFile: String, scriptBuilder: StringBuilder
     scriptBuilder.append("include mvn:org.diversify:org.diversify.kevoree.restarter:latest\n")
 
     scriptBuilder.append("add ").append("sync : WSGroup\n")
+    scriptBuilder.append("add ").append("broadcast : BroadcastGroup\n")
+
     scriptBuilder.append("add nginxChannel : UselessChannel\n")
     scriptBuilder.append("add lbMonitorChannelGetNbSosieCalled : DistributedBroadcast\n")
     scriptBuilder.append("add lbMonitorChannelReceiveNbSosieCalled : DistributedBroadcast\n")
@@ -78,13 +81,17 @@ fun buildNodeScript(nodesConfigurationFile: String, scriptBuilder: StringBuilder
     scriptBuilder.append("add response : AsyncBroadcast\n")
 
 
+    var port = 9000
+
     val reader = BufferedReader(FileReader(File(nodesConfigurationFile)))
     var line = reader.readLine()
     while (line != null) {
         val configuration = line!!.split(";")
         scriptBuilder.append("add ").append(configuration[0]).append(" : ").append(configuration[1]).append("\n")
-        scriptBuilder.append("set sync.port/").append(configuration[0]).append(" = '9000'\n")
+        scriptBuilder.append("set sync.port/").append(configuration[0]).append(" = '" + port + "'\n")
+        port++
         scriptBuilder.append("attach ").append(configuration[0]).append(" sync\n")
+        scriptBuilder.append("attach ").append(configuration[0]).append(" broadcast\n")
         scriptBuilder.append("network ").append(configuration[0]).append(".ip.lan ").append(configuration[2]).append("\n")
 
         var i = Integer.parseInt(configuration[3])
@@ -96,6 +103,9 @@ fun buildNodeScript(nodesConfigurationFile: String, scriptBuilder: StringBuilder
             if (configuration[1].equalsIgnoreCase("javanode")) {
                 scriptBuilder.append("network ").append(configuration[0]).append("Child").append(i).append(".ip.lan ").append(configuration[2]).append("\n")
             }
+//            scriptBuilder.append("set broadcast.port/").append(configuration[0]).append("Child").append(i).append(" = '" + port + "'\n")
+//            port++
+            scriptBuilder.append("attach ").append(configuration[0]).append("Child").append(i).append(" broadcast\n")
         }
 
         if (configuration.size == 5) {
@@ -127,6 +137,7 @@ fun buildNodeScript(nodesConfigurationFile: String, scriptBuilder: StringBuilder
             "       proxy_set_header Connection \"upgrade\";\n" +
             "   }\n" +
             "}'\n")
+            scriptBuilder.append("set ").append(configuration[0]).append("Child0").append(".nginx.started = 'false'\n")
 
             scriptBuilder.append("add ").append(configuration[0]).append("Child0").append(".softwareInstaller : ScriptRunner\n")
             scriptBuilder.append("set ").append(configuration[0]).append("Child0").append(".softwareInstaller.startScript = 'apt-get update\n" +
@@ -142,7 +153,8 @@ fun buildNodeScript(nodesConfigurationFile: String, scriptBuilder: StringBuilder
             "# If you want you can bind a single interface, if the bind option is not\n" +
             "# specified all the interfaces will listen for incoming connections.\n" +
             "#\n" +
-            "#bind <ip>\n" +
+            // this line is specific to JavaNode !! Maybe we need to do something else for LightLXC
+            "bind " + configuration[2]+ "\n" +
             "timeout 0\n" +
             "tcp-keepalive 60\n" +
             "loglevel notice\n" +
@@ -185,6 +197,7 @@ fun buildNodeScript(nodesConfigurationFile: String, scriptBuilder: StringBuilder
             "EOF\n" +
             "/etc/init.d/redis-server restart\n" +
             "'\n")
+            scriptBuilder.append("set ").append(configuration[0]).append("Child0").append(".softwareInstaller.started = 'false'\n")
 
             scriptBuilder.append("add ").append(configuration[0]).append("Child0").append(".lbMonitor : KevoreeLBMonitor\n")
             // here we can specify the port and logFile for lbMonitor
@@ -196,7 +209,7 @@ fun buildNodeScript(nodesConfigurationFile: String, scriptBuilder: StringBuilder
             scriptBuilder.append("add ").append(configuration[0]).append("Child0").append(".webserver : NettyHTTPServer\n")
             scriptBuilder.append("set ").append(configuration[0]).append("Child0").append(".webserver.port = '7999'\n")
 
-            scriptBuilder.append("add ").append(configuration[0]).append("Child0").append(".restarter : DemoRestarter\n")
+            scriptBuilder.append("add ").append(configuration[0]).append("Child0").append(".restarter : DemoManager\n")
             scriptBuilder.append("set ").append(configuration[0]).append("Child0").append(".restarter.componentType = 'SosieRunner'\n")
 
 
@@ -233,6 +246,7 @@ fun appendSosieConfiguration(nodesConfigurationFile: String, sosiesUrlFile: Stri
     val nodesList = ArrayList<String>()
     val javaParentNodes = ArrayList<String>()
     val portMap = HashMap<String, Int>()
+    var redisServer = ""
 
     var reader = BufferedReader(FileReader(File(nodesConfigurationFile)))
     var line = reader.readLine()
@@ -254,6 +268,8 @@ fun appendSosieConfiguration(nodesConfigurationFile: String, sosiesUrlFile: Stri
             if (configuration[1].equalsIgnoreCase("javanode")) {
                 javaParentNodes.remove(configuration[0] + "Child0")
             }
+            // this line is specific to JavaNode !! Maybe we need to do something else for LightLXC
+            redisServer = configuration[2];
         }
 
         line = reader.readLine()
@@ -276,6 +292,8 @@ fun appendSosieConfiguration(nodesConfigurationFile: String, sosiesUrlFile: Stri
                 sosieName = sosieName!!.substring(sosieName!!.indexOf("-") + 1)
             }
             scriptBuilder.append("add ").append(nodeName).append(".").append(sosieName).append(nodeName).append(i).append(" : SosieRunner\n")
+            scriptBuilder.append("set ").append(nodeName).append(".").append(sosieName).append(nodeName).append(i).append(".started = 'false'\n")
+
             scriptBuilder.append("set ").append(nodeName).append(".").append(sosieName).append(nodeName).append(i).append(".sosieUrl = '").append(line).append("'\n")
 
             var port = 0
@@ -297,6 +315,7 @@ fun appendSosieConfiguration(nodesConfigurationFile: String, sosiesUrlFile: Stri
             }
 
             scriptBuilder.append("set ").append(nodeName).append(".").append(sosieName).append(nodeName).append(i).append(".port = '").append(port).append("'\n")
+            scriptBuilder.append("set ").append(nodeName).append(".").append(sosieName).append(nodeName).append(i).append(".redisServer = '").append(redisServer).append("'\n")
 
             scriptBuilder.append("bind ").append(nodeName).append(".").append(sosieName).append(nodeName).append(i).append(".useless nginxChannel\n")
             scriptBuilder.append("bind ").append(nodeName).append(".").append(sosieName).append(nodeName).append(i).append(".getNbSosieCalled lbMonitorChannelGetNbSosieCalled\n")
