@@ -1,198 +1,351 @@
 repo 'http://oss.sonatype.org/content/groups/public/'
 repo 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/'
 include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.hazelcast:latest
 include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lxc:latest
 include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:latest
+include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.system:latest
 include mvn:org.kevoree.library.java:org.kevoree.library.java.hazelcast:latest
 include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:latest
 include mvn:org.kevoree.komponents:http-netty:latest
 include mvn:org.diversify.demo:kevoree-utils-xtend:latest
-include mvn:org.diversify.demo:nginxconf-generator:latest
+include mvn:org.diversify:org.diversify.kevoree.nginx:1.0.0-SNAPSHOT
 include mvn:org.diversify:org.diversify.kevoree.loadBalancer:latest
 include mvn:org.diversify:org.diversify.kevoree.restarter:latest
 add sync : WSGroup
+add broadcast : BroadcastGroup
 add nginxChannel : UselessChannel
 add lbMonitorChannelGetNbSosieCalled : DistributedBroadcast
 add lbMonitorChannelReceiveNbSosieCalled : DistributedBroadcast
 add request : AsyncBroadcast
 add response : AsyncBroadcast
-add node250 : LXCNode
-set sync.port/node250 = '9000'
-attach node250 sync
-network node250.ip.lan 10.100.0.135
-add node250.node250Child4 : JavaNode
-add node250.node250Child3 : JavaNode
-add node250.node250Child2 : JavaNode
-add node250.node250Child1 : JavaNode
-add node250.node250Child0 : JavaNode
-add node250Child0.nginx : NginxLoadBalancerComponent
-bind node250Child0.nginx.outputPort nginxChannel
-add node250Child0.lbMonitor : KevoreeLBMonitor
-bind node250Child0.lbMonitor.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
-bind node250Child0.lbMonitor.receiveNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
-add node250Child0.webserver : NettyHTTPServer
-set node250Child0.webserver.port = '7999'
-add node250Child0.restarter : DemoRestarter
-set node250Child0.restarter.componentType = 'SosieRunner'
-add node250Child0.favicon : FaviconHandler
-set node250Child0.favicon.urlPattern = '/favicon.*'
-set node250Child0.favicon.favicon = 'favicon.png'
-bind node250Child0.webserver.request request
-bind node250Child0.webserver.response response
-bind node250Child0.favicon.request request
-bind node250Child0.favicon.content response
-bind node250Child0.restarter.request request
-bind node250Child0.restarter.content response
-add node839 : LXCNode
-set sync.port/node839 = '9000'
-attach node839 sync
-network node839.ip.lan 10.100.0.154
-add node839.node839Child3 : JavaNode
-add node839.node839Child2 : JavaNode
-add node839.node839Child1 : JavaNode
-add node839.node839Child0 : JavaNode
-add node716 : LXCNode
-set sync.port/node716 = '9000'
-attach node716 sync
-network node716.ip.lan 10.100.0.156
-add node716.node716Child3 : JavaNode
-add node716.node716Child2 : JavaNode
-add node716.node716Child1 : JavaNode
-add node716.node716Child0 : JavaNode
-add node566 : LXCNode
-set sync.port/node566 = '9000'
-attach node566 sync
-network node566.ip.lan 10.100.0.157
-add node566.node566Child3 : JavaNode
-add node566.node566Child2 : JavaNode
-add node566.node566Child1 : JavaNode
-add node566.node566Child0 : JavaNode
-add node289 : LXCNode
-set sync.port/node289 = '9000'
-attach node289 sync
-network node289.ip.lan 10.100.0.158
-add node289.node289Child3 : JavaNode
-add node289.node289Child2 : JavaNode
-add node289.node289Child1 : JavaNode
-add node289.node289Child0 : JavaNode
+add fog4 : LXCNode
+set sync.port/fog4 = '9000'
+attach fog4 sync
+attach fog4 broadcast
+network fog4.ip.lan 10.0.4.1
+add fog4.diversifyfog4Child4 : JavaNode
+attach diversifyfog4Child4 broadcast
+add fog4.diversifyfog4Child3 : JavaNode
+attach diversifyfog4Child3 broadcast
+add fog4.diversifyfog4Child2 : JavaNode
+attach diversifyfog4Child2 broadcast
+add fog4.diversifyfog4Child1 : JavaNode
+attach diversifyfog4Child1 broadcast
+add fog4.diversifyfog4Child0 : JavaNode
+attach diversifyfog4Child0 broadcast
+add diversifyfog4Child0.nginx : NginxConfigurator
+bind diversifyfog4Child0.nginx.useless nginxChannel
+set diversifyfog4Child0.nginx.servers = '###############################################################################
+# Definition of the load balancer front-end
+###############################################################################
+server {
+   listen 80;
+   server_name localhost;
+   access_log /tmp/loadbalancerclient/proxy.log proxy; #proxy refers to the log format defined in nginx.conf
+   location / {
+       proxy_pass http://backend;
+   }
+   location /client {
+       root /tmp/loadbalancerclient;
+       autoindex on;
+   }
+   location /client/ws {
+       proxy_pass http://localhost:8099;
+       # These are the option for websockets (need nginx >= v1.3.13)
+       proxy_set_header X-Real-IP $remote_addr;
+       proxy_set_header Host $host;
+       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+       proxy_http_version 1.1;
+       proxy_set_header Upgrade $http_upgrade;
+       proxy_set_header Connection "upgrade";
+   }
+}'
+set diversifyfog4Child0.nginx.started = 'false'
+add diversifyfog4Child0.softwareInstaller : ScriptRunner
+set diversifyfog4Child0.softwareInstaller.startScript = 'apt-get update
+apt-get install nginx redis-server git --no-install-recommends -y
+cat /etc/nginx/nginx.conf | sed "s/error_log \\/var\\/log\\/nginx\\/error.log;/error_log \\/var\\/log\\/nginx\\/error.log;\\nlog_format proxy \'[\\$time_local]; \\$remote_addr; \\$upstream_addr; \\$upstream_response_time; \\$request; \\$remote_user;\'/g" > /tmp/nginx.conf
+cp /tmp/nginx.conf /etc/nginx/nginx.conf
+rm -rf /tmp/nginx.conf
+rm -rf /etc/nginx/sites-enabled/default
+cat > \'/etc/redis/redis.conf\' << EOF
+daemonize yes
+pidfile /var/run/redis/redis-server.pid
+port 6379
+# If you want you can bind a single interface, if the bind option is not
+# specified all the interfaces will listen for incoming connections.
+#
+bind 10.0.4.1
+timeout 0
+tcp-keepalive 60
+loglevel notice
+logfile /var/log/redis/redis-server.log
+databases 16
+save 900 1
+save 300 10
+save 60 10000
+stop-writes-on-bgsave-error yes
+rdbcompression yes
+rdbchecksum yes
+dbfilename dump.rdb
+dir /var/lib/redis
+slave-serve-stale-data yes
+slave-read-only yes
+repl-disable-tcp-nodelay no
+slave-priority 100
+maxclients 10000
+appendonly no
+appendfsync everysec
+no-appendfsync-on-rewrite no
+auto-aof-rewrite-percentage 100
+auto-aof-rewrite-min-size 64mb
+lua-time-limit 5000
+slowlog-log-slower-than 10000
+slowlog-max-len 128
+hash-max-ziplist-entries 512
+hash-max-ziplist-value 64
+list-max-ziplist-entries 512
+list-max-ziplist-value 64
+set-max-intset-entries 512
+zset-max-ziplist-entries 128
+zset-max-ziplist-value 64
+activerehashing yes
+client-output-buffer-limit normal 0 0 0
+client-output-buffer-limit slave 256mb 64mb 60
+client-output-buffer-limit pubsub 32mb 8mb 60
+hz 50
+aof-rewrite-incremental-fsync yes
+EOF
+/etc/init.d/redis-server restart
+'
+set diversifyfog4Child0.softwareInstaller.started = 'false'
+add diversifyfog4Child0.lbMonitor : KevoreeLBMonitor
+bind diversifyfog4Child0.lbMonitor.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind diversifyfog4Child0.lbMonitor.receiveNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+add diversifyfog4Child0.webserver : NettyHTTPServer
+set diversifyfog4Child0.webserver.port = '7999'
+add diversifyfog4Child0.restarter : DemoManager
+set diversifyfog4Child0.restarter.componentType = 'SosieRunner'
+add diversifyfog4Child0.favicon : FaviconHandler
+set diversifyfog4Child0.favicon.urlPattern = '/favicon.*'
+set diversifyfog4Child0.favicon.favicon = 'favicon.png'
+bind diversifyfog4Child0.webserver.request request
+bind diversifyfog4Child0.webserver.response response
+bind diversifyfog4Child0.favicon.request request
+bind diversifyfog4Child0.favicon.content response
+bind diversifyfog4Child0.restarter.request request
+bind diversifyfog4Child0.restarter.content response
+add fog1 : LXCNode
+set sync.port/fog1 = '9001'
+attach fog1 sync
+attach fog1 broadcast
+network fog1.ip.lan 10.0.1.1
+add fog1.diversifyfog1Child3 : JavaNode
+attach diversifyfog1Child3 broadcast
+add fog1.diversifyfog1Child2 : JavaNode
+attach diversifyfog1Child2 broadcast
+add fog1.diversifyfog1Child1 : JavaNode
+attach diversifyfog1Child1 broadcast
+add fog1.diversifyfog1Child0 : JavaNode
+attach diversifyfog1Child0 broadcast
+add fog5 : LXCNode
+set sync.port/fog5 = '9002'
+attach fog5 sync
+attach fog5 broadcast
+network fog5.ip.lan 10.0.5.1
+add fog5.diversifyfog5Child3 : JavaNode
+attach diversifyfog5Child3 broadcast
+add fog5.diversifyfog5Child2 : JavaNode
+attach diversifyfog5Child2 broadcast
+add fog5.diversifyfog5Child1 : JavaNode
+attach diversifyfog5Child1 broadcast
+add fog5.diversifyfog5Child0 : JavaNode
+attach diversifyfog5Child0 broadcast
+add fog7 : LXCNode
+set sync.port/fog7 = '9003'
+attach fog7 sync
+attach fog7 broadcast
+network fog7.ip.lan 10.0.7.1
+add fog7.diversifyfog7Child3 : JavaNode
+attach diversifyfog7Child3 broadcast
+add fog7.diversifyfog7Child2 : JavaNode
+attach diversifyfog7Child2 broadcast
+add fog7.diversifyfog7Child1 : JavaNode
+attach diversifyfog7Child1 broadcast
+add fog7.diversifyfog7Child0 : JavaNode
+attach diversifyfog7Child0 broadcast
+add fog9 : LXCNode
+set sync.port/fog9 = '9004'
+attach fog9 sync
+attach fog9 broadcast
+network fog9.ip.lan 10.0.9.1
+add fog9.diversifyfog9Child3 : JavaNode
+attach diversifyfog9Child3 broadcast
+add fog9.diversifyfog9Child2 : JavaNode
+attach diversifyfog9Child2 broadcast
+add fog9.diversifyfog9Child1 : JavaNode
+attach diversifyfog9Child1 broadcast
+add fog9.diversifyfog9Child0 : JavaNode
+attach diversifyfog9Child0 broadcast
 include mvn:org.diversify:org.diversify.kevoree.sosie:latest
-add node250Child4.factory_and_indirection_on_RhinoEnginerhino15node250Child40 : SosieRunner
-set node250Child4.factory_and_indirection_on_RhinoEnginerhino15node250Child40.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino15/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino15.zip'
-set node250Child4.factory_and_indirection_on_RhinoEnginerhino15node250Child40.port = '8080'
-bind node250Child4.factory_and_indirection_on_RhinoEnginerhino15node250Child40.useless nginxChannel
-bind node250Child4.factory_and_indirection_on_RhinoEnginerhino15node250Child40.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
-bind node250Child4.factory_and_indirection_on_RhinoEnginerhino15node250Child40.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
-add node250Child3.factory_and_indirection_on_RhinoEnginerhino16node250Child31 : SosieRunner
-set node250Child3.factory_and_indirection_on_RhinoEnginerhino16node250Child31.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino16/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino16.zip'
-set node250Child3.factory_and_indirection_on_RhinoEnginerhino16node250Child31.port = '8080'
-bind node250Child3.factory_and_indirection_on_RhinoEnginerhino16node250Child31.useless nginxChannel
-bind node250Child3.factory_and_indirection_on_RhinoEnginerhino16node250Child31.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
-bind node250Child3.factory_and_indirection_on_RhinoEnginerhino16node250Child31.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
-add node250Child2.factory_and_indirection_on_RhinoEnginerhino4node250Child22 : SosieRunner
-set node250Child2.factory_and_indirection_on_RhinoEnginerhino4node250Child22.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino4/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino4.zip'
-set node250Child2.factory_and_indirection_on_RhinoEnginerhino4node250Child22.port = '8080'
-bind node250Child2.factory_and_indirection_on_RhinoEnginerhino4node250Child22.useless nginxChannel
-bind node250Child2.factory_and_indirection_on_RhinoEnginerhino4node250Child22.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
-bind node250Child2.factory_and_indirection_on_RhinoEnginerhino4node250Child22.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
-add node250Child1.factory_and_indirection_on_RhinoEnginerhino5node250Child13 : SosieRunner
-set node250Child1.factory_and_indirection_on_RhinoEnginerhino5node250Child13.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino5/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino5.zip'
-set node250Child1.factory_and_indirection_on_RhinoEnginerhino5node250Child13.port = '8080'
-bind node250Child1.factory_and_indirection_on_RhinoEnginerhino5node250Child13.useless nginxChannel
-bind node250Child1.factory_and_indirection_on_RhinoEnginerhino5node250Child13.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
-bind node250Child1.factory_and_indirection_on_RhinoEnginerhino5node250Child13.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
-add node839Child3.factory_and_indirection_on_RhinoEnginerhino8node839Child34 : SosieRunner
-set node839Child3.factory_and_indirection_on_RhinoEnginerhino8node839Child34.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino8/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino8.zip'
-set node839Child3.factory_and_indirection_on_RhinoEnginerhino8node839Child34.port = '8080'
-bind node839Child3.factory_and_indirection_on_RhinoEnginerhino8node839Child34.useless nginxChannel
-bind node839Child3.factory_and_indirection_on_RhinoEnginerhino8node839Child34.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
-bind node839Child3.factory_and_indirection_on_RhinoEnginerhino8node839Child34.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
-add node839Child2.indirection_on_Streamrhino15node839Child25 : SosieRunner
-set node839Child2.indirection_on_Streamrhino15node839Child25.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino15/composed-sosie-1-indirection_on_Streamrhino15.zip'
-set node839Child2.indirection_on_Streamrhino15node839Child25.port = '8080'
-bind node839Child2.indirection_on_Streamrhino15node839Child25.useless nginxChannel
-bind node839Child2.indirection_on_Streamrhino15node839Child25.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
-bind node839Child2.indirection_on_Streamrhino15node839Child25.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
-add node839Child1.indirection_on_Streamrhino16node839Child16 : SosieRunner
-set node839Child1.indirection_on_Streamrhino16node839Child16.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino16/composed-sosie-1-indirection_on_Streamrhino16.zip'
-set node839Child1.indirection_on_Streamrhino16node839Child16.port = '8080'
-bind node839Child1.indirection_on_Streamrhino16node839Child16.useless nginxChannel
-bind node839Child1.indirection_on_Streamrhino16node839Child16.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
-bind node839Child1.indirection_on_Streamrhino16node839Child16.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
-add node839Child0.indirection_on_Streamrhino4node839Child07 : SosieRunner
-set node839Child0.indirection_on_Streamrhino4node839Child07.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino4/composed-sosie-1-indirection_on_Streamrhino4.zip'
-set node839Child0.indirection_on_Streamrhino4node839Child07.port = '8080'
-bind node839Child0.indirection_on_Streamrhino4node839Child07.useless nginxChannel
-bind node839Child0.indirection_on_Streamrhino4node839Child07.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
-bind node839Child0.indirection_on_Streamrhino4node839Child07.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
-add node716Child3.indirection_on_Streamrhino5node716Child38 : SosieRunner
-set node716Child3.indirection_on_Streamrhino5node716Child38.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino5/composed-sosie-1-indirection_on_Streamrhino5.zip'
-set node716Child3.indirection_on_Streamrhino5node716Child38.port = '8080'
-bind node716Child3.indirection_on_Streamrhino5node716Child38.useless nginxChannel
-bind node716Child3.indirection_on_Streamrhino5node716Child38.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
-bind node716Child3.indirection_on_Streamrhino5node716Child38.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
-add node716Child2.indirection_on_Streamrhino8node716Child29 : SosieRunner
-set node716Child2.indirection_on_Streamrhino8node716Child29.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip'
-set node716Child2.indirection_on_Streamrhino8node716Child29.port = '8080'
-bind node716Child2.indirection_on_Streamrhino8node716Child29.useless nginxChannel
-bind node716Child2.indirection_on_Streamrhino8node716Child29.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
-bind node716Child2.indirection_on_Streamrhino8node716Child29.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
-add node716Child1.REGULARnode716Child110 : SosieRunner
-set node716Child1.REGULARnode716Child110.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
-set node716Child1.REGULARnode716Child110.port = '8080'
-bind node716Child1.REGULARnode716Child110.useless nginxChannel
-bind node716Child1.REGULARnode716Child110.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
-bind node716Child1.REGULARnode716Child110.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
-add node716Child0.REGULARnode716Child011 : SosieRunner
-set node716Child0.REGULARnode716Child011.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
-set node716Child0.REGULARnode716Child011.port = '8080'
-bind node716Child0.REGULARnode716Child011.useless nginxChannel
-bind node716Child0.REGULARnode716Child011.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
-bind node716Child0.REGULARnode716Child011.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
-add node566Child3.REGULARnode566Child312 : SosieRunner
-set node566Child3.REGULARnode566Child312.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
-set node566Child3.REGULARnode566Child312.port = '8080'
-bind node566Child3.REGULARnode566Child312.useless nginxChannel
-bind node566Child3.REGULARnode566Child312.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
-bind node566Child3.REGULARnode566Child312.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
-add node566Child2.REGULARnode566Child213 : SosieRunner
-set node566Child2.REGULARnode566Child213.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
-set node566Child2.REGULARnode566Child213.port = '8080'
-bind node566Child2.REGULARnode566Child213.useless nginxChannel
-bind node566Child2.REGULARnode566Child213.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
-bind node566Child2.REGULARnode566Child213.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
-add node566Child1.REGULARnode566Child114 : SosieRunner
-set node566Child1.REGULARnode566Child114.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
-set node566Child1.REGULARnode566Child114.port = '8080'
-bind node566Child1.REGULARnode566Child114.useless nginxChannel
-bind node566Child1.REGULARnode566Child114.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
-bind node566Child1.REGULARnode566Child114.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
-add node566Child0.REGULARnode566Child015 : SosieRunner
-set node566Child0.REGULARnode566Child015.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
-set node566Child0.REGULARnode566Child015.port = '8080'
-bind node566Child0.REGULARnode566Child015.useless nginxChannel
-bind node566Child0.REGULARnode566Child015.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
-bind node566Child0.REGULARnode566Child015.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
-add node289Child3.REGULARnode289Child316 : SosieRunner
-set node289Child3.REGULARnode289Child316.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
-set node289Child3.REGULARnode289Child316.port = '8080'
-bind node289Child3.REGULARnode289Child316.useless nginxChannel
-bind node289Child3.REGULARnode289Child316.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
-bind node289Child3.REGULARnode289Child316.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
-add node289Child2.REGULARnode289Child217 : SosieRunner
-set node289Child2.REGULARnode289Child217.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
-set node289Child2.REGULARnode289Child217.port = '8080'
-bind node289Child2.REGULARnode289Child217.useless nginxChannel
-bind node289Child2.REGULARnode289Child217.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
-bind node289Child2.REGULARnode289Child217.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
-add node289Child1.REGULARnode289Child118 : SosieRunner
-set node289Child1.REGULARnode289Child118.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
-set node289Child1.REGULARnode289Child118.port = '8080'
-bind node289Child1.REGULARnode289Child118.useless nginxChannel
-bind node289Child1.REGULARnode289Child118.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
-bind node289Child1.REGULARnode289Child118.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
-add node289Child0.REGULARnode289Child019 : SosieRunner
-set node289Child0.REGULARnode289Child019.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
-set node289Child0.REGULARnode289Child019.port = '8080'
-bind node289Child0.REGULARnode289Child019.useless nginxChannel
-bind node289Child0.REGULARnode289Child019.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
-bind node289Child0.REGULARnode289Child019.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+add diversifyfog4Child4.factory_and_indirection_on_RhinoEnginerhino15diversifyfog4Child40 : SosieRunner
+set diversifyfog4Child4.factory_and_indirection_on_RhinoEnginerhino15diversifyfog4Child40.started = 'false'
+set diversifyfog4Child4.factory_and_indirection_on_RhinoEnginerhino15diversifyfog4Child40.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino15/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino15.zip'
+set diversifyfog4Child4.factory_and_indirection_on_RhinoEnginerhino15diversifyfog4Child40.port = '8080'
+set diversifyfog4Child4.factory_and_indirection_on_RhinoEnginerhino15diversifyfog4Child40.redisServer = '10.0.4.1'
+bind diversifyfog4Child4.factory_and_indirection_on_RhinoEnginerhino15diversifyfog4Child40.useless nginxChannel
+bind diversifyfog4Child4.factory_and_indirection_on_RhinoEnginerhino15diversifyfog4Child40.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind diversifyfog4Child4.factory_and_indirection_on_RhinoEnginerhino15diversifyfog4Child40.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+add diversifyfog4Child3.factory_and_indirection_on_RhinoEnginerhino16diversifyfog4Child31 : SosieRunner
+set diversifyfog4Child3.factory_and_indirection_on_RhinoEnginerhino16diversifyfog4Child31.started = 'false'
+set diversifyfog4Child3.factory_and_indirection_on_RhinoEnginerhino16diversifyfog4Child31.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino16/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino16.zip'
+set diversifyfog4Child3.factory_and_indirection_on_RhinoEnginerhino16diversifyfog4Child31.port = '8080'
+set diversifyfog4Child3.factory_and_indirection_on_RhinoEnginerhino16diversifyfog4Child31.redisServer = '10.0.4.1'
+bind diversifyfog4Child3.factory_and_indirection_on_RhinoEnginerhino16diversifyfog4Child31.useless nginxChannel
+bind diversifyfog4Child3.factory_and_indirection_on_RhinoEnginerhino16diversifyfog4Child31.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind diversifyfog4Child3.factory_and_indirection_on_RhinoEnginerhino16diversifyfog4Child31.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+add diversifyfog4Child2.factory_and_indirection_on_RhinoEnginerhino4diversifyfog4Child22 : SosieRunner
+set diversifyfog4Child2.factory_and_indirection_on_RhinoEnginerhino4diversifyfog4Child22.started = 'false'
+set diversifyfog4Child2.factory_and_indirection_on_RhinoEnginerhino4diversifyfog4Child22.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino4/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino4.zip'
+set diversifyfog4Child2.factory_and_indirection_on_RhinoEnginerhino4diversifyfog4Child22.port = '8080'
+set diversifyfog4Child2.factory_and_indirection_on_RhinoEnginerhino4diversifyfog4Child22.redisServer = '10.0.4.1'
+bind diversifyfog4Child2.factory_and_indirection_on_RhinoEnginerhino4diversifyfog4Child22.useless nginxChannel
+bind diversifyfog4Child2.factory_and_indirection_on_RhinoEnginerhino4diversifyfog4Child22.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind diversifyfog4Child2.factory_and_indirection_on_RhinoEnginerhino4diversifyfog4Child22.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+add diversifyfog4Child1.factory_and_indirection_on_RhinoEnginerhino5diversifyfog4Child13 : SosieRunner
+set diversifyfog4Child1.factory_and_indirection_on_RhinoEnginerhino5diversifyfog4Child13.started = 'false'
+set diversifyfog4Child1.factory_and_indirection_on_RhinoEnginerhino5diversifyfog4Child13.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino5/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino5.zip'
+set diversifyfog4Child1.factory_and_indirection_on_RhinoEnginerhino5diversifyfog4Child13.port = '8080'
+set diversifyfog4Child1.factory_and_indirection_on_RhinoEnginerhino5diversifyfog4Child13.redisServer = '10.0.4.1'
+bind diversifyfog4Child1.factory_and_indirection_on_RhinoEnginerhino5diversifyfog4Child13.useless nginxChannel
+bind diversifyfog4Child1.factory_and_indirection_on_RhinoEnginerhino5diversifyfog4Child13.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind diversifyfog4Child1.factory_and_indirection_on_RhinoEnginerhino5diversifyfog4Child13.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+add diversifyfog1Child3.factory_and_indirection_on_RhinoEnginerhino8diversifyfog1Child34 : SosieRunner
+set diversifyfog1Child3.factory_and_indirection_on_RhinoEnginerhino8diversifyfog1Child34.started = 'false'
+set diversifyfog1Child3.factory_and_indirection_on_RhinoEnginerhino8diversifyfog1Child34.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino8/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino8.zip'
+set diversifyfog1Child3.factory_and_indirection_on_RhinoEnginerhino8diversifyfog1Child34.port = '8080'
+set diversifyfog1Child3.factory_and_indirection_on_RhinoEnginerhino8diversifyfog1Child34.redisServer = '10.0.4.1'
+bind diversifyfog1Child3.factory_and_indirection_on_RhinoEnginerhino8diversifyfog1Child34.useless nginxChannel
+bind diversifyfog1Child3.factory_and_indirection_on_RhinoEnginerhino8diversifyfog1Child34.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind diversifyfog1Child3.factory_and_indirection_on_RhinoEnginerhino8diversifyfog1Child34.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+add diversifyfog1Child2.indirection_on_Streamrhino15diversifyfog1Child25 : SosieRunner
+set diversifyfog1Child2.indirection_on_Streamrhino15diversifyfog1Child25.started = 'false'
+set diversifyfog1Child2.indirection_on_Streamrhino15diversifyfog1Child25.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino15/composed-sosie-1-indirection_on_Streamrhino15.zip'
+set diversifyfog1Child2.indirection_on_Streamrhino15diversifyfog1Child25.port = '8080'
+set diversifyfog1Child2.indirection_on_Streamrhino15diversifyfog1Child25.redisServer = '10.0.4.1'
+bind diversifyfog1Child2.indirection_on_Streamrhino15diversifyfog1Child25.useless nginxChannel
+bind diversifyfog1Child2.indirection_on_Streamrhino15diversifyfog1Child25.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind diversifyfog1Child2.indirection_on_Streamrhino15diversifyfog1Child25.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+add diversifyfog1Child1.indirection_on_Streamrhino16diversifyfog1Child16 : SosieRunner
+set diversifyfog1Child1.indirection_on_Streamrhino16diversifyfog1Child16.started = 'false'
+set diversifyfog1Child1.indirection_on_Streamrhino16diversifyfog1Child16.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino16/composed-sosie-1-indirection_on_Streamrhino16.zip'
+set diversifyfog1Child1.indirection_on_Streamrhino16diversifyfog1Child16.port = '8080'
+set diversifyfog1Child1.indirection_on_Streamrhino16diversifyfog1Child16.redisServer = '10.0.4.1'
+bind diversifyfog1Child1.indirection_on_Streamrhino16diversifyfog1Child16.useless nginxChannel
+bind diversifyfog1Child1.indirection_on_Streamrhino16diversifyfog1Child16.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind diversifyfog1Child1.indirection_on_Streamrhino16diversifyfog1Child16.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+add diversifyfog1Child0.indirection_on_Streamrhino4diversifyfog1Child07 : SosieRunner
+set diversifyfog1Child0.indirection_on_Streamrhino4diversifyfog1Child07.started = 'false'
+set diversifyfog1Child0.indirection_on_Streamrhino4diversifyfog1Child07.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino4/composed-sosie-1-indirection_on_Streamrhino4.zip'
+set diversifyfog1Child0.indirection_on_Streamrhino4diversifyfog1Child07.port = '8080'
+set diversifyfog1Child0.indirection_on_Streamrhino4diversifyfog1Child07.redisServer = '10.0.4.1'
+bind diversifyfog1Child0.indirection_on_Streamrhino4diversifyfog1Child07.useless nginxChannel
+bind diversifyfog1Child0.indirection_on_Streamrhino4diversifyfog1Child07.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind diversifyfog1Child0.indirection_on_Streamrhino4diversifyfog1Child07.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+add diversifyfog5Child3.indirection_on_Streamrhino5diversifyfog5Child38 : SosieRunner
+set diversifyfog5Child3.indirection_on_Streamrhino5diversifyfog5Child38.started = 'false'
+set diversifyfog5Child3.indirection_on_Streamrhino5diversifyfog5Child38.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino5/composed-sosie-1-indirection_on_Streamrhino5.zip'
+set diversifyfog5Child3.indirection_on_Streamrhino5diversifyfog5Child38.port = '8080'
+set diversifyfog5Child3.indirection_on_Streamrhino5diversifyfog5Child38.redisServer = '10.0.4.1'
+bind diversifyfog5Child3.indirection_on_Streamrhino5diversifyfog5Child38.useless nginxChannel
+bind diversifyfog5Child3.indirection_on_Streamrhino5diversifyfog5Child38.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind diversifyfog5Child3.indirection_on_Streamrhino5diversifyfog5Child38.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+add diversifyfog5Child2.indirection_on_Streamrhino8diversifyfog5Child29 : SosieRunner
+set diversifyfog5Child2.indirection_on_Streamrhino8diversifyfog5Child29.started = 'false'
+set diversifyfog5Child2.indirection_on_Streamrhino8diversifyfog5Child29.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip'
+set diversifyfog5Child2.indirection_on_Streamrhino8diversifyfog5Child29.port = '8080'
+set diversifyfog5Child2.indirection_on_Streamrhino8diversifyfog5Child29.redisServer = '10.0.4.1'
+bind diversifyfog5Child2.indirection_on_Streamrhino8diversifyfog5Child29.useless nginxChannel
+bind diversifyfog5Child2.indirection_on_Streamrhino8diversifyfog5Child29.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind diversifyfog5Child2.indirection_on_Streamrhino8diversifyfog5Child29.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+add diversifyfog5Child1.REGULARdiversifyfog5Child110 : SosieRunner
+set diversifyfog5Child1.REGULARdiversifyfog5Child110.started = 'false'
+set diversifyfog5Child1.REGULARdiversifyfog5Child110.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
+set diversifyfog5Child1.REGULARdiversifyfog5Child110.port = '8080'
+set diversifyfog5Child1.REGULARdiversifyfog5Child110.redisServer = '10.0.4.1'
+bind diversifyfog5Child1.REGULARdiversifyfog5Child110.useless nginxChannel
+bind diversifyfog5Child1.REGULARdiversifyfog5Child110.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind diversifyfog5Child1.REGULARdiversifyfog5Child110.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+add diversifyfog5Child0.REGULARdiversifyfog5Child011 : SosieRunner
+set diversifyfog5Child0.REGULARdiversifyfog5Child011.started = 'false'
+set diversifyfog5Child0.REGULARdiversifyfog5Child011.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
+set diversifyfog5Child0.REGULARdiversifyfog5Child011.port = '8080'
+set diversifyfog5Child0.REGULARdiversifyfog5Child011.redisServer = '10.0.4.1'
+bind diversifyfog5Child0.REGULARdiversifyfog5Child011.useless nginxChannel
+bind diversifyfog5Child0.REGULARdiversifyfog5Child011.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind diversifyfog5Child0.REGULARdiversifyfog5Child011.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+add diversifyfog7Child3.REGULARdiversifyfog7Child312 : SosieRunner
+set diversifyfog7Child3.REGULARdiversifyfog7Child312.started = 'false'
+set diversifyfog7Child3.REGULARdiversifyfog7Child312.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
+set diversifyfog7Child3.REGULARdiversifyfog7Child312.port = '8080'
+set diversifyfog7Child3.REGULARdiversifyfog7Child312.redisServer = '10.0.4.1'
+bind diversifyfog7Child3.REGULARdiversifyfog7Child312.useless nginxChannel
+bind diversifyfog7Child3.REGULARdiversifyfog7Child312.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind diversifyfog7Child3.REGULARdiversifyfog7Child312.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+add diversifyfog7Child2.REGULARdiversifyfog7Child213 : SosieRunner
+set diversifyfog7Child2.REGULARdiversifyfog7Child213.started = 'false'
+set diversifyfog7Child2.REGULARdiversifyfog7Child213.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
+set diversifyfog7Child2.REGULARdiversifyfog7Child213.port = '8080'
+set diversifyfog7Child2.REGULARdiversifyfog7Child213.redisServer = '10.0.4.1'
+bind diversifyfog7Child2.REGULARdiversifyfog7Child213.useless nginxChannel
+bind diversifyfog7Child2.REGULARdiversifyfog7Child213.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind diversifyfog7Child2.REGULARdiversifyfog7Child213.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+add diversifyfog7Child1.REGULARdiversifyfog7Child114 : SosieRunner
+set diversifyfog7Child1.REGULARdiversifyfog7Child114.started = 'false'
+set diversifyfog7Child1.REGULARdiversifyfog7Child114.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
+set diversifyfog7Child1.REGULARdiversifyfog7Child114.port = '8080'
+set diversifyfog7Child1.REGULARdiversifyfog7Child114.redisServer = '10.0.4.1'
+bind diversifyfog7Child1.REGULARdiversifyfog7Child114.useless nginxChannel
+bind diversifyfog7Child1.REGULARdiversifyfog7Child114.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind diversifyfog7Child1.REGULARdiversifyfog7Child114.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+add diversifyfog7Child0.REGULARdiversifyfog7Child015 : SosieRunner
+set diversifyfog7Child0.REGULARdiversifyfog7Child015.started = 'false'
+set diversifyfog7Child0.REGULARdiversifyfog7Child015.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
+set diversifyfog7Child0.REGULARdiversifyfog7Child015.port = '8080'
+set diversifyfog7Child0.REGULARdiversifyfog7Child015.redisServer = '10.0.4.1'
+bind diversifyfog7Child0.REGULARdiversifyfog7Child015.useless nginxChannel
+bind diversifyfog7Child0.REGULARdiversifyfog7Child015.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind diversifyfog7Child0.REGULARdiversifyfog7Child015.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+add diversifyfog9Child3.REGULARdiversifyfog9Child316 : SosieRunner
+set diversifyfog9Child3.REGULARdiversifyfog9Child316.started = 'false'
+set diversifyfog9Child3.REGULARdiversifyfog9Child316.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
+set diversifyfog9Child3.REGULARdiversifyfog9Child316.port = '8080'
+set diversifyfog9Child3.REGULARdiversifyfog9Child316.redisServer = '10.0.4.1'
+bind diversifyfog9Child3.REGULARdiversifyfog9Child316.useless nginxChannel
+bind diversifyfog9Child3.REGULARdiversifyfog9Child316.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind diversifyfog9Child3.REGULARdiversifyfog9Child316.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+add diversifyfog9Child2.REGULARdiversifyfog9Child217 : SosieRunner
+set diversifyfog9Child2.REGULARdiversifyfog9Child217.started = 'false'
+set diversifyfog9Child2.REGULARdiversifyfog9Child217.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
+set diversifyfog9Child2.REGULARdiversifyfog9Child217.port = '8080'
+set diversifyfog9Child2.REGULARdiversifyfog9Child217.redisServer = '10.0.4.1'
+bind diversifyfog9Child2.REGULARdiversifyfog9Child217.useless nginxChannel
+bind diversifyfog9Child2.REGULARdiversifyfog9Child217.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind diversifyfog9Child2.REGULARdiversifyfog9Child217.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+add diversifyfog9Child1.REGULARdiversifyfog9Child118 : SosieRunner
+set diversifyfog9Child1.REGULARdiversifyfog9Child118.started = 'false'
+set diversifyfog9Child1.REGULARdiversifyfog9Child118.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
+set diversifyfog9Child1.REGULARdiversifyfog9Child118.port = '8080'
+set diversifyfog9Child1.REGULARdiversifyfog9Child118.redisServer = '10.0.4.1'
+bind diversifyfog9Child1.REGULARdiversifyfog9Child118.useless nginxChannel
+bind diversifyfog9Child1.REGULARdiversifyfog9Child118.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind diversifyfog9Child1.REGULARdiversifyfog9Child118.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled
+add diversifyfog9Child0.REGULARdiversifyfog9Child019 : SosieRunner
+set diversifyfog9Child0.REGULARdiversifyfog9Child019.started = 'false'
+set diversifyfog9Child0.REGULARdiversifyfog9Child019.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
+set diversifyfog9Child0.REGULARdiversifyfog9Child019.port = '8080'
+set diversifyfog9Child0.REGULARdiversifyfog9Child019.redisServer = '10.0.4.1'
+bind diversifyfog9Child0.REGULARdiversifyfog9Child019.useless nginxChannel
+bind diversifyfog9Child0.REGULARdiversifyfog9Child019.getNbSosieCalled lbMonitorChannelGetNbSosieCalled
+bind diversifyfog9Child0.REGULARdiversifyfog9Child019.sendNbSosieCalled lbMonitorChannelReceiveNbSosieCalled

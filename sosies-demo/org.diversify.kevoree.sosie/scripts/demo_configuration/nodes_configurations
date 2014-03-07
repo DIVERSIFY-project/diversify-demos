@@ -1,5 +1,5 @@
-node250;LXCNode;10.100.0.135;5;master
-node839;LXCNode;10.100.0.154;4
-node716;LXCNode;10.100.0.156;4
-node566;LXCNode;10.100.0.157;4
-node289;LXCNode;10.100.0.158;4
+fog4;LXCNode;10.0.4.1;5;master
+fog1;LXCNode;10.0.1.1;4;
+fog5;LXCNode;10.0.5.1;4;
+fog7;LXCNode;10.0.7.1;4;
+fog9;LXCNode;10.0.9.1;4;
