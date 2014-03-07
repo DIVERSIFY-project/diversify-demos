@@ -98,21 +98,21 @@ fun buildNodeScript(nodesConfigurationFile: String, scriptBuilder: StringBuilder
 
         while (i > 0) {
             i--
-            scriptBuilder.append("add ").append(configuration[0]).append(".").append(configuration[0]).append("Child").append(i).append(" : JavaNode\n")
+            scriptBuilder.append("add ").append(configuration[0]).append(".").append("diversify").append(configuration[0]).append("Child").append(i).append(" : JavaNode\n")
             // ack to define network information when we use JavaNode as hosting node
             if (configuration[1].equalsIgnoreCase("javanode")) {
-                scriptBuilder.append("network ").append(configuration[0]).append("Child").append(i).append(".ip.lan ").append(configuration[2]).append("\n")
+                scriptBuilder.append("network ").append("diversify").append(configuration[0]).append("Child").append(i).append(".ip.lan ").append(configuration[2]).append("\n")
             }
 //            scriptBuilder.append("set broadcast.port/").append(configuration[0]).append("Child").append(i).append(" = '" + port + "'\n")
 //            port++
-            scriptBuilder.append("attach ").append(configuration[0]).append("Child").append(i).append(" broadcast\n")
+            scriptBuilder.append("attach ").append("diversify").append(configuration[0]).append("Child").append(i).append(" broadcast\n")
         }
 
         if (configuration.size == 5) {
-            scriptBuilder.append("add ").append(configuration[0]).append("Child0").append(".nginx : NginxConfigurator\n")
-            scriptBuilder.append("bind ").append(configuration[0]).append("Child0").append(".nginx.useless nginxChannel\n")
+            scriptBuilder.append("add ").append("diversify").append(configuration[0]).append("Child0").append(".nginx : NginxConfigurator\n")
+            scriptBuilder.append("bind ").append("diversify").append(configuration[0]).append("Child0").append(".nginx.useless nginxChannel\n")
 
-            scriptBuilder.append("set ").append(configuration[0]).append("Child0").append(".nginx.servers = '###############################################################################\n" +
+            scriptBuilder.append("set ").append("diversify").append(configuration[0]).append("Child0").append(".nginx.servers = '###############################################################################\n" +
             "# Definition of the load balancer front-end\n" +
             "###############################################################################\n" +
             "server {\n" +
@@ -137,10 +137,10 @@ fun buildNodeScript(nodesConfigurationFile: String, scriptBuilder: StringBuilder
             "       proxy_set_header Connection \"upgrade\";\n" +
             "   }\n" +
             "}'\n")
-            scriptBuilder.append("set ").append(configuration[0]).append("Child0").append(".nginx.started = 'false'\n")
+            scriptBuilder.append("set ").append("diversify").append(configuration[0]).append("Child0").append(".nginx.started = 'false'\n")
 
-            scriptBuilder.append("add ").append(configuration[0]).append("Child0").append(".softwareInstaller : ScriptRunner\n")
-            scriptBuilder.append("set ").append(configuration[0]).append("Child0").append(".softwareInstaller.startScript = 'apt-get update\n" +
+            scriptBuilder.append("add ").append("diversify").append(configuration[0]).append("Child0").append(".softwareInstaller : ScriptRunner\n")
+            scriptBuilder.append("set ").append("diversify").append(configuration[0]).append("Child0").append(".softwareInstaller.startScript = 'apt-get update\n" +
             "apt-get install nginx redis-server git --no-install-recommends -y\n" +
             "cat /etc/nginx/nginx.conf | sed \"s/error_log \\\\/var\\\\/log\\\\/nginx\\\\/error.log;/error_log \\\\/var\\\\/log\\\\/nginx\\\\/error.log;\\\\nlog_format proxy \\'[\\\\\$time_local]; \\\\\$remote_addr; \\\\\$upstream_addr; \\\\\$upstream_response_time; \\\\\$request; \\\\\$remote_user;\\'/g\" > /tmp/nginx.conf\n" +
             "cp /tmp/nginx.conf /etc/nginx/nginx.conf\n" +
@@ -197,35 +197,35 @@ fun buildNodeScript(nodesConfigurationFile: String, scriptBuilder: StringBuilder
             "EOF\n" +
             "/etc/init.d/redis-server restart\n" +
             "'\n")
-            scriptBuilder.append("set ").append(configuration[0]).append("Child0").append(".softwareInstaller.started = 'false'\n")
+            scriptBuilder.append("set ").append("diversify").append(configuration[0]).append("Child0").append(".softwareInstaller.started = 'false'\n")
 
-            scriptBuilder.append("add ").append(configuration[0]).append("Child0").append(".lbMonitor : KevoreeLBMonitor\n")
+            scriptBuilder.append("add ").append("diversify").append(configuration[0]).append("Child0").append(".lbMonitor : KevoreeLBMonitor\n")
             // here we can specify the port and logFile for lbMonitor
-            scriptBuilder.append("bind ").append(configuration[0]).append("Child0").append(".lbMonitor.getNbSosieCalled lbMonitorChannelGetNbSosieCalled\n")
-            scriptBuilder.append("bind ").append(configuration[0]).append("Child0").append(".lbMonitor.receiveNbSosieCalled lbMonitorChannelReceiveNbSosieCalled\n")
+            scriptBuilder.append("bind ").append("diversify").append(configuration[0]).append("Child0").append(".lbMonitor.getNbSosieCalled lbMonitorChannelGetNbSosieCalled\n")
+            scriptBuilder.append("bind ").append("diversify").append(configuration[0]).append("Child0").append(".lbMonitor.receiveNbSosieCalled lbMonitorChannelReceiveNbSosieCalled\n")
 
 
 
-            scriptBuilder.append("add ").append(configuration[0]).append("Child0").append(".webserver : NettyHTTPServer\n")
-            scriptBuilder.append("set ").append(configuration[0]).append("Child0").append(".webserver.port = '7999'\n")
+            scriptBuilder.append("add ").append("diversify").append(configuration[0]).append("Child0").append(".webserver : NettyHTTPServer\n")
+            scriptBuilder.append("set ").append("diversify").append(configuration[0]).append("Child0").append(".webserver.port = '7999'\n")
 
-            scriptBuilder.append("add ").append(configuration[0]).append("Child0").append(".restarter : DemoManager\n")
-            scriptBuilder.append("set ").append(configuration[0]).append("Child0").append(".restarter.componentType = 'SosieRunner'\n")
-
-
-            scriptBuilder.append("add ").append(configuration[0]).append("Child0").append(".favicon : FaviconHandler\n")
-            scriptBuilder.append("set ").append(configuration[0]).append("Child0").append(".favicon.urlPattern = '/favicon.*'\n")
-            scriptBuilder.append("set ").append(configuration[0]).append("Child0").append(".favicon.favicon = 'favicon.png'\n")
+            scriptBuilder.append("add ").append("diversify").append(configuration[0]).append("Child0").append(".restarter : DemoManager\n")
+            scriptBuilder.append("set ").append("diversify").append(configuration[0]).append("Child0").append(".restarter.componentType = 'SosieRunner'\n")
 
 
-            scriptBuilder.append("bind ").append(configuration[0]).append("Child0").append(".webserver.request request\n")
-            scriptBuilder.append("bind ").append(configuration[0]).append("Child0").append(".webserver.response response\n")
+            scriptBuilder.append("add ").append("diversify").append(configuration[0]).append("Child0").append(".favicon : FaviconHandler\n")
+            scriptBuilder.append("set ").append("diversify").append(configuration[0]).append("Child0").append(".favicon.urlPattern = '/favicon.*'\n")
+            scriptBuilder.append("set ").append("diversify").append(configuration[0]).append("Child0").append(".favicon.favicon = 'favicon.png'\n")
 
-            scriptBuilder.append("bind ").append(configuration[0]).append("Child0").append(".favicon.request request\n")
-            scriptBuilder.append("bind ").append(configuration[0]).append("Child0").append(".favicon.content response\n")
 
-            scriptBuilder.append("bind ").append(configuration[0]).append("Child0").append(".restarter.request request\n")
-            scriptBuilder.append("bind ").append(configuration[0]).append("Child0").append(".restarter.content response\n")
+            scriptBuilder.append("bind ").append("diversify").append(configuration[0]).append("Child0").append(".webserver.request request\n")
+            scriptBuilder.append("bind ").append("diversify").append(configuration[0]).append("Child0").append(".webserver.response response\n")
+
+            scriptBuilder.append("bind ").append("diversify").append(configuration[0]).append("Child0").append(".favicon.request request\n")
+            scriptBuilder.append("bind ").append("diversify").append(configuration[0]).append("Child0").append(".favicon.content response\n")
+
+            scriptBuilder.append("bind ").append("diversify").append(configuration[0]).append("Child0").append(".restarter.request request\n")
+            scriptBuilder.append("bind ").append("diversify").append(configuration[0]).append("Child0").append(".restarter.content response\n")
         }
 
         line = reader.readLine()
@@ -256,14 +256,14 @@ fun appendSosieConfiguration(nodesConfigurationFile: String, sosiesUrlFile: Stri
         var i = Integer.parseInt(configuration[3])
         while (i > 0) {
             i--
-            nodesList.add(configuration[0] + "Child" + i)
+            nodesList.add("diversify" + configuration[0] + "Child" + i)
             // Ack to ensure port are not the same between component on different childNode but with the same JavaNode parent
             if (configuration[1].equalsIgnoreCase("javanode")) {
                 javaParentNodes.add(configuration[0] + "Child" + i)
             }
         }
         if (configuration.size == 5) {
-            nodesList.remove(configuration[0] + "Child0")
+            nodesList.remove("diversify" + configuration[0] + "Child0")
             // Ack to ensure port are not the same between component on different childNode but with the same JavaNode parent
             if (configuration[1].equalsIgnoreCase("javanode")) {
                 javaParentNodes.remove(configuration[0] + "Child0")
