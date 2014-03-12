@@ -5,7 +5,7 @@
     <meta charset="utf-8"/>
     <link rel="shortcut icon" type="image/png" href="/favicon.png"/>
     <meta name="viewport" content="width=1274, user-scalable=yes"/>
-    <title>Demo Restart</title>
+    <title>Demo Start</title>
     <script src="jquery.min.js"></script>
     <style>
         body {
@@ -49,10 +49,10 @@
     </style>
     <script type="text/javascript">
         jQuery(document).ready(function () {
-            jQuery('#restart').click(function () {
-                jQuery.get("{pattern}restartSosie", function (data) {
+            jQuery('#start').click(function () {
+                jQuery.get("{pattern}startSosie", function (data) {
                     if(data != 'done') {
-                        alert("Unable to restart the demo");
+                        alert("Unable to start the demo");
                     }
                 });
             });
@@ -60,6 +60,6 @@
     </script>
 </head>
 <body>
-<input class="round" id="restart" type="submit" value="Restart"/>
+<input class="round" id="start" type="submit" value="Start"/>
 </body>
 </html>

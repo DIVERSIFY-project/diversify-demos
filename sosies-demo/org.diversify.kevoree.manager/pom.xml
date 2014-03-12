@@ -9,17 +9,18 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>org.diversify.kevoree.restarter</artifactId>
-
-    <properties>
-        <kevoree.komponents.version>1.1.0-SNAPSHOT</kevoree.komponents.version>
-    </properties>
+    <artifactId>org.diversify.kevoree.manager</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>org.kevoree.komponents</groupId>
             <artifactId>http-samples</artifactId>
-            <version>${kevoree.komponents.version}</version>
+            <version>${komponents.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kevoree.komponents</groupId>
+            <artifactId>helpers</artifactId>
+            <version>${komponents.version}</version>
         </dependency>
     </dependencies>
 
