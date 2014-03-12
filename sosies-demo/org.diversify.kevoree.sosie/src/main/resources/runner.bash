@@ -32,9 +32,15 @@ EOF
 }
 
 function killProcess() { # <network port>
-    kill -9 `ps axu | grep "java -Xbootclasspath/p:" | grep "run.jar" | grep "mdms/main.js" | grep " -p $1"| awk '{ print $2 }'`
+        kill -9 `ps axu | grep "java -Xbootclasspath/p:" | grep "run.jar" | grep "mdms/main.js" | grep " -p $1" | grep -v "grep" | awk '{ print $2 }'`
 }
 
+function isRunning() {
+    exist=`ps axu | grep "java -Xbootclasspath/p:" | grep "run.jar" | grep "mdms/main.js" | grep " -p $1" | grep -v "grep" | awk '{ print $2 }'`
+    if [[ exist == "" ]]; then
+        exit 1
+    fi
+}
 function clean() { # sosie folder
     rm -rf "$1"
     rm -rf "/tmp/mdms"
@@ -43,6 +49,9 @@ function clean() { # sosie folder
 case "$1" in
     get)
         getSosie "$2" "$3"
+    ;;
+    isRunning)
+        isRunning "$2"
     ;;
     run)
         run "$2" "$3" "$4" "$5" "$6"
@@ -54,7 +63,7 @@ case "$1" in
         clean "$2"
     ;;
     *)
-        echo "Usage: $0 {get <sosie url> <output folder> | run <output folder> <sosie folder> <network port> <redis server host> <redis server port> | kill <network port>| clean <sosie folder>}"
+        echo "Usage: $0 {get <sosie url> <output folder> | run <output folder> <sosie folder> <network port> <redis server host> <redis server port> | isRunning <network port> | kill <network port>| clean <sosie folder>}"
         exit 1
     ;;
 esac
