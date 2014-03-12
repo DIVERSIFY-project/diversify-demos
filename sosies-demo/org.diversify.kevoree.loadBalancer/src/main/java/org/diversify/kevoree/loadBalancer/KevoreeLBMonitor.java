@@ -1,6 +1,8 @@
 package org.diversify.kevoree.loadBalancer;
 
 import org.java_websocket.WebSocketImpl;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.kevoree.annotation.*;
 import org.kevoree.api.ModelService;
 import org.kevoree.api.Port;
@@ -30,16 +32,14 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
     private String logFile;
     @Param(optional = true, defaultValue = "/tmp/loadbalancerclient/")
     private String pathWhereExtract;
-
-    @Output(optional = false)
-    private Port getNbSosieCalled;
+    @Output(optional = true)
+    private Port notifyRequest;
 
     @KevoreeInject
     ModelService modelservice;
 
     private LBWebSocketServer server;
     private AbstractLogReader logReader;
-    private GetNbRequestCallback callback;
 
 
     @Start
@@ -76,14 +76,24 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
     public void modelUpdated() {
         modelservice.unregisterModelListener(this);
         logReader = new LogReader(server, logFile);
-        callback = new GetNbRequestCallback();
+//        callback = new GetNbRequestCallback();
         logReader.startReader();
     }
 
     @Input(optional = false)
-    public void receiveNbSosieCalled(Object result) {
-        if (result instanceof Integer) {
-            callback.receive((Integer) result);
+    public void receiveSosieInformation(Object result) {
+        if (result instanceof String ){
+            //register file corresponding to the sosie
+            try {
+                JSONObject jsonReader = new JSONObject(result.toString());
+                String nodeId = jsonReader.get("node").toString();
+                String information = jsonReader.get("information").toString();
+                OutputStream stream = new FileOutputStream(new File(pathWhereExtract + File.separator + nodeId + ".txt"));
+                stream.write(information.getBytes("UTF-8"));
+                stream.flush();
+                stream.close();
+
+            } catch (JSONException ignored) {} catch (FileNotFoundException ignored) {} catch (UnsupportedEncodingException ignored) {} catch (IOException ignored) {}
         }
     }
 
@@ -117,10 +127,8 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
                         if (!content.split(";")[2].trim().equals("-")) {
                             String[] hosts = content.split(";")[2].trim().split(",");
                             for (String host : hosts) {
-                                callback.initialize();
-                                getNbSosieCalled.send(host);
-                                String toSend = content.replace(content.split(";")[2], host) + "; " + callback.getNbSosieCalled();
-                                Log.warn(toSend);
+                                String toSend = content.replace(content.split(";")[2], host);
+                                notifyRequest.send(toSend);
                                 server.sendToAll(toSend);
                             }
                         }
@@ -133,33 +141,6 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
                 reader.close();
             } catch (IOException ignored) {
             }
-        }
-    }
-
-    private class GetNbRequestCallback {
-        int nbSosieCalled;
-        boolean received;
-
-        synchronized void initialize() {
-            received = false;
-        }
-
-        synchronized void receive(int nbSosieCalled) {
-            this.nbSosieCalled = nbSosieCalled;
-            received = true;
-            this.notify();
-        }
-
-        synchronized int getNbSosieCalled() {
-            if (!received) {
-                try {
-                    this.wait(5000);
-                } catch (InterruptedException ignored) {
-                    ignored.printStackTrace();
-                }
-            }
-            return nbSosieCalled;
-
         }
     }
 }
