@@ -10,6 +10,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <kotlin.version>0.6.1673</kotlin.version>
         <kevoree.version>3.4.2-SNAPSHOT</kevoree.version>
         <kevoree.library.version>3.4.2-SNAPSHOT</kevoree.library.version>
         <komponents.version>1.1.0-SNAPSHOT</komponents.version>
@@ -18,9 +19,12 @@
     <modules>
         <module>org.diversify.kevoree.sosie</module>
         <module>org.diversify.kevoree.loadBalancer</module>
-        <module>org.diversify.kevoree.generator</module>
-        <module>org.diversify.kevoree.restarter</module>
         <module>org.diversify.kevoree.nginx</module>
+        <module>org.diversify.kevoree.manager</module>
+        <module>org.diversify.kevoree.generator</module>
+        <module>org.diversify.kevoree.modelSwitcher</module>
+        <module>org.diversify.kevore.deploy</module>
+        <!--<module>org.diversify.kevoree.watchdog</module>-->
     </modules>
 
     <dependencies>
