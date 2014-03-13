@@ -94,9 +94,9 @@ class ModelGeneratorFromModel {
         scriptBuilder.append("repo 'http://oss.sonatype.org/content/groups/public/'\n")
         scriptBuilder.append("repo 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/'\n")
 
-        scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest\n")
-        scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lxc:latest\n")
-        scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:latest\n")
+        scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:3.4.2-SNAPSHOT\n")
+        scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lxc:3.4.2-SNAPSHOT\n")
+        scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:3.4.2-SNAPSHOT\n")
 
         if (baseModel.findGroupsByID("sync") == null) {
             scriptBuilder.append("add ").append("sync : WSGroup\n")
@@ -135,13 +135,13 @@ class ModelGeneratorFromModel {
         scriptBuilder.append("repo 'http://oss.sonatype.org/content/groups/public/'\n")
         scriptBuilder.append("repo 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/'\n")
 
-        scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest\n")
-        scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.hazelcast:latest\n")
-        scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lxc:latest\n")
-        scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:latest\n")
-        scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.system:latest\n")
-        scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.hazelcast:latest\n")
-        scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:latest\n")
+        scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:3.4.2-SNAPSHOT\n")
+        scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.hazelcast:3.4.2-SNAPSHOT\n")
+        scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lxc:3.4.2-SNAPSHOT\n")
+        scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:3.4.2-SNAPSHOT\n")
+        scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.system:3.4.2-SNAPSHOT\n")
+        scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.hazelcast:3.4.2-SNAPSHOT\n")
+        scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:3.4.2-SNAPSHOT\n")
 
         scriptBuilder.append("include mvn:org.kevoree.komponents:http-netty:latest\n")
 
@@ -153,7 +153,7 @@ class ModelGeneratorFromModel {
         scriptBuilder.append("include mvn:org.diversify:org.diversify.kevoree.manager:latest\n")
         //        scriptBuilder.append("include mvn:org.diversify:org.diversify.kevoree.generator:latest\n")
 
-        scriptBuilder.append("add ").append("broadcast : BroadcastNettyHttpGroup\n")
+        scriptBuilder.append("add ").append("broadcast : BroadcastGroup\n")
 
         scriptBuilder.append("add ").append("sync : WSGroup\n")
         scriptBuilder.append("add nginxChannel : UselessChannel\n")
@@ -203,6 +203,13 @@ class ModelGeneratorFromModel {
                 "   access_log /tmp/loadbalancerclient/proxy.log proxy; #proxy refers to the log format defined in nginx.conf\n" +
                 "   location / {\n" +
                 "       proxy_pass http://backend;\n" +
+                "       # These are the option for websockets (need nginx >= v1.3.13)\n" +
+                "       proxy_set_header X-Real-IP \$remote_addr;\n" +
+                "       proxy_set_header Host \$host;\n" +
+                "       proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;\n" +
+                "       proxy_http_version 1.1;\n" +
+                "       proxy_set_header Upgrade \$http_upgrade;\n" +
+                "       proxy_set_header Connection \"upgrade\";\n" +
                 "   }\n" +
                 "   location /client {\n" +
                 "       root /tmp/loadbalancerclient;\n" +
@@ -224,10 +231,49 @@ class ModelGeneratorFromModel {
                 scriptBuilder.append("add ").append("diversify").append(configuration[0]).append("Child0").append(".softwareInstaller : ScriptRunner\n")
                 scriptBuilder.append("set ").append("diversify").append(configuration[0]).append("Child0").append(".softwareInstaller.startScript = 'apt-get update\n" +
                 "apt-get install nginx redis-server git --no-install-recommends -y\n" +
-                "cat /etc/nginx/nginx.conf | sed \"s/error_log \\\\/var\\\\/log\\\\/nginx\\\\/error.log;/error_log \\\\/var\\\\/log\\\\/nginx\\\\/error.log;\\\\nlog_format proxy \\'[\\\\\$time_local]; \\\\\$remote_addr; \\\\\$upstream_addr; \\\\\$upstream_response_time; \\\\\$request; \\\\\$remote_user;\\'/g\" > /tmp/nginx.conf\n" +
-                "cp /tmp/nginx.conf /etc/nginx/nginx.conf\n" +
-                "rm -rf /tmp/nginx.conf\n" +
+
+                "cat > /etc/nginx/nginx.conf << EOF\n" +
+                "user www-data;\n" +
+                "worker_processes 4;\n" +
+                "pid /run/nginx.pid;\n" +
+                "events {\n" +
+                "worker_connections 768;\n" +
+                "# multi_accept on;\n" +
+                "}\n" +
+                "http {\n" +
+                "set_real_ip_from 10.0.0.0/8;\n" +
+                "real_ip_header X-Forwarded-For;\n" +
+                "##\n" +
+                "# Basic Settings\n" +
+                "##\n" +
+                "sendfile on;\n" +
+                "tcp_nopush on;\n" +
+                "tcp_nodelay on;\n" +
+                "keepalive_timeout 65;\n" +
+                "types_hash_max_size 2048;\n" +
+                "# server_tokens off;\n" +
+                "# server_names_hash_bucket_size 64;\n" +
+                "# server_name_in_redirect off;\n" +
+                "include /etc/nginx/mime.types;\n" +
+                "default_type application/octet-stream;\n" +
+                "##\n" +
+                "# Logging Settings\n" +
+                "##\n" +
+                "access_log /var/log/nginx/access.log;\n" +
+                "error_log /var/log/nginx/error.log;\n" +
+                "log_format proxy \\'[\\\\\$time_local]; \\\\\$remote_addr; \\\\\$upstream_addr; \\\\\$upstream_response_time; \\\\\$request; \\\\\$remote_user;\\'\n" +
+                "##\n" +
+                "# Gzip Settings\n" +
+                "##\n" +
+                "gzip on;\n" +
+                "gzip_disable \"msie6\";\n" +
+                "include /etc/nginx/conf.d/*.conf;\n" +
+                "include /etc/nginx/sites-enabled/*;\n" +
+                "}\n" +
+                "EOF\n" +
+
                 "rm -rf /etc/nginx/sites-enabled/default\n" +
+
                 "cat > \\'/etc/redis/redis.conf\\' << EOF\n" +
                 "daemonize yes\n" +
                 "pidfile /var/run/redis/redis-server.pid\n" +
@@ -236,7 +282,7 @@ class ModelGeneratorFromModel {
                 "# specified all the interfaces will listen for incoming connections.\n" +
                 "#\n" +
                 // this line is specific to JavaNode !! Maybe we need to do something else for LightLXC
-                "bind " + configuration[2] + "\n" +
+                "bind {redis-ip}\n" +
                 "timeout 0\n" +
                 "tcp-keepalive 60\n" +
                 "loglevel notice\n" +
@@ -278,10 +324,29 @@ class ModelGeneratorFromModel {
                 "aof-rewrite-incremental-fsync yes\n" +
                 "EOF\n" +
                 "/etc/init.d/redis-server restart\n" +
+                "wget \"http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip\" --content-disposition -O \"/tmp/sosie.zip\"\n" +
+                "tar -xvf \"/tmp/sosie.zip\" -C \"/tmp/\"\n" +
+                "rm -rf \"/tmp/sosie.zip\"\n" +
+                "cd \"/tmp/\"\n" +
+                "rm -rf mdms\n" +
+                "git config --system http.sslVerify false\n" +
+                "git clone https://github.com/maxleiko/mdms-ringojs.git mdms\n" +
+                // this line is specific to JavaNode !! Maybe we need to do something else for LightLXC
+                "redis-cli -h {redis-ip} -p 6379 FLUSHDB\n" +
+                "rm \"/tmp/mdms/config.json\"\n" +
+                "cat > \"/tmp/mdms/config.json\" << EOF\n" +
+                "{\n" +
+                // this line is specific to JavaNode !! Maybe we need to do something else for LightLXC
+                "    \"redis-server\": \"{redis-ip}\",\n" +
+                "    \"redis-port\":   6379\n" +
+                "}\n" +
+                "EOF\n" +
+                "/tmp/ringojs-0.10/bin/ringo /tmp/mdms/tools/fakedb.js" +
                 "'\n")
                 scriptBuilder.append("set ").append("diversify").append(configuration[0]).append("Child0").append(".softwareInstaller.started = 'false'\n")
 
                 scriptBuilder.append("add ").append("diversify").append(configuration[0]).append("Child0").append(".lbMonitor : KevoreeLBMonitor\n")
+                scriptBuilder.append("set ").append("diversify").append(configuration[0]).append("Child0").append(".lbMonitor.serverName = 'cloud.diversify-project.eu'\n")
                 // here we can specify the port and logFile for lbMonitor
                 scriptBuilder.append("bind ").append("diversify").append(configuration[0]).append("Child0").append(".lbMonitor.receiveSosieInformation lbMonitorChannelReceiveSosieInformation\n")
 
@@ -394,6 +459,11 @@ class ModelGeneratorFromModel {
 
                 scriptBuilder.append("bind ").append(nodeName).append(".").append(sosieName).append(nodeName).append(i).append(".useless nginxChannel\n")
                 scriptBuilder.append("bind ").append(nodeName).append(".").append(sosieName).append(nodeName).append(i).append(".sendSosieInformation lbMonitorChannelReceiveSosieInformation\n")
+
+                scriptBuilder.append("add ").append(nodeName).append(".softwareInstaller : ScriptRunner\n")
+                scriptBuilder.append("set ").append(nodeName).append(".softwareInstaller.startScript = 'apt-get update\n" +
+                "apt-get install git --no-install-recommends -y'\n")
+                scriptBuilder.append("set ").append(nodeName).append(".softwareInstaller.started = 'false'\n")
 
                 if (i < nodesList.size - 1) {
                     i++
