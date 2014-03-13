@@ -35,7 +35,7 @@ import java.util.zip.ZipFile;
 @ComponentType
 public class DemoManager extends SimpleTemplatingStaticFileHandler implements ModelListener {
 
-    @Param(optional = true, defaultValue = "SosieRunner,ModelSwitcher")
+    @Param(optional = true, defaultValue = "SosieRunner")
     private String componentTypes;
     @Param(optional = true, defaultValue = "nginx,softwareInstaller")
     private String configuratorComponents;
@@ -112,12 +112,6 @@ public class DemoManager extends SimpleTemplatingStaticFileHandler implements Mo
         }
     }
 
-    /*private boolean isRunning;
-    private boolean isStopping;
-    private boolean isStarting;
-    private boolean isConfiguring;
-    private boolean isSwitching;*/
-
     @Override
     protected synchronized void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         if (req.getRequestURI().toLowerCase().endsWith("stopsosie") || req.getRequestURI().toLowerCase().endsWith("stopsosie/")) {
@@ -160,32 +154,20 @@ public class DemoManager extends SimpleTemplatingStaticFileHandler implements Mo
             writer.write("done");
             writer.flush();
         } else if (req.getRequestURI().toLowerCase().endsWith("configuresystem") || req.getRequestURI().toLowerCase().endsWith("configuresystem/")) {
-            final StringBuilder stopScriptBuilder = new StringBuilder();
             final StringBuilder startScriptBuilder = new StringBuilder();
             for (String componentPath : configuratorPaths) {
                 KMFContainer component = modelService.getCurrentModel().getModel().findByPath(componentPath);
                 if (component != null && component instanceof ComponentInstance) {
-                    stopScriptBuilder.append("set ").append(((ContainerNode) component.eContainer()).getName()).append(".").append(((ComponentInstance) component).getName()).append(".started = 'false'\n");
                     startScriptBuilder.append("set ").append(((ContainerNode) component.eContainer()).getName()).append(".").append(((ComponentInstance) component).getName()).append(".started = 'true'\n");
                 }
             }
 
-            System.err.println(stopScriptBuilder.toString());
-            modelService.unregisterModelListener(this);
+            System.err.println(startScriptBuilder.toString());
             callback.initialize();
-            modelService.submitScript(stopScriptBuilder.toString(), callback);
+            modelService.unregisterModelListener(DemoManager.this);
+            modelService.submitScript(startScriptBuilder.toString(), callback);
             if (callback.waitForResult(10000)) {
-                try {
-                    Thread.sleep(30000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                System.err.println(startScriptBuilder.toString());
-                callback.initialize();
-                modelService.submitScript(startScriptBuilder.toString(), callback);
-                if (callback.waitForResult(10000)) {
-                    modelService.registerModelListener(DemoManager.this);
-                }
+                modelService.registerModelListener(DemoManager.this);
             }
 
             PrintWriter writer = resp.getWriter();
@@ -194,15 +176,38 @@ public class DemoManager extends SimpleTemplatingStaticFileHandler implements Mo
         } else if (req.getRequestURI().toLowerCase().endsWith("switch")) {
             ContainerRoot model = (ContainerRoot) loader.loadModelFromStream(new FileInputStream(models[previousModel])).get(0);
             StringBuilder script = new StringBuilder();
+
+            List<String> sosies = new ArrayList<String>();
+            String redisServer = "";
+            String softwareInstallUpdate = "";
+
             for (ContainerNode node : model.getNodes()) {
+                String ip = "";
                 for (NetworkInfo ni : node.getNetworkInformation()) {
                     for (NetworkProperty np : ni.getValues()) {
                         if (ni.getName().contains("ip") || np.getName().contains("ip")) {
                             script.append("network ").append(node.getName()).append(".").append(ni.getName()).append(".").append(np.getName()).append(" ").append(np.getValue()).append("\n");
+                            ip = np.getValue();
+                        }
+                    }
+                    if (node.getName().startsWith("diversify")) {
+                        for (ComponentInstance component : node.getComponents()) {
+                            if (component.getTypeDefinition().getName().equalsIgnoreCase("SosieRunner")) {
+                                sosies.add("set " + node.getName() + "." + component.getName() + ".redisServer = '");
+                            } else if (component.getTypeDefinition().getName().equalsIgnoreCase("ScriptRunner") && component.getDictionary().findValuesByID("startScript").getValue().contains("/etc/init.d/redis-server")) {
+                                redisServer = ip;
+
+                                softwareInstallUpdate = "set " + node.getName() + "." + component.getName() + ".startScript = '" + component.getDictionary().findValuesByID("startScript").getValue().replace("{redis-ip}", redisServer).replace("\\", "\\\\").replace("\'", "\\'") + "'";
+                            }
                         }
                     }
                 }
             }
+            for (String sosie : sosies) {
+                script.append(sosie + redisServer + "'\n");
+            }
+            script.append(softwareInstallUpdate + "\n");
+
             try {
                 kevScriptService.execute(script.toString(), model);
             } catch (Exception ignored) {
@@ -230,63 +235,6 @@ public class DemoManager extends SimpleTemplatingStaticFileHandler implements Mo
 
     @Override
     public synchronized boolean preUpdate(ContainerRoot containerRoot, ContainerRoot containerRoot2) {
-        /*if (isRunning) {
-            if (isConfiguring) {
-                if (isStopping) {
-                    boolean ok = true;
-                    for (String componentPath : configuratorPaths) {
-                        KMFContainer component = modelService.getCurrentModel().getModel().findByPath(componentPath);
-                        if (component != null && component instanceof ComponentInstance) {
-                            if ((((ComponentInstance) component).getStarted())) {
-                                ok = false;
-                                break;
-                            }
-                        }
-                    }
-                    return ok;
-                } else if (isStarting) {
-                    boolean ok = true;
-                    for (String componentPath : configuratorPaths) {
-                        KMFContainer component = modelService.getCurrentModel().getModel().findByPath(componentPath);
-                        if (component != null && component instanceof ComponentInstance) {
-                            if (!(((ComponentInstance) component).getStarted())) {
-                                ok = false;
-                                break;
-                            }
-                        }
-                    }
-                    return ok;
-                } else {
-                    return true;
-                }
-            } else if (isStopping) {
-                boolean ok = true;
-                for (String componentPath : componentPaths) {
-                    KMFContainer component = modelService.getCurrentModel().getModel().findByPath(componentPath);
-                    if (component != null && component instanceof ComponentInstance) {
-                        if ((((ComponentInstance) component).getStarted())) {
-                            ok = false;
-                            break;
-                        }
-                    }
-                }
-                return ok;
-            } else if (isStarting) {
-                boolean ok = true;
-                for (String componentPath : componentPaths) {
-                    KMFContainer component = modelService.getCurrentModel().getModel().findByPath(componentPath);
-                    if (component != null && component instanceof ComponentInstance) {
-                        if (!(((ComponentInstance) component).getStarted())) {
-                            ok = false;
-                            break;
-                        }
-                    }
-                }
-                return ok;
-            } else if (isSwitching) {
-                return true;
-            }
-        }*/
         return true;
     }
 
@@ -303,6 +251,7 @@ public class DemoManager extends SimpleTemplatingStaticFileHandler implements Mo
     @Override
     public synchronized void modelUpdated() {
         componentPaths.clear();
+        configuratorPaths.clear();
         for (ContainerNode node : modelService.getCurrentModel().getModel().getNodes()) {
             for (ComponentInstance component : node.getComponents()) {
                 if (componentTypes.contains(component.getTypeDefinition().getName())) {
