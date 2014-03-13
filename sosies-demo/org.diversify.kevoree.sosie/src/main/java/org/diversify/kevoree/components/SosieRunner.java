@@ -2,6 +2,7 @@ package org.diversify.kevoree.components;
 
 import org.json.JSONObject;
 import org.json.JSONStringer;
+import org.kevoree.ComponentInstance;
 import org.kevoree.ContainerNode;
 import org.kevoree.NetworkInfo;
 import org.kevoree.NetworkProperty;
@@ -53,6 +54,16 @@ public class SosieRunner {
 
     private final String rhinoRepoUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/";
 
+    public void setSosieUrl(String sosieUrl) throws Exception {
+
+        boolean needUpdate = this.sosieUrl != null && ((ComponentInstance) (((ContainerNode) modelService.getCurrentModel().getModel().findNodesByID(context.getNodeName())).findComponentsByID(context.getInstanceName()))).getStarted();
+        this.sosieUrl = sosieUrl;
+        if (needUpdate) {
+            stop();
+            start();
+        }
+    }
+
     @Start
     public void start() throws Exception {
         if (sosieUrl.contains("composed-sosie-")) {
@@ -61,6 +72,11 @@ public class SosieRunner {
         } else if (sosieUrl.contains("ringo-")) {
             sosieName = sosieUrl.substring(sosieUrl.indexOf("ringo-") + "ringo-".length(), sosieUrl.length() - ".zip".length());
             sosieName = sosieName.substring(sosieName.indexOf("-") + 1);
+        } else {
+            sosieName = "ringojs-0.10";
+        }
+        if (sosieName.equalsIgnoreCase("regular")) {
+            sosieName = "ringojs-0.10";
         }
         directory = new File(System.getProperty("java.io.tmpdir") + File.separator + context.getInstanceName());
         if ((directory.isFile() && directory.delete() && directory.mkdirs()) || (!directory.exists() && directory.mkdirs()) || (directory.isDirectory())) {
@@ -120,72 +136,63 @@ public class SosieRunner {
     public void useless() {
     }
 
-    /*public static void main(String[] args) {
-        SosieRunner runner = new SosieRunner();
-        runner.sosieName = "composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino4";
-        runner.runnerPath = "/home/edaubert/workspace/diversify-project/diversify-demos/sosies-demo/org.diversify.kevoree.sosie/src/main/resources/runner.bash";
-        runner.directory = new File("/tmp");
-        try {
-            runner.sendInformation();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }*/
-
     private void sendInformation() throws Exception {
-        String rhinoVersion = sosieName.substring(sosieName.indexOf("rhino"));
+        if (sosieName.contains("rhino")) {
+            String rhinoVersion = sosieName.substring(sosieName.indexOf("rhino"));
 
-        standardOutput = new File(directory.getAbsolutePath() + File.separator + context.getInstanceName() + ".log");
-        standardOutput.createNewFile();
-        process = new ProcessBuilder().directory(directory).command("bash", runnerPath, "get", rhinoRepoUrl + "org.diversify/rhino/1-" + rhinoVersion + "/rhino-1-" + rhinoVersion + ".zip", directory.getAbsolutePath()).redirectErrorStream(true).start();
-        new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput, true)).start();
-        if (process.waitFor() == 0) {
-            process = null;
-            standardOutput.delete();
+            standardOutput = new File(directory.getAbsolutePath() + File.separator + context.getInstanceName() + ".log");
+            standardOutput.createNewFile();
+            process = new ProcessBuilder().directory(directory).command("bash", runnerPath, "get", rhinoRepoUrl + "org.diversify/rhino/1-" + rhinoVersion + "/rhino-1-" + rhinoVersion + ".zip", directory.getAbsolutePath()).redirectErrorStream(true).start();
+            new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput, true)).start();
+            if (process.waitFor() == 0) {
+                process = null;
+                standardOutput.delete();
 
-            FileInputStream inputStream = new FileInputStream(new File(directory.getAbsolutePath() + File.separator + rhinoVersion + File.separator + "diversificationPoint" + rhinoVersion.replace("rhino", "")));
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                FileInputStream inputStream = new FileInputStream(new File(directory.getAbsolutePath() + File.separator + rhinoVersion + File.separator + "diversificationPoint" + rhinoVersion.replace("rhino", "")));
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-            byte[] bytes = new byte[2048];
-            int length = inputStream.read(bytes);
+                byte[] bytes = new byte[2048];
+                int length = inputStream.read(bytes);
 
-            while (length != -1) {
-                outputStream.write(bytes, 0, length);
-                length = inputStream.read(bytes);
+                while (length != -1) {
+                    outputStream.write(bytes, 0, length);
+                    length = inputStream.read(bytes);
+                }
+
+                JSONObject jsonReader = new JSONObject(new String(outputStream.toByteArray()));
+
+                JSONObject fragmentPosition = ((JSONObject) jsonReader.get("CodeFragmentPosition"));
+                JSONObject fragmentReplace = ((JSONObject) jsonReader.get("CodeFragmentReplace"));
+
+
+                StringBuilder info = new StringBuilder();
+                info.append("Position: ");
+                info.append(fragmentPosition.get("Position"));
+                info.append("\nStatementType: ");
+                info.append(((String) fragmentPosition.get("Type")).replace("Ct", "").replace("Impl", "")).append(" -> ");
+                info.append(((String) fragmentReplace.get("Type")).replace("Ct", "").replace("Impl", ""));
+
+
+                String message = new JSONStringer().object().key("node").value(getIps().get(0).replace(".", "_") + "_" + port).key("information").value(info.toString()).endObject().toString();
+
+                Log.info("Sending information about sosie: {}", message);
+                sendSosieInformation.send(message);
+            } else {
+                throw new Exception("Unable to download Rhino sosie " + rhinoVersion + " for " + context.getInstanceName() + " on " + context.getNodeName());
             }
-
-            JSONObject jsonReader = new JSONObject(new String(outputStream.toByteArray()));
-
-            JSONObject fragmentPosition = ((JSONObject) jsonReader.get("CodeFragmentPosition"));
-            JSONObject fragmentReplace = ((JSONObject) jsonReader.get("CodeFragmentReplace"));
-
-
-            StringBuilder info = new StringBuilder();
-            info.append("Position: ");
-            info.append(fragmentPosition.get("Position"));
-            info.append("\nStatementType: ");
-            info.append(((String) fragmentPosition.get("Type")).replace("Ct", "").replace("Impl", "")).append(" -> ");
-            info.append(((String) fragmentReplace.get("Type")).replace("Ct", "").replace("Impl", ""));
-
-
-            String message = new JSONStringer().object().key("node").value(getIps().get(0) + ":" + port).key("information").value(info.toString()).endObject().toString();
+        } else {
+            String message = new JSONStringer().object().key("node").value(getIps().get(0).replace(".", "_") + "_" + port).key("information").value("Regular version of rhino and ringo").endObject().toString();
 
             Log.info("Sending information about sosie: {}", message);
             sendSosieInformation.send(message);
-        } else {
-            throw new Exception("Unable to download Rhino sosie " + rhinoVersion + " for " + context.getInstanceName() + " on " + context.getNodeName());
         }
     }
 
 
     private List<String> getIps() {
         List<String> ips = new ArrayList<String>();
-        if (modelService.getCurrentModel() != null && modelService.getCurrentModel().getModel() != null) {
-            ContainerNode node = modelService.getCurrentModel().getModel().findNodesByID(context.getNodeName());
+        if (modelService.getPendingModel() != null) {
+            ContainerNode node = modelService.getPendingModel().findNodesByID(context.getNodeName());
             if (node != null) {
                 for (NetworkInfo networkInfo : node.getNetworkInformation()) {
                     for (NetworkProperty networkProperty : networkInfo.getValues()) {

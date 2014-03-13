@@ -27,7 +27,8 @@ cat > "${mdms_home}/config.json" << EOF
 }
 EOF
 
-	${ringo_path}ringo ${mdms_home}tools/fakedb.js
+	${ringo_path}ringo-admin install ringo/stick
+	#${ringo_path}ringo ${mdms_home}tools/fakedb.js
 	${ringo_path}ringo ${mdms_home}main.js -p "$3"
 }
 
