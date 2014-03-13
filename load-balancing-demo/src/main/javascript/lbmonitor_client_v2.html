@@ -6,6 +6,7 @@
     <title>DIVERSIFY Load Balancer Monitor</title>
     <meta charset="UTF-8">
     <script type="text/javascript" src="lib/jquery-1.9.0.js"></script>
+    <script type="text/javascript" src="lib/reconnecting-websocket.min.js"></script>
     <script type="text/javascript" src="lib/jquery-ui-1.9.2-min.js"></script>
     <script type="text/javascript" src="js/jquery.jsPlumb-1.5.5.js"></script>
 
@@ -279,7 +280,7 @@
         * Initialization code and web socket communication
         **********************************************************************/
         jsPlumb.ready(function() {
-                var LBMSock = new WebSocket("ws://" + ws_host + ":" + ws_port);
+                var LBMSock = new ReconnectingWebSocket("ws://" + ws_host + ":" + ws_port);
 
                 LBMSock.onopen = function()
                 {
