@@ -51,22 +51,50 @@ fun main(args: Array<String>) {
     if (model != null && iaasModel != null) {
         println("Starting deployment ...")
         val parentNodes = iaasModel!!.nodes.filter { node -> node.hosts.find { subNode -> subNode.name!!.startsWith("diversify") } != null }
-//        sendModel(iaasModel!!, parentNodes, 5)
+//        sendModel(iaasModel!!, parentNodes, 5, 30000)
 
         updateModelWithIps(model!!, parentNodes)
         updateModelForRedisServer(model!!)
 
-        Thread.sleep(20000)
+//        Thread.sleep(10000)
 
         val nodes = model!!.nodes.filter { node -> node.name!!.startsWith("diversify") }
-        sendModel(model!!, nodes, 15)
+        sendModel(model!!, nodes, 15, 10000)
         System.exit(0)
     }
     System.exit(1)
 }
 
-fun sendModel(model: ContainerRoot, nodes: List<ContainerNode>, nbTry: Int): Boolean {
+fun sendModel(model: ContainerRoot, nodes: List<ContainerNode>, nbTry: Int, delay : Int): Boolean {
     val modeString = JSONModelSerializer().serialize(model)
+
+    nodes.forEach { node ->
+        System.out.println("Try to send model to " + node.name)
+        val port = getPort(node)
+        var done = false
+        getIps(node).all { ip ->
+            var KO = false;
+            for (i in 1..nbTry) {
+                try {
+                    val client = WebSocketClient(URI("ws://" + ip + ":" + port))
+                    client.connectBlocking()
+                    client.send("push/" + modeString)
+                    done = true
+                    KO = false
+                    break
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    KO = true
+                }
+            }
+            KO
+        }
+        if (done) {
+            System.out.println("model sent to " + node.name)
+        } else {
+            System.out.println("Unable to sent model to " + node.name)
+        }
+    }
 
     return nodes.all { node ->
         val port = getPort(node)
@@ -77,8 +105,8 @@ fun sendModel(model: ContainerRoot, nodes: List<ContainerNode>, nbTry: Int): Boo
                 try {
                     val client = WebSocketClient(URI("ws://" + ip + ":" + port))
                     client.connectBlocking()
-                    client.send("push/" + modeString)
-                    if (client.waitFor(model, 30000, 5)) {
+//                    client.send("push/" + modeString)
+                    if (client.waitFor(model, delay, 5)) {
                         done = true
                         KO = false
                         break
@@ -91,9 +119,9 @@ fun sendModel(model: ContainerRoot, nodes: List<ContainerNode>, nbTry: Int): Boo
             KO
         }
         if (done) {
-            System.out.println("model sent to " + node.name)
+            System.out.println("node updated: " + node.name)
         } else {
-            System.out.println("Unable to sent model to " + node.name)
+            System.out.println("Node " + node.name + " seems to not be up to date.")
         }
         done
     }
@@ -115,12 +143,15 @@ fun updateModelWithIps(model: ContainerRoot, parentNodes: List<ContainerNode>): 
 fun updateModelForRedisServer(model: ContainerRoot) {
     val sosies = ArrayList<String>()
     var redisServer = ""
+    var softwareInstallUpdate = ""
     model.nodes.forEach { node ->
         node.components.forEach { component ->
             if (component.typeDefinition!!.name!!.equalsIgnoreCase("SosieRunner")) {
                 sosies.add("set " + node.name + "." + component.name + ".redisServer = '")
-            } else if (component.typeDefinition!!.name!!.equalsIgnoreCase("ScriptRunner")) {
+            } else if (component.typeDefinition!!.name!!.equalsIgnoreCase("ScriptRunner") && component.dictionary!!.findValuesByID("startScript")!!.value!!.contains("/etc/init.d/redis-server restart")) {
                 redisServer = getIps(node).get(0)
+
+                softwareInstallUpdate = "set " + node.name + "." + component.name + ".startScript = '" + component.dictionary!!.findValuesByID("startScript")!!.value!!.replace("{redis-ip}", redisServer).replace("\\", "\\\\").replace("\'", "\\'") + "'";
             }
         }
     }
@@ -130,6 +161,7 @@ fun updateModelForRedisServer(model: ContainerRoot) {
     sosies.forEach { sosie ->
         script.append(sosie + redisServer + "'\n")
     }
+    script.append(softwareInstallUpdate + "\n")
 
     val engine = KevScriptEngine()
 
