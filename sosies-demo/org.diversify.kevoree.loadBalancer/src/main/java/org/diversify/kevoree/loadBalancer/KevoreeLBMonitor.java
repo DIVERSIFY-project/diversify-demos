@@ -3,7 +3,11 @@ package org.diversify.kevoree.loadBalancer;
 import org.java_websocket.WebSocketImpl;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.kevoree.ContainerNode;
+import org.kevoree.NetworkInfo;
+import org.kevoree.NetworkProperty;
 import org.kevoree.annotation.*;
+import org.kevoree.api.Context;
 import org.kevoree.api.ModelService;
 import org.kevoree.api.Port;
 import org.kevoree.api.handler.ModelListenerAdapter;
@@ -12,6 +16,8 @@ import org.thingml.lbmonitor.AbstractLogReader;
 import org.thingml.lbmonitor.LBWebSocketServer;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * User: Erwan Daubert - erwan.daubert@gmail.com
@@ -36,7 +42,9 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
     private Port notifyRequest;
 
     @KevoreeInject
-    ModelService modelservice;
+    ModelService modelService;
+    @KevoreeInject
+    Context context;
 
     private LBWebSocketServer server;
     private AbstractLogReader logReader;
@@ -44,20 +52,21 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
 
     @Start
     public void start() throws IOException {
-        modelservice.registerModelListener(this);
+        modelService.registerModelListener(this);
 
         File folderWhereExtract = new File(pathWhereExtract);
         if (!folderWhereExtract.exists()) {
             folderWhereExtract.mkdirs();
         }
+//        System.out.println(InetAddress.getByName(serverName).getHostAddress());
         KevoreeLBMonitorWebContentExtractor.getInstance().extractConfiguration(folderWhereExtract.getAbsolutePath(), true);
         KevoreeLBMonitorWebContentExtractor.getInstance().replaceFileString("localhost:8099", serverName + ":80/client/ws", folderWhereExtract.getAbsolutePath());
         KevoreeLBMonitorWebContentExtractor.getInstance().replaceServerAndPortString("localhost", serverName , "8099", "80/client/ws", folderWhereExtract.getAbsolutePath());
 
         WebSocketImpl.DEBUG = false;
-
         server = new LBWebSocketServer(port);
         server.start();
+
         Log.info("[LBWebSocketServer] Server started on port {}", server.getPort());
     }
 
@@ -69,30 +78,53 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
         if (server != null) {
             server.stop();
         }
+        KevoreeLBMonitorWebContentExtractor.getInstance().deleteConfiguration(pathWhereExtract);
+    }
+
+    private List<String> getIps() {
+        List<String> ips = new ArrayList<String>();
+        if (modelService.getPendingModel() != null) {
+            ContainerNode node = modelService.getPendingModel().findNodesByID(context.getNodeName());
+            if (node != null) {
+                for (NetworkInfo networkInfo : node.getNetworkInformation()) {
+                    for (NetworkProperty networkProperty : networkInfo.getValues()) {
+                        if (networkInfo.getName().equalsIgnoreCase("ip") || networkProperty.getName().equalsIgnoreCase("ip")) {
+                            ips.add(networkProperty.getValue());
+                        }
+                    }
+                }
+            } else {
+                Log.warn("{}: Unable to find the current node in current model", context.getInstanceName());
+            }
+        } else {
+            Log.warn("{}: Unable to get current model from ModelService", context.getInstanceName());
+        }
+        return ips;
     }
 
 
     @Override
     public void modelUpdated() {
-        modelservice.unregisterModelListener(this);
+        modelService.unregisterModelListener(this);
         logReader = new LogReader(server, logFile);
-//        callback = new GetNbRequestCallback();
         logReader.startReader();
     }
 
     @Input(optional = false)
     public void receiveSosieInformation(Object result) {
+        Log.warn("Receive information from a sosie");
         if (result instanceof String ){
             //register file corresponding to the sosie
             try {
                 JSONObject jsonReader = new JSONObject(result.toString());
                 String nodeId = jsonReader.get("node").toString();
                 String information = jsonReader.get("information").toString();
-                OutputStream stream = new FileOutputStream(new File(pathWhereExtract + File.separator + nodeId + ".txt"));
+                OutputStream stream = new FileOutputStream(new File(pathWhereExtract + File.separator + "client" + File.separator + nodeId + ".txt"));
                 stream.write(information.getBytes("UTF-8"));
                 stream.flush();
                 stream.close();
 
+                Log.warn("Information about the sosie stored on {}", pathWhereExtract +File.separator + "client" +  File.separator + nodeId + ".txt");
             } catch (JSONException ignored) {} catch (FileNotFoundException ignored) {} catch (UnsupportedEncodingException ignored) {} catch (IOException ignored) {}
         }
     }

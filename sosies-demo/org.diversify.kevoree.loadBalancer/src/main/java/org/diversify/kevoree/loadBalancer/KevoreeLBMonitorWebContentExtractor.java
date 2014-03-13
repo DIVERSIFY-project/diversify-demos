@@ -50,20 +50,20 @@ public class KevoreeLBMonitorWebContentExtractor {
         }
         zipIn.close();
     }
-    
+
     public void replaceFileString(String old, String _new, String destDirectory) throws IOException {
-        String fileName = destDirectory + File.separator + "client"+ File.separator +"lbmonitor_client.html";
+        String fileName = destDirectory + File.separator + "client" + File.separator + "lbmonitor_client.html";
         FileInputStream fis = new FileInputStream(fileName);
         String content = IOUtils.toString(fis, Charset.defaultCharset());
         content = content.replaceAll(old, _new);
         FileOutputStream fos = new FileOutputStream(fileName);
         IOUtils.write(content, new FileOutputStream(fileName), Charset.defaultCharset());
         fis.close();
-        fos.close();    
+        fos.close();
     }
 
     public void replaceServerAndPortString(String oldserver, String newServer, String oldPort, String newPort, String destDirectory) throws IOException {
-        String fileName = destDirectory + File.separator + "client"+ File.separator +"lbmonitor_client_v2.html";
+        String fileName = destDirectory + File.separator + "client" + File.separator + "lbmonitor_client_v2.html";
         FileInputStream fis = new FileInputStream(fileName);
         String content = IOUtils.toString(fis, Charset.defaultCharset());
         content = content.replaceAll("\"" + oldserver + "\"", "\"" + newServer + "\"");
@@ -71,10 +71,10 @@ public class KevoreeLBMonitorWebContentExtractor {
         FileOutputStream fos = new FileOutputStream(fileName);
         IOUtils.write(content, new FileOutputStream(fileName), Charset.defaultCharset());
         fis.close();
-        fos.close();    
+        fos.close();
     }
 
-    
+
     private void extractFile(ZipInputStream zipIn, String filePath, boolean deleteOnExit) throws IOException {
         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
         byte[] bytesIn = new byte[2048];
@@ -85,15 +85,31 @@ public class KevoreeLBMonitorWebContentExtractor {
         bos.close();
     }
 
-    
+    public void deleteConfiguration(String folderPath) {
+        File folder = new File(folderPath);
+        if (folder.isDirectory()) {
+            for (File file : folder.listFiles()) {
+                if (file.isFile()) {
+                    file.delete();
+                } else {
+                    deleteConfiguration(file.getAbsolutePath());
+                }
+            }
+        } else {
+            folder.delete();
+        }
+    }
+
+
     private KevoreeLBMonitorWebContentExtractor() {
-	}
-    
+    }
+
     private static KevoreeLBMonitorWebContentExtractor instance;
-	public static KevoreeLBMonitorWebContentExtractor getInstance() {
-		if (instance==null){
-			instance = new KevoreeLBMonitorWebContentExtractor();
-		}
-		return instance;
-	}
+
+    public static KevoreeLBMonitorWebContentExtractor getInstance() {
+        if (instance == null) {
+            instance = new KevoreeLBMonitorWebContentExtractor();
+        }
+        return instance;
+    }
 }
