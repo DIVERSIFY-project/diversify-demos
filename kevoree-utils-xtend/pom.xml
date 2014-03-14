@@ -8,7 +8,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<xtend.version>2.5.2</xtend.version>
-		<kevoree.version>3.4.2-SNAPSHOT</kevoree.version>
+		<kevoree.version>3.5.3</kevoree.version>
 	</properties>
 
 	<dependencies>
