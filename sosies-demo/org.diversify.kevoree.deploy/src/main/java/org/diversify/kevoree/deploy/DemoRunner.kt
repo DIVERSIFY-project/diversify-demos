@@ -133,7 +133,7 @@ fun process(models: Array<String>, deploy: Boolean) {
 
             }
         }
-        println("Select configuration [1, 2, 3]:")
+        println("Select configuration [1, 2, 3, quit]:")
         line = reader.readLine()
     }
 }
@@ -199,7 +199,6 @@ fun sendModel(model: ContainerRoot, nodes: List<ContainerNode>, nbTry: Int, dela
     if (modelString != null) {
         nodes.forEach { node ->
             sendModelToNode(node, modelString, nbTry)
-            Thread.sleep(delay)
         }
 
         return nodes.all { node ->
@@ -222,12 +221,9 @@ fun sendModelWithDelayForRoot(model: ContainerRoot, nodes: List<ContainerNode>, 
             }
         }
 
-        Thread.sleep(delay)
-
         nodes.forEach { node ->
             if (rootNode == null || !rootNode.name.equals(node.name)) {
                 sendModelToNode(node, modelString, nbTry)
-                Thread.sleep(delay)
             }
         }
 
