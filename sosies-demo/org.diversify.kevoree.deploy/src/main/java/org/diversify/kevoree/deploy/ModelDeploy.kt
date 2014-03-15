@@ -1,3 +1,4 @@
+/*
 package org.diversify.kevoree.deploy
 
 import org.kevoree.ContainerRoot
@@ -11,6 +12,7 @@ import java.net.URI
 import org.kevoree.serializer.JSONModelSerializer
 import org.kevoree.impl.DefaultKevoreeFactory
 
+*/
 /**
  * User: Erwan Daubert - erwan.daubert@gmail.com
  * Date: 10/03/14
@@ -18,7 +20,9 @@ import org.kevoree.impl.DefaultKevoreeFactory
  *
  * @author Erwan Daubert
  * @version 1.0
- */
+ *//*
+
+
 fun main(args: Array<String>) {
     var baseModelFile = args.find { arg -> arg.startsWith("baseIaaSModel=") }
     var scriptFile = args.find { arg -> arg.startsWith("script=") }
@@ -59,7 +63,9 @@ fun main(args: Array<String>) {
 //        Thread.sleep(10000)
 
         val nodes = model!!.nodes.filter { node -> node.name!!.startsWith("diversify") }
-        sendModel(model!!, nodes, 15, 10000)
+        while (!sendModel(model!!, nodes, 15, 10000)) {
+            Thread.sleep(500)
+        }
         System.exit(0)
     }
     System.exit(1)
@@ -100,7 +106,7 @@ fun sendModel(model: ContainerRoot, nodes: List<ContainerNode>, nbTry: Int, dela
         val port = getPort(node)
         var done = false
         getIps(node).all { ip ->
-            var KO = false;
+            var KO = true;
             for (i in 1..nbTry) {
                 try {
                     val client = WebSocketClient(URI("ws://" + ip + ":" + port))
@@ -113,7 +119,6 @@ fun sendModel(model: ContainerRoot, nodes: List<ContainerNode>, nbTry: Int, dela
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    KO = true
                 }
             }
             KO
@@ -197,3 +202,4 @@ fun getIps(node: ContainerNode): List<String> {
     }
     return ips
 }
+*/
