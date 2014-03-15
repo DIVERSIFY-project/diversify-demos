@@ -113,10 +113,16 @@ class ModelGeneratorFromModel {
 
             if (baseModel.findNodesByID(configuration[0]) == null) {
                 scriptBuilder.append("add ").append(configuration[0]).append(" : ").append(configuration[1]).append("\n")
+                scriptBuilder.append("attach ").append(configuration[0]).append(" sync\n")
                 scriptBuilder.append("set sync.port/").append(configuration[0]).append(" = '" + port + "'\n")
                 port++
-                scriptBuilder.append("attach ").append(configuration[0]).append(" sync\n")
                 scriptBuilder.append("network ").append(configuration[0]).append(".ip.lan ").append(configuration[2]).append("\n")
+            } else {
+                if (configuration[1].equalsIgnoreCase("javanode")) {
+                    scriptBuilder.append("attach ").append(configuration[0]).append(" sync\n")
+                    scriptBuilder.append("set sync.port/").append(configuration[0]).append(" = '" + port + "'\n")
+                    port++
+                }
             }
             var i = Integer.parseInt(configuration[3])
 
@@ -126,6 +132,9 @@ class ModelGeneratorFromModel {
                 // ack to define network information when we use JavaNode as hosting node
                 if (configuration[1].equalsIgnoreCase("javanode")) {
                     scriptBuilder.append("network ").append("diversify").append(configuration[0]).append("Child").append(i).append(".ip.lan ").append(configuration[2]).append("\n")
+                    scriptBuilder.append("attach ").append("diversify").append(configuration[0]).append("Child").append(i).append(" sync\n")
+                    scriptBuilder.append("set ").append("sync.port/").append("diversify").append(configuration[0]).append("Child").append(i).append(" = '").append(port).append("'\n")
+                    port++
                 }
             }
             line = reader.readLine()
@@ -152,10 +161,6 @@ class ModelGeneratorFromModel {
         scriptBuilder.append("include mvn:org.diversify:org.diversify.kevoree.loadBalancer:latest\n")
         scriptBuilder.append("include mvn:org.diversify:org.diversify.kevoree.sosie:latest\n");
 
-        scriptBuilder.append("include mvn:org.diversify:org.diversify.kevoree.manager:latest\n")
-
-        scriptBuilder.append("add ").append("broadcast : BroadcastGroup\n")
-
         scriptBuilder.append("add ").append("sync : WSGroup\n")
         scriptBuilder.append("add nginxChannel : UselessChannel\n")
         scriptBuilder.append("add lbMonitorChannelReceiveSosieInformation : DistributedBroadcast\n")
@@ -163,7 +168,7 @@ class ModelGeneratorFromModel {
         scriptBuilder.append("add response : AsyncBroadcast\n")
 
 
-        var port = 9000
+        var port = 9001
 
         val reader = BufferedReader(FileReader(File(nodesConfigurationFile)))
         var line = reader.readLine()
@@ -179,9 +184,12 @@ class ModelGeneratorFromModel {
                 if (configuration[1].equalsIgnoreCase("javanode")) {
                     scriptBuilder.append("network ").append("diversify").append(configuration[0]).append("Child").append(i).append(".ip.lan ").append(configuration[2]).append("\n")
                 }
-                scriptBuilder.append("attach ").append("diversify").append(configuration[0]).append("Child").append(i).append(" broadcast\n")
-//                scriptBuilder.append("set ").append("broadcast.port = '1010'\n")
                 scriptBuilder.append("attach ").append("diversify").append(configuration[0]).append("Child").append(i).append(" sync\n")
+                // ack to define network information when we use JavaNode as hosting node
+                if (configuration[1].equalsIgnoreCase("javanode")) {
+                    scriptBuilder.append("set ").append("sync.port/").append("diversify").append(configuration[0]).append("Child").append(i).append(" = '").append(port).append("'\n")
+                    port++
+                }
             }
             line = reader.readLine()
         }
@@ -354,6 +362,19 @@ class ModelGeneratorFromModel {
 
                 if (modelUpdate) {
                     scriptBuilder.append("add ").append("diversify").append(configuration[0]).append("Child0").append(".sosieRandomModifier : SosieRandomModifier\n")
+                    scriptBuilder.append("set ").append("diversify").append(configuration[0]).append("Child0").append(".sosieRandomModifier.threshold = '35'\n")
+                    scriptBuilder.append("set ").append("diversify").append(configuration[0]).append("Child0").append(".sosieRandomModifier.availableSosies = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino15/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino15.zip\n" +
+                    "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino16/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino16.zip\n" +
+                    "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino4/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino4.zip\n" +
+                    "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino5/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino5.zip\n" +
+                    "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino8/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino8.zip\n" +
+                    "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino15/composed-sosie-1-indirection_on_Streamrhino15.zip\n" +
+                    "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino16/composed-sosie-1-indirection_on_Streamrhino16.zip\n" +
+                    "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino4/composed-sosie-1-indirection_on_Streamrhino4.zip\n" +
+                    "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino5/composed-sosie-1-indirection_on_Streamrhino5.zip\n" +
+                    "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip\n" +
+                    "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'\n")
+
                 }
             }
             line = reader.readLine()
