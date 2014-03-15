@@ -361,6 +361,7 @@ class ModelGeneratorFromModel {
                 scriptBuilder.append("bind ").append("diversify").append(configuration[0]).append("Child0").append(".lbMonitor.receiveSosieInformation lbMonitorChannelReceiveSosieInformation\n")
 
                 if (modelUpdate) {
+                    scriptBuilder.append("add notificationOnRequest : DistributedBroadcast\n")
                     scriptBuilder.append("add ").append("diversify").append(configuration[0]).append("Child0").append(".sosieRandomModifier : SosieRandomModifier\n")
                     scriptBuilder.append("set ").append("diversify").append(configuration[0]).append("Child0").append(".sosieRandomModifier.threshold = '35'\n")
                     scriptBuilder.append("set ").append("diversify").append(configuration[0]).append("Child0").append(".sosieRandomModifier.availableSosies = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino15/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino15.zip\n" +
@@ -374,6 +375,9 @@ class ModelGeneratorFromModel {
                     "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino5/composed-sosie-1-indirection_on_Streamrhino5.zip\n" +
                     "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip\n" +
                     "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'\n")
+
+                    scriptBuilder.append("bind ").append("diversify").append(configuration[0]).append("Child0").append(".sosieRandomModifier.notificationRequest notificationOnRequest\n")
+                    scriptBuilder.append("bind ").append("diversify").append(configuration[0]).append("Child0").append(".lbMonitor.notifyRequest notificationOnRequest\n")
 
                 }
             }
