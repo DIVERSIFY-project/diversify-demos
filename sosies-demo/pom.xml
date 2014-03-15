@@ -20,7 +20,6 @@
         <module>org.diversify.kevoree.sosie</module>
         <module>org.diversify.kevoree.loadBalancer</module>
         <module>org.diversify.kevoree.nginx</module>
-        <module>org.diversify.kevoree.manager</module>
         <module>org.diversify.kevoree.generator</module>
         <module>org.diversify.kevoree.modelSwitcher</module>
         <module>org.diversify.kevoree.deploy</module>
