@@ -52,7 +52,7 @@ public class WebSocketClient extends org.java_websocket.client.WebSocketClient {
 
     }
 
-    public synchronized boolean waitFor(ContainerRoot model, int timeout, int nbTry) {
+    public synchronized boolean waitFor(ContainerRoot model, long timeout, int nbTry) {
         while (!done && nbTry > 0) {
             this.model = null;
             try {
@@ -69,7 +69,7 @@ public class WebSocketClient extends org.java_websocket.client.WebSocketClient {
         return done;
     }
 
-    public synchronized boolean waitForIps(ContainerRoot model, List<ContainerNode> nodes, int timeout, int nbTry) {
+    public synchronized boolean waitForIps(ContainerRoot model, List<ContainerNode> nodes, long timeout, int nbTry) {
         while (!done && nbTry > 0) {
             this.model = null;
             this.send("pull");

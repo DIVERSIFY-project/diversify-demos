@@ -1,7 +1,5 @@
-/*
 package org.diversify.kevoree.deploy
 
-import java.net.URI
 import org.kevoree.ContainerNode
 import org.kevoree.ContainerRoot
 import org.kevoree.modeling.api.json.JSONModelSerializer
@@ -17,8 +15,8 @@ import org.kevoree.loader.JSONModelLoader
 import java.io.File
 import org.kevoree.cloner.DefaultModelCloner
 import org.kevoree.komponents.helpers.Reader
+import java.net.URI
 
-*/
 /**
  * User: Erwan Daubert - erwan.daubert@gmail.com
  * Date: 14/03/14
@@ -26,68 +24,118 @@ import org.kevoree.komponents.helpers.Reader
  *
  * @author Erwan Daubert
  * @version 1.0
- *//*
+ */
 
 fun main(args: Array<String>) {
 
-    val mavenResolver = MavenResolver()
-    val urls = HashSet<String>()
-    urls.add("http://sd-35000.dedibox.fr:8080/archiva/repository/internal/")
+    var local = args.find { arg -> arg.equalsIgnoreCase("local") }
+    var deploy = args.find { arg -> arg.equalsIgnoreCase("deploy") }
 
-    val modelSwitcher = mavenResolver.resolve("mvn:org.diversify:org.diversify.kevoree.modelSwitcher:latest", urls)
-    if (modelSwitcher != null && modelSwitcher.exists()) {
+    if (local == null) {
+        val mavenResolver = MavenResolver()
+        val urls = HashSet<String>()
+        urls.add("http://sd-35000.dedibox.fr:8080/archiva/repository/internal/")
 
-        var zipFile = ZipFile(modelSwitcher);
+        var modelSwitcher: File?
+        if (args.size == 1 && args.get(0).startsWith("mvn:")) {
+            modelSwitcher = mavenResolver.resolve(args.get(0), urls)
+        } else {
+            modelSwitcher = mavenResolver.resolve("mvn:org.diversify:org.diversify.kevoree.modelSwitcher:latest", urls)
+        }
 
-        val models = Array<String>(4, { i ->
-            getModel(i, zipFile)
-        })
+        if (modelSwitcher != null && modelSwitcher!!.exists()) {
+
+            var zipFile = ZipFile(modelSwitcher!!);
+
+            val models = Array<String>(4, { i ->
+                getModel(i, zipFile)
+            })
+
+            process(models, deploy != null)
+
+        }
+        System.exit(1);
+    } else {
+        var iaasModelPath = args.find { arg -> arg.startsWith("iaasModel=") }
+        var model1Path = args.find { arg -> arg.startsWith("model1=") }
+        var model2Path = args.find { arg -> arg.startsWith("model2=") }
+        var model3Path = args.find { arg -> arg.startsWith("model3=") }
+
+        if (iaasModelPath != null && model1Path != null && model2Path != null && model3Path != null) {
+            val models = array(iaasModelPath!!.substring("iaasModel=".length), model1Path!!.substring("model1=".length), model2Path!!.substring("model2=".length), model3Path!!.substring("model3=".length))
+            process(models, deploy != null)
+        } else {
+            System.err.println("Missing models");
+            System.exit(1)
+        }
+    }
+}
+
+fun process(models: Array<String>, deploy: Boolean) {
+    val iaasModel = JSONModelLoader().loadModelFromStream(FileInputStream(File(models.get(0))))?.get(0) as ContainerRoot
+    val model1 = JSONModelLoader().loadModelFromStream(FileInputStream(File(models.get(1))))?.get(0) as ContainerRoot
+    val model2 = JSONModelLoader().loadModelFromStream(FileInputStream(File(models.get(2))))?.get(0) as ContainerRoot
+    val model3 = JSONModelLoader().loadModelFromStream(FileInputStream(File(models.get(3))))?.get(0) as ContainerRoot
+
+    if (deploy) {
+        println("Deploying on iaas...")
+        sendModelToIaaS(iaasModel)
+    }
+
+    updateModel(model1, iaasModel)
+    updateModel(model2, iaasModel)
+    updateModel(model3, iaasModel)
+
+    val model1Configured = configureSystem(model1)
+    val model2Configured = configureSystem(model2)
+    val model3Configured = configureSystem(model3)
 
 
-        val iaasModel = JSONModelLoader().loadModelFromStream(FileInputStream(File(models.get(0).substring("model=".length).replaceAll(".kev$", "-iaas.kev"))))?.get(0) as ContainerRoot
-        val model1 = JSONModelLoader().loadModelFromStream(FileInputStream(File(models.get(1))))?.get(0) as ContainerRoot
-        val model2 = JSONModelLoader().loadModelFromStream(FileInputStream(File(models.get(2))))?.get(0) as ContainerRoot
-        val model3 = JSONModelLoader().loadModelFromStream(FileInputStream(File(models.get(3))))?.get(0) as ContainerRoot
-
-        updateModel(model1, iaasModel)
-        updateModel(model2, iaasModel)
-        updateModel(model3, iaasModel)
-
-        val model1Configured = configureSystem(model1)
-        val model2Configured = configureSystem(model2)
-        val model3Configured = configureSystem(model3)
+    val model1Started = startSosies(model1)
+    val model2Started = startSosies(model2)
+    val model3Started = startSosies(model3)
 
 
-        val model1Started = startSosies(model1)
-        val model2Started = startSosies(model2)
-        val model3Started = startSosies(model3)
+    val reader = BufferedReader(InputStreamReader(System.`in`))
 
-        val reader = BufferedReader(InputStreamReader(System.`in`))
-        var line = reader.readLine()
-        while (line != null) {
-            if (line!!.equalsIgnoreCase("quit")) {
-                System.exit(0)
-            } else {
-                if (line.equals("1")) {
-                    sendModel(model1)
-                    sendModelWithDelayForRoot(model1Configured)
-                    sendModel(model1Started)
-                } else if (line.equals("2")) {
-                    sendModel(model2)
-                    sendModelWithDelayForRoot(model2Configured)
-                    sendModel(model2Started)
-                } else if (line.equals("3")) {
-                    sendModel(model3)
-                    sendModelWithDelayForRoot(model3Configured)
-                    sendModel(model3Started)
-                } else {
-
-                }
-            }
+    println("Boot the system ? [yes, no]:")
+    var line = reader.readLine()
+    if (line.equals("yes")) {
+        sendModelToBootNodes(model1)
+        println("Is it OK ? [yes, no]:")
+        line = reader.readLine()
+        while (!line.equals("yes")) {
+            sendModelToBootNodes(model1)
+            println("Is it OK ? [yes, no]:")
             line = reader.readLine()
         }
     }
-    System.exit(1);
+
+    println("Select configuration [1, 2, 3, quit]:")
+    line = reader.readLine()
+    while (line != null) {
+        if (line!!.equalsIgnoreCase("quit")) {
+            System.exit(0)
+        } else {
+            if (line.equals("1")) {
+                sendModel(model1)
+                sendModelWithDelayForRoot(model1Configured)
+                sendModel(model1Started)
+            } else if (line.equals("2")) {
+                sendModel(model2)
+                sendModelWithDelayForRoot(model2Configured)
+                sendModel(model2Started)
+            } else if (line.equals("3")) {
+                sendModel(model3)
+                sendModelWithDelayForRoot(model3Configured)
+                sendModel(model3Started)
+            } else {
+
+            }
+        }
+        println("Select configuration [1, 2, 3]:")
+        line = reader.readLine()
+    }
 }
 
 fun getModel(i: Int, zipFile: ZipFile): String {
@@ -107,14 +155,21 @@ fun getModel(i: Int, zipFile: ZipFile): String {
 }
 
 fun updateModel(model: ContainerRoot, iaasModel: ContainerRoot) {
-    println("Starting deployment ...")
     val parentNodes = iaasModel.nodes.filter { node -> node.hosts.find { subNode -> subNode.name!!.startsWith("diversify") } != null }
 
     updateModelWithIps(model, parentNodes)
     updateModelForRedisServer(model)
 }
 
-fun sendModel(model: ContainerRoot) {
+fun sendModelToIaaS(model: ContainerRoot) {
+
+    val nodes = model.nodes.filter { node -> node.hosts.find { subNode -> subNode.name!!.startsWith("diversify") } != null }
+    while (!sendModel(model, nodes, 15, 10000)) {
+        Thread.sleep(500)
+    }
+}
+
+fun sendModelToBootNodes(model: ContainerRoot) {
 
     val nodes = model.nodes.filter { node -> node.name!!.startsWith("diversify") }
     while (!sendModel(model, nodes, 15, 10000)) {
@@ -122,21 +177,29 @@ fun sendModel(model: ContainerRoot) {
     }
 }
 
-fun sendModelWithDelayForRoot(model: ContainerRoot) {
+fun sendModel(model: ContainerRoot) {
 
     val nodes = model.nodes.filter { node -> node.name!!.startsWith("diversify") }
-    while (!sendModelWithDelayForRoot(model, nodes, 15, 10000)) {
+    while (!sendModel(model, nodes, 15, 1000)) {
         Thread.sleep(500)
     }
 }
 
-fun sendModel(model: ContainerRoot, nodes: List<ContainerNode>, nbTry: Int, delay: Int): Boolean {
+fun sendModelWithDelayForRoot(model: ContainerRoot) {
+
+    val nodes = model.nodes.filter { node -> node.name!!.startsWith("diversify") }
+    while (!sendModelWithDelayForRoot(model, nodes, 15, 10000, 1000)) {
+        Thread.sleep(500)
+    }
+}
+
+fun sendModel(model: ContainerRoot, nodes: List<ContainerNode>, nbTry: Int, delay: Long): Boolean {
     val modelString = JSONModelSerializer().serialize(model)
 
     if (modelString != null) {
         nodes.forEach { node ->
             sendModelToNode(node, modelString, nbTry)
-            Thread.sleep(2000)
+            Thread.sleep(delay)
         }
 
         return nodes.all { node ->
@@ -147,24 +210,24 @@ fun sendModel(model: ContainerRoot, nodes: List<ContainerNode>, nbTry: Int, dela
     }
 }
 
-fun sendModelWithDelayForRoot(model: ContainerRoot, nodes: List<ContainerNode>, nbTry: Int, delay: Int): Boolean {
+fun sendModelWithDelayForRoot(model: ContainerRoot, nodes: List<ContainerNode>, nbTry: Int, delayRoot: Long, delay : Long): Boolean {
     val modelString = JSONModelSerializer().serialize(model)
 
     if (modelString != null) {
         val rootNode = findRootNode(model)
         if (rootNode != null) {
             sendModelToNode(rootNode, modelString, nbTry)
-            if (!waitForAcknowledge(rootNode, model, nbTry, delay)) {
+            if (!waitForAcknowledge(rootNode, model, nbTry, delayRoot)) {
                 return false
             }
         }
 
-        Thread.sleep(2000)
+        Thread.sleep(delay)
 
         nodes.forEach { node ->
             if (rootNode == null || !rootNode.name.equals(node.name)) {
                 sendModelToNode(node, modelString, nbTry)
-                Thread.sleep(2000)
+                Thread.sleep(delay)
             }
         }
 
@@ -208,7 +271,7 @@ fun sendModelToNode(node: ContainerNode, modelString: String, nbTry: Int) {
     }
 }
 
-fun waitForAcknowledge(node: ContainerNode, model: ContainerRoot, nbTry: Int, delay: Int): Boolean {
+fun waitForAcknowledge(node: ContainerNode, model: ContainerRoot, nbTry: Int, delay: Long): Boolean {
     val port = getPort(node)
     var done = false
     getIps(node).all { ip ->
@@ -299,7 +362,7 @@ fun updateModelWithIps(model: ContainerRoot, parentNodes: List<ContainerNode>): 
 }
 
 fun getPort(node: ContainerNode): Int {
-    var group = node.groups.find { group -> group.name == "sync" }
+    var group = node.groups.find { group -> group.name.equals("sync") }
     if (group != null) {
         val fragmentDictionary = group!!.findFragmentDictionaryByID(node.name!!)
         if (fragmentDictionary != null) {
@@ -351,7 +414,7 @@ fun getIps(node: ContainerNode): List<String> {
         }
     }
     if (ips.size() == 0) {
-
+        ips.add("127.0.0.1")
     }
     return ips
-}*/
+}
