@@ -3,9 +3,6 @@ package org.diversify.kevoree.loadBalancer;
 import org.java_websocket.WebSocketImpl;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.kevoree.ContainerNode;
-import org.kevoree.NetworkInfo;
-import org.kevoree.NetworkProperty;
 import org.kevoree.annotation.*;
 import org.kevoree.api.Context;
 import org.kevoree.api.ModelService;
@@ -16,8 +13,6 @@ import org.thingml.lbmonitor.AbstractLogReader;
 import org.thingml.lbmonitor.LBWebSocketServer;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * User: Erwan Daubert - erwan.daubert@gmail.com
@@ -61,11 +56,13 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
 //        System.out.println(InetAddress.getByName(serverName).getHostAddress());
         KevoreeLBMonitorWebContentExtractor.getInstance().extractConfiguration(folderWhereExtract.getAbsolutePath(), true);
         KevoreeLBMonitorWebContentExtractor.getInstance().replaceFileString("localhost:8099", serverName + ":80/client/ws", folderWhereExtract.getAbsolutePath());
-        KevoreeLBMonitorWebContentExtractor.getInstance().replaceServerAndPortString("localhost", serverName , "8099", "80/client/ws", folderWhereExtract.getAbsolutePath());
+        KevoreeLBMonitorWebContentExtractor.getInstance().replaceServerAndPortString("localhost", serverName, "8099", "80/client/ws", folderWhereExtract.getAbsolutePath());
 
         WebSocketImpl.DEBUG = false;
         server = new LBWebSocketServer(port);
         server.start();
+
+        new File(logFile).delete();
 
         Log.info("[LBWebSocketServer] Server started on port {}", server.getPort());
     }
@@ -81,28 +78,6 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
         KevoreeLBMonitorWebContentExtractor.getInstance().deleteConfiguration(pathWhereExtract);
     }
 
-    private List<String> getIps() {
-        List<String> ips = new ArrayList<String>();
-        if (modelService.getPendingModel() != null) {
-            ContainerNode node = modelService.getPendingModel().findNodesByID(context.getNodeName());
-            if (node != null) {
-                for (NetworkInfo networkInfo : node.getNetworkInformation()) {
-                    for (NetworkProperty networkProperty : networkInfo.getValues()) {
-                        if (networkInfo.getName().equalsIgnoreCase("ip") || networkProperty.getName().equalsIgnoreCase("ip")) {
-                            ips.add(networkProperty.getValue());
-                        }
-                    }
-                }
-            } else {
-                Log.warn("{}: Unable to find the current node in current model", context.getInstanceName());
-            }
-        } else {
-            Log.warn("{}: Unable to get current model from ModelService", context.getInstanceName());
-        }
-        return ips;
-    }
-
-
     @Override
     public void modelUpdated() {
         modelService.unregisterModelListener(this);
@@ -111,9 +86,9 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
     }
 
     @Input(optional = false)
-    public void receiveSosieInformation(Object result) {
+    public synchronized void receiveSosieInformation(Object result) {
         Log.warn("Receive information from a sosie");
-        if (result instanceof String ){
+        if (result instanceof String) {
             //register file corresponding to the sosie
             try {
                 JSONObject jsonReader = new JSONObject(result.toString());
@@ -124,8 +99,17 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
                 stream.flush();
                 stream.close();
 
-                Log.warn("Information about the sosie stored on {}", pathWhereExtract +File.separator + "client" +  File.separator + nodeId + ".txt");
-            } catch (JSONException ignored) {} catch (FileNotFoundException ignored) {} catch (UnsupportedEncodingException ignored) {} catch (IOException ignored) {}
+                Log.warn("Information about the sosie stored on {}", pathWhereExtract + File.separator + "client" + File.separator + nodeId + ".txt");
+                server.sendToAll("update=" + nodeId);
+            } catch (JSONException ignored) {
+                ignored.printStackTrace();
+            } catch (FileNotFoundException ignored) {
+                ignored.printStackTrace();
+            } catch (UnsupportedEncodingException ignored) {
+                ignored.printStackTrace();
+            } catch (IOException ignored) {
+                ignored.printStackTrace();
+            }
         }
     }
 
@@ -144,25 +128,27 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
             while (reader == null) {
                 try {
                     reader = new BufferedReader(new FileReader(new File(logFilePath)));
-                } catch (FileNotFoundException ignored) {
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException ignored1) {
-                    }
+                } catch (FileNotFoundException ignored) {}
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException ignored1) {
                 }
             }
-
             while (!stop) {
                 try {
                     while (reader.ready()) {
                         String content = reader.readLine();
-                        if (!content.split(";")[2].trim().equals("-")) {
-                            String[] hosts = content.split(";")[2].trim().split(",");
-                            for (String host : hosts) {
-                                String toSend = content.replace(content.split(";")[2], host);
-                                notifyRequest.send(toSend);
-                                server.sendToAll(toSend);
+                        try {
+                            if (content.split(";").length >= 2 && !content.split(";")[2].trim().equals("-")) {
+                                String[] hosts = content.split(";")[2].trim().split(",");
+                                for (String host : hosts) {
+                                    String toSend = content.replace(content.split(";")[2], host);
+                                    notifyRequest.send(toSend);
+                                    server.sendToAll(toSend);
+                                }
                             }
+                        } catch (Throwable ignored) {
+                            ignored.printStackTrace();
                         }
                     }
                 } catch (IOException ignored) {
