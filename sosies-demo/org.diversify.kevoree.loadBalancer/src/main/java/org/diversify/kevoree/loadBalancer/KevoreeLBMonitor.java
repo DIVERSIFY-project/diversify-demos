@@ -142,9 +142,11 @@ public class KevoreeLBMonitor extends ModelListenerAdapter {
                             if (content.split(";").length >= 2 && !content.split(";")[2].trim().equals("-")) {
                                 String[] hosts = content.split(";")[2].trim().split(",");
                                 for (String host : hosts) {
+                                    if (!host.startsWith("127.0.0")) {
                                     String toSend = content.replace(content.split(";")[2], host);
                                     notifyRequest.send(toSend);
                                     server.sendToAll(toSend);
+                                    }
                                 }
                             }
                         } catch (Throwable ignored) {
