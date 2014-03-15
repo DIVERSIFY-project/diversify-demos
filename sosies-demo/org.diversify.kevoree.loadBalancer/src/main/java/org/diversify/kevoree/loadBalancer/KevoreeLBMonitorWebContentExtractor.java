@@ -1,6 +1,7 @@
 package org.diversify.kevoree.loadBalancer;
 
 import org.apache.commons.io.IOUtils;
+import org.kevoree.log.Log;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -90,7 +91,9 @@ public class KevoreeLBMonitorWebContentExtractor {
         if (folder.isDirectory()) {
             for (File file : folder.listFiles()) {
                 if (file.isFile()) {
-                    file.delete();
+                    if (!file.delete()) {
+                        Log.warn("Unable to delete {}", file.getAbsolutePath());
+                    }
                 } else {
                     deleteConfiguration(file.getAbsolutePath());
                 }
