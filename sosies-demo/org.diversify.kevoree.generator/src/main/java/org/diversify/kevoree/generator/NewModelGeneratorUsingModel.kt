@@ -22,6 +22,8 @@ import java.io.FileInputStream
  * @version 1.0
  */
 class ModelGeneratorFromModel {
+
+    val kevoreeLibraryVersion = "3.5.1"
     fun main(args: Array<String>) {
         var baseModelFile = args.find { arg -> arg.startsWith("model=") }
         var nodesConfigurationFile = args.find { arg -> arg.startsWith("nodes=") }
@@ -94,9 +96,9 @@ class ModelGeneratorFromModel {
         scriptBuilder.append("repo 'http://oss.sonatype.org/content/groups/public/'\n")
         scriptBuilder.append("repo 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/'\n")
 
-        scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:3.4.2-SNAPSHOT\n")
-        scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lxc:3.4.2-SNAPSHOT\n")
-        scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:3.4.2-SNAPSHOT\n")
+        scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:$kevoreeLibraryVersion\n")
+        scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lxc:$kevoreeLibraryVersion\n")
+        scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:$kevoreeLibraryVersion\n")
 
         if (baseModel.findGroupsByID("sync") == null) {
             scriptBuilder.append("add ").append("sync : WSGroup\n")
@@ -134,24 +136,23 @@ class ModelGeneratorFromModel {
 
         scriptBuilder.append("repo 'http://oss.sonatype.org/content/groups/public/'\n")
         scriptBuilder.append("repo 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/'\n")
+        scriptBuilder.append("repo 'http://maven.reacloud.com/repository/reacloud/snapshots/'\n")
 
-        scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:3.4.2-SNAPSHOT\n")
-        scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.hazelcast:3.4.2-SNAPSHOT\n")
-        scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lxc:3.4.2-SNAPSHOT\n")
-        scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:3.4.2-SNAPSHOT\n")
-        scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.system:3.4.2-SNAPSHOT\n")
-        scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.hazelcast:3.4.2-SNAPSHOT\n")
-        scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:3.4.2-SNAPSHOT\n")
+        scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:$kevoreeLibraryVersion\n")
+        scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.hazelcast:$kevoreeLibraryVersion\n")
+        scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lxc:$kevoreeLibraryVersion\n")
+        scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:$kevoreeLibraryVersion\n")
+        scriptBuilder.append("include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.system:$kevoreeLibraryVersion\n")
+        scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.hazelcast:$kevoreeLibraryVersion\n")
+        scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:$kevoreeLibraryVersion\n")
 
-        scriptBuilder.append("include mvn:org.kevoree.komponents:http-netty:latest\n")
 
         scriptBuilder.append("include mvn:org.diversify.demo:kevoree-utils-xtend:latest\n")
         scriptBuilder.append("include mvn:org.diversify:org.diversify.kevoree.nginx:latest\n")
         scriptBuilder.append("include mvn:org.diversify:org.diversify.kevoree.loadBalancer:latest\n")
+        scriptBuilder.append("include mvn:org.diversify:org.diversify.kevoree.sosie:latest\n");
 
-        //scriptBuilder.append("include mvn:org.diversify:org.diversify.kevoree.watchdog:1.0.0-SNAPSHOT\n") // latest must be used but doesn't work. I think the index on sd-35000 repository is not efficient
         scriptBuilder.append("include mvn:org.diversify:org.diversify.kevoree.manager:latest\n")
-        //        scriptBuilder.append("include mvn:org.diversify:org.diversify.kevoree.generator:latest\n")
 
         scriptBuilder.append("add ").append("broadcast : BroadcastGroup\n")
 
@@ -179,6 +180,7 @@ class ModelGeneratorFromModel {
                     scriptBuilder.append("network ").append("diversify").append(configuration[0]).append("Child").append(i).append(".ip.lan ").append(configuration[2]).append("\n")
                 }
                 scriptBuilder.append("attach ").append("diversify").append(configuration[0]).append("Child").append(i).append(" broadcast\n")
+//                scriptBuilder.append("set ").append("broadcast.port = '1010'\n")
                 scriptBuilder.append("attach ").append("diversify").append(configuration[0]).append("Child").append(i).append(" sync\n")
             }
             line = reader.readLine()
@@ -349,29 +351,6 @@ class ModelGeneratorFromModel {
                 scriptBuilder.append("set ").append("diversify").append(configuration[0]).append("Child0").append(".lbMonitor.serverName = 'cloud.diversify-project.eu'\n")
                 // here we can specify the port and logFile for lbMonitor
                 scriptBuilder.append("bind ").append("diversify").append(configuration[0]).append("Child0").append(".lbMonitor.receiveSosieInformation lbMonitorChannelReceiveSosieInformation\n")
-
-
-
-                scriptBuilder.append("add ").append("diversify").append(configuration[0]).append("Child0").append(".webserver : NettyHTTPServer\n")
-                scriptBuilder.append("set ").append("diversify").append(configuration[0]).append("Child0").append(".webserver.port = '7999'\n")
-
-                scriptBuilder.append("add ").append("diversify").append(configuration[0]).append("Child0").append(".restarter : DemoManager\n")
-                scriptBuilder.append("set ").append("diversify").append(configuration[0]).append("Child0").append(".restarter.componentTypes = 'SosieRunner'\n")
-
-
-                scriptBuilder.append("add ").append("diversify").append(configuration[0]).append("Child0").append(".favicon : FaviconHandler\n")
-                scriptBuilder.append("set ").append("diversify").append(configuration[0]).append("Child0").append(".favicon.urlPattern = '/favicon.*'\n")
-                scriptBuilder.append("set ").append("diversify").append(configuration[0]).append("Child0").append(".favicon.favicon = 'favicon.png'\n")
-
-
-                scriptBuilder.append("bind ").append("diversify").append(configuration[0]).append("Child0").append(".webserver.request request\n")
-                scriptBuilder.append("bind ").append("diversify").append(configuration[0]).append("Child0").append(".webserver.response response\n")
-
-                scriptBuilder.append("bind ").append("diversify").append(configuration[0]).append("Child0").append(".favicon.request request\n")
-                scriptBuilder.append("bind ").append("diversify").append(configuration[0]).append("Child0").append(".favicon.content response\n")
-
-                scriptBuilder.append("bind ").append("diversify").append(configuration[0]).append("Child0").append(".restarter.request request\n")
-                scriptBuilder.append("bind ").append("diversify").append(configuration[0]).append("Child0").append(".restarter.content response\n")
 
                 if (modelUpdate) {
                     scriptBuilder.append("add ").append("diversify").append(configuration[0]).append("Child0").append(".sosieRandomModifier : SosieRandomModifier\n")
