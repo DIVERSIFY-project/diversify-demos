@@ -11,8 +11,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.version>0.6.1673</kotlin.version>
-        <kevoree.version>3.4.2-SNAPSHOT</kevoree.version>
-        <kevoree.library.version>3.4.2-SNAPSHOT</kevoree.library.version>
+        <kevoree.version>3.5.4</kevoree.version>
+        <kevoree.library.version>3.5.1</kevoree.library.version>
         <komponents.version>1.1.0-SNAPSHOT</komponents.version>
     </properties>
 
@@ -23,8 +23,7 @@
         <module>org.diversify.kevoree.manager</module>
         <module>org.diversify.kevoree.generator</module>
         <module>org.diversify.kevoree.modelSwitcher</module>
-        <module>org.diversify.kevore.deploy</module>
-        <!--<module>org.diversify.kevoree.watchdog</module>-->
+        <module>org.diversify.kevoree.deploy</module>
     </modules>
 
     <dependencies>
@@ -85,6 +84,27 @@
             <id>kevoree.oss.snapshots</id>
             <name>kevoree-snapshots</name>
             <url>http://oss.sonatype.org/content/groups/public/</url>
+        </repository>
+
+        <repository>
+            <id>reacloud-release</id>
+            <url>http://maven.reacloud.com/repository/reacloud/releases</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>reacloud-snapshot</id>
+            <url>http://maven.reacloud.com/repository/reacloud/snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
     </repositories>
 
