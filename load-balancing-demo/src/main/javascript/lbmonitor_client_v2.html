@@ -88,17 +88,14 @@ function get_color_for_component(component_name) {
     if (colors[component_name] == null || colors[component_name] == undefined) {
         colors[component_name] = get_random_color();
     }
-    console.log(colors[component_name]);
     return colors[component_name];
 }
 
 function update_color_for_component(component_name) {
-    console.log(colors[component_name]);
     colors[component_name] = get_random_color();
-    console.log(colors[component_name]);
 }
 
-function rand(min, max) {
+/*function rand(min, max) {
     var random = parseInt(Math.random() * (max - min + 1), 10) + min;
     return random
 }
@@ -108,6 +105,11 @@ function get_random_color() {
     var s = rand(30, 100); // saturation 30-100%
     var l = rand(30, 70); // lightness 30-70%
     return 'hsl(' + h + ',' + s + '%,' + l + '%)';
+}*/
+
+
+function get_random_color() {
+    return '#' + ('00000' + (Math.random() * 16777216 << 0).toString(16)).substr(-6);
 }
 
 /**********************************************************************
@@ -131,7 +133,7 @@ function srv_component_color(obj_id, num, color) {
 function srv_blink_activity_led(obj_id) {
     srv_activity_led_color(obj_id, "red");
     setTimeout(function () {
-        srv_activity_led_color(obj_id, "grey")
+        srv_activity_led_color(obj_id, "grey");
     }, 750);
 
 }
@@ -177,7 +179,7 @@ function add_server(srv_addr, srv_id) {
         'left': posx
     });
 
-    // Put the peices in the document
+    // Put the pieces in the document
     newNode.append(image);
     $('#container').append(newNode);
 
@@ -378,7 +380,6 @@ function handle_server_hit(time, src_addr, srv_addr, resp_time, request) {
     else {
         servers[srv_id]++;
         srv_blink_activity_led(srv_id);
-        console.log(srv_id);
         if (jQuery.inArray(srv_id, updateComponents) != -1) {
             update_server(srv_id);
             updateComponents = updateComponents.filter(function (id) {
@@ -408,6 +409,7 @@ function handle_server_hit(time, src_addr, srv_addr, resp_time, request) {
     }
     log_to_console(log);
 }
+
 </script>
 </body>
 </html>
