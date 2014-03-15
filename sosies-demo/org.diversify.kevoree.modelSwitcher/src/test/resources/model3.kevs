@@ -1,0 +1,220 @@
+repo 'http://oss.sonatype.org/content/groups/public/'
+repo 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/'
+repo 'http://maven.reacloud.com/repository/reacloud/snapshots/'
+include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:3.5.1
+include mvn:org.kevoree.library.java:org.kevoree.library.java.hazelcast:3.5.1
+include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lxc:3.5.1
+include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:3.5.1
+include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.system:3.5.1
+include mvn:org.kevoree.library.java:org.kevoree.library.java.hazelcast:3.5.1
+include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:3.5.1
+include mvn:org.diversify.demo:kevoree-utils-xtend:latest
+include mvn:org.diversify:org.diversify.kevoree.nginx:latest
+include mvn:org.diversify:org.diversify.kevoree.loadBalancer:latest
+include mvn:org.diversify:org.diversify.kevoree.sosie:latest
+add sync : WSGroup
+add nginxChannel : UselessChannel
+add lbMonitorChannelReceiveSosieInformation : DistributedBroadcast
+add request : AsyncBroadcast
+add response : AsyncBroadcast
+add diversifynode0Child2 : JavaNode
+set diversifynode0Child2.log = 'trace'
+network diversifynode0Child2.ip.lan 131.254.14.25
+attach diversifynode0Child2 sync
+set sync.port/diversifynode0Child2 = '9001'
+add diversifynode0Child1 : JavaNode
+set diversifynode0Child1.log = 'trace'
+network diversifynode0Child1.ip.lan 131.254.14.25
+attach diversifynode0Child1 sync
+set sync.port/diversifynode0Child1 = '9002'
+add diversifynode0Child0 : JavaNode
+set diversifynode0Child0.log = 'trace'
+network diversifynode0Child0.ip.lan 131.254.14.25
+attach diversifynode0Child0 sync
+set sync.port/diversifynode0Child0 = '9003'
+add diversifynode0Child0.nginx : NginxConfigurator
+bind diversifynode0Child0.nginx.useless nginxChannel
+set diversifynode0Child0.nginx.servers = '###############################################################################
+# Definition of the load balancer front-end
+###############################################################################
+server {
+   listen 80;
+   server_name localhost;
+   access_log /tmp/loadbalancerclient/proxy.log proxy; #proxy refers to the log format defined in nginx.conf
+   location / {
+       proxy_pass http://backend;
+       # These are the option for websockets (need nginx >= v1.3.13)
+       proxy_set_header X-Real-IP $remote_addr;
+       proxy_set_header Host $host;
+       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+       proxy_http_version 1.1;
+       proxy_set_header Upgrade $http_upgrade;
+       proxy_set_header Connection "upgrade";
+   }
+   location /client {
+       root /tmp/loadbalancerclient;
+       autoindex on;
+   }
+   location /client/ws {
+       proxy_pass http://localhost:8099;
+       # These are the option for websockets (need nginx >= v1.3.13)
+       proxy_set_header X-Real-IP $remote_addr;
+       proxy_set_header Host $host;
+       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+       proxy_http_version 1.1;
+       proxy_set_header Upgrade $http_upgrade;
+       proxy_set_header Connection "upgrade";
+   }
+}'
+set diversifynode0Child0.nginx.started = 'false'
+add diversifynode0Child0.softwareInstaller : ScriptRunner
+set diversifynode0Child0.softwareInstaller.startScript = 'apt-get update
+apt-get install nginx redis-server git --no-install-recommends -y
+cat > /etc/nginx/nginx.conf << EOF
+user www-data;
+worker_processes 4;
+pid /run/nginx.pid;
+events {
+worker_connections 768;
+# multi_accept on;
+}
+http {
+set_real_ip_from 10.0.0.0/8;
+real_ip_header X-Forwarded-For;
+##
+# Basic Settings
+##
+sendfile on;
+tcp_nopush on;
+tcp_nodelay on;
+keepalive_timeout 65;
+types_hash_max_size 2048;
+# server_tokens off;
+# server_names_hash_bucket_size 64;
+# server_name_in_redirect off;
+include /etc/nginx/mime.types;
+default_type application/octet-stream;
+##
+# Logging Settings
+##
+access_log /var/log/nginx/access.log;
+error_log /var/log/nginx/error.log;
+log_format proxy \'[\\$time_local]; \\$remote_addr; \\$upstream_addr; \\$upstream_response_time; \\$request; \\$remote_user;\'
+##
+# Gzip Settings
+##
+gzip on;
+gzip_disable "msie6";
+include /etc/nginx/conf.d/*.conf;
+include /etc/nginx/sites-enabled/*;
+}
+EOF
+rm -rf /etc/nginx/sites-enabled/default
+cat > \'/etc/redis/redis.conf\' << EOF
+daemonize yes
+pidfile /var/run/redis/redis-server.pid
+port 6379
+# If you want you can bind a single interface, if the bind option is not
+# specified all the interfaces will listen for incoming connections.
+#
+bind {redis-ip}
+timeout 0
+tcp-keepalive 60
+loglevel notice
+logfile /var/log/redis/redis-server.log
+databases 16
+save 900 1
+save 300 10
+save 60 10000
+stop-writes-on-bgsave-error yes
+rdbcompression yes
+rdbchecksum yes
+dbfilename dump.rdb
+dir /var/lib/redis
+slave-serve-stale-data yes
+slave-read-only yes
+repl-disable-tcp-nodelay no
+slave-priority 100
+maxclients 10000
+appendonly no
+appendfsync everysec
+no-appendfsync-on-rewrite no
+auto-aof-rewrite-percentage 100
+auto-aof-rewrite-min-size 64mb
+lua-time-limit 5000
+slowlog-log-slower-than 10000
+slowlog-max-len 128
+hash-max-ziplist-entries 512
+hash-max-ziplist-value 64
+list-max-ziplist-entries 512
+list-max-ziplist-value 64
+set-max-intset-entries 512
+zset-max-ziplist-entries 128
+zset-max-ziplist-value 64
+activerehashing yes
+client-output-buffer-limit normal 0 0 0
+client-output-buffer-limit slave 256mb 64mb 60
+client-output-buffer-limit pubsub 32mb 8mb 60
+hz 50
+aof-rewrite-incremental-fsync yes
+EOF
+/etc/init.d/redis-server restart
+wget "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip" --content-disposition -O "/tmp/sosie.zip"
+tar -xvf "/tmp/sosie.zip" -C "/tmp/"
+rm -rf "/tmp/sosie.zip"
+cd "/tmp/"
+rm -rf mdms
+git config --system http.sslVerify false
+git clone https://github.com/maxleiko/mdms-ringojs.git mdms
+redis-cli -h {redis-ip} -p 6379 FLUSHDB
+rm "/tmp/mdms/config.json"
+cat > "/tmp/mdms/config.json" << EOF
+{
+    "redis-server": "{redis-ip}",
+    "redis-port":   6379
+}
+EOF
+/tmp/ringojs-0.10/bin/ringo /tmp/mdms/tools/fakedb.js'
+set diversifynode0Child0.softwareInstaller.started = 'false'
+add diversifynode0Child0.lbMonitor : KevoreeLBMonitor
+set diversifynode0Child0.lbMonitor.serverName = 'cloud.diversify-project.eu'
+bind diversifynode0Child0.lbMonitor.receiveSosieInformation lbMonitorChannelReceiveSosieInformation
+add notificationOnRequest : DistributedBroadcast
+add diversifynode0Child0.sosieRandomModifier : SosieRandomModifier
+set diversifynode0Child0.sosieRandomModifier.threshold = '35'
+set diversifynode0Child0.sosieRandomModifier.availableSosies = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino15/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino15.zip
+http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino16/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino16.zip
+http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino4/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino4.zip
+http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino5/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino5.zip
+http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino8/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino8.zip
+http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino15/composed-sosie-1-indirection_on_Streamrhino15.zip
+http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino16/composed-sosie-1-indirection_on_Streamrhino16.zip
+http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino4/composed-sosie-1-indirection_on_Streamrhino4.zip
+http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino5/composed-sosie-1-indirection_on_Streamrhino5.zip
+http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip
+http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
+bind diversifynode0Child0.sosieRandomModifier.notificationRequest notificationOnRequest
+bind diversifynode0Child0.lbMonitor.notifyRequest notificationOnRequest
+include mvn:org.diversify:org.diversify.kevoree.sosie:latest
+add diversifynode0Child2.factory_and_indirection_on_RhinoEnginerhino15diversifynode0Child20 : SosieRunner
+set diversifynode0Child2.factory_and_indirection_on_RhinoEnginerhino15diversifynode0Child20.started = 'false'
+set diversifynode0Child2.factory_and_indirection_on_RhinoEnginerhino15diversifynode0Child20.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino15/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino15.zip'
+set diversifynode0Child2.factory_and_indirection_on_RhinoEnginerhino15diversifynode0Child20.port = '8080'
+set diversifynode0Child2.factory_and_indirection_on_RhinoEnginerhino15diversifynode0Child20.redisServer = '131.254.14.25'
+bind diversifynode0Child2.factory_and_indirection_on_RhinoEnginerhino15diversifynode0Child20.useless nginxChannel
+bind diversifynode0Child2.factory_and_indirection_on_RhinoEnginerhino15diversifynode0Child20.sendSosieInformation lbMonitorChannelReceiveSosieInformation
+add diversifynode0Child2.softwareInstaller : ScriptRunner
+set diversifynode0Child2.softwareInstaller.startScript = 'apt-get update
+apt-get install git --no-install-recommends -y'
+set diversifynode0Child2.softwareInstaller.started = 'false'
+add diversifynode0Child1.factory_and_indirection_on_RhinoEnginerhino16diversifynode0Child11 : SosieRunner
+set diversifynode0Child1.factory_and_indirection_on_RhinoEnginerhino16diversifynode0Child11.started = 'false'
+set diversifynode0Child1.factory_and_indirection_on_RhinoEnginerhino16diversifynode0Child11.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino16/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino16.zip'
+set diversifynode0Child1.factory_and_indirection_on_RhinoEnginerhino16diversifynode0Child11.port = '8080'
+set diversifynode0Child1.factory_and_indirection_on_RhinoEnginerhino16diversifynode0Child11.redisServer = '131.254.14.25'
+bind diversifynode0Child1.factory_and_indirection_on_RhinoEnginerhino16diversifynode0Child11.useless nginxChannel
+bind diversifynode0Child1.factory_and_indirection_on_RhinoEnginerhino16diversifynode0Child11.sendSosieInformation lbMonitorChannelReceiveSosieInformation
+add diversifynode0Child1.softwareInstaller : ScriptRunner
+set diversifynode0Child1.softwareInstaller.startScript = 'apt-get update
+apt-get install git --no-install-recommends -y'
+set diversifynode0Child1.softwareInstaller.started = 'false'

@@ -62,20 +62,19 @@
                         </goals>
                         <configuration>
                             <executable>java</executable>
-                            <!--<mainClass>org.diversify.kevoree.generator.ModelGenerator</mainClass>-->
                             <arguments>
                                 <argument>-jar</argument>
                                 <argument>
                                     ${project.basedir}/../org.diversify.kevoree.generator/target/org.diversify.kevoree.generator-1.0.0-SNAPSHOT.jar
                                 </argument>
                                 <argument>
-                                    model=${project.basedir}/../org.diversify.kevoree.sosie/scripts/demo_configuration/iaasModel.json
+                                    model=${project.basedir}/../src/main/resources/scripts/demo_configuration/iaasModel.json
                                 </argument>
                                 <argument>
-                                    nodes=${project.basedir}/../org.diversify.kevoree.sosie/scripts/demo_configuration/model1/nodes_configurations
+                                    nodes=${project.basedir}/../src/main/resources/scripts/demo_configuration/model1/nodes_configurations
                                 </argument>
                                 <argument>
-                                    sosies=${project.basedir}/../org.diversify.kevoree.sosie/scripts/demo_configuration/model1/selected_configurations
+                                    sosies=${project.basedir}/../src/main/resources/scripts/demo_configuration/model1/selected_configurations
                                 </argument>
                                 <argument>
                                     outputScript=${project.basedir}/src/main/resources/model1.kevs
@@ -94,20 +93,19 @@
                         </goals>
                         <configuration>
                             <executable>java</executable>
-                            <!--<mainClass>org.diversify.kevoree.generator.ModelGenerator</mainClass>-->
                             <arguments>
                                 <argument>-jar</argument>
                                 <argument>
                                     ${project.basedir}/../org.diversify.kevoree.generator/target/org.diversify.kevoree.generator-1.0.0-SNAPSHOT.jar
                                 </argument>
                                 <argument>
-                                    model=${project.basedir}/../org.diversify.kevoree.sosie/scripts/demo_configuration/iaasModel.json
+                                    model=${project.basedir}/../src/main/resources/scripts/demo_configuration/iaasModel.json
                                 </argument>
                                 <argument>
-                                    nodes=${project.basedir}/../org.diversify.kevoree.sosie/scripts/demo_configuration/model2/nodes_configurations
+                                    nodes=${project.basedir}/../src/main/resources/scripts/demo_configuration/model2/nodes_configurations
                                 </argument>
                                 <argument>
-                                    sosies=${project.basedir}/../org.diversify.kevoree.sosie/scripts/demo_configuration/model2/selected_configurations
+                                    sosies=${project.basedir}/../src/main/resources/scripts/demo_configuration/model2/selected_configurations
                                 </argument>
                                 <argument>
                                     outputScript=${project.basedir}/src/main/resources/model2.kevs
@@ -126,20 +124,19 @@
                         </goals>
                         <configuration>
                             <executable>java</executable>
-                            <!--<mainClass>org.diversify.kevoree.generator.ModelGenerator</mainClass>-->
                             <arguments>
                                 <argument>-jar</argument>
                                 <argument>
                                     ${project.basedir}/../org.diversify.kevoree.generator/target/org.diversify.kevoree.generator-1.0.0-SNAPSHOT.jar
                                 </argument>
                                 <argument>
-                                    model=${project.basedir}/../org.diversify.kevoree.sosie/scripts/demo_configuration/iaasModel.json
+                                    model=${project.basedir}/../src/main/resources/scripts/demo_configuration/iaasModel.json
                                 </argument>
                                 <argument>
-                                    nodes=${project.basedir}/../org.diversify.kevoree.sosie/scripts/demo_configuration/model3/nodes_configurations
+                                    nodes=${project.basedir}/../src/main/resources/scripts/demo_configuration/model3/nodes_configurations
                                 </argument>
                                 <argument>
-                                    sosies=${project.basedir}/../org.diversify.kevoree.sosie/scripts/demo_configuration/model3/selected_configurations
+                                    sosies=${project.basedir}/../src/main/resources/scripts/demo_configuration/model3/selected_configurations
                                 </argument>
                                 <argument>
                                     outputScript=${project.basedir}/src/main/resources/model3.kevs
@@ -147,6 +144,101 @@
                                 <argument>
                                     outputModel=${project.basedir}/src/main/resources/model3.kev
                                 </argument>
+                                <argument>modelUpdater=true</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-test-model1</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>java</executable>
+                            <arguments>
+                                <argument>-jar</argument>
+                                <argument>
+                                    ${project.basedir}/../org.diversify.kevoree.generator/target/org.diversify.kevoree.generator-1.0.0-SNAPSHOT.jar
+                                </argument>
+                                <argument>
+                                    model=${project.basedir}/../src/main/resources/scripts/demo_test_configuration/iaasModel.json
+                                </argument>
+                                <argument>
+                                    nodes=${project.basedir}/../src/main/resources/scripts/demo_test_configuration/model1/nodes_configurations
+                                </argument>
+                                <argument>
+                                    sosies=${project.basedir}/../src/main/resources/scripts/demo_test_configuration/model1/selected_configurations
+                                </argument>
+                                <argument>
+                                    outputScript=${project.basedir}/src/test/resources/model1.kevs
+                                </argument>
+                                <argument>
+                                    outputModel=${project.basedir}/src/test/resources/model1.kev
+                                </argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-test-model2</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>java</executable>
+                            <arguments>
+                                <argument>-jar</argument>
+                                <argument>
+                                    ${project.basedir}/../org.diversify.kevoree.generator/target/org.diversify.kevoree.generator-1.0.0-SNAPSHOT.jar
+                                </argument>
+                                <argument>
+                                    model=${project.basedir}/../src/main/resources/scripts/demo_test_configuration/iaasModel.json
+                                </argument>
+                                <argument>
+                                    nodes=${project.basedir}/../src/main/resources/scripts/demo_test_configuration/model2/nodes_configurations
+                                </argument>
+                                <argument>
+                                    sosies=${project.basedir}/../src/main/resources/scripts/demo_test_configuration/model2/selected_configurations
+                                </argument>
+                                <argument>
+                                    outputScript=${project.basedir}/src/test/resources/model2.kevs
+                                </argument>
+                                <argument>
+                                    outputModel=${project.basedir}/src/test/resources/model2.kev
+                                </argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-test-model3</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>java</executable>
+                            <arguments>
+                                <argument>-jar</argument>
+                                <argument>
+                                    ${project.basedir}/../org.diversify.kevoree.generator/target/org.diversify.kevoree.generator-1.0.0-SNAPSHOT.jar
+                                </argument>
+                                <argument>
+                                    model=${project.basedir}/../src/main/resources/scripts/demo_test_configuration/iaasModel.json
+                                </argument>
+                                <argument>
+                                    nodes=${project.basedir}/../src/main/resources/scripts/demo_test_configuration/model3/nodes_configurations
+                                </argument>
+                                <argument>
+                                    sosies=${project.basedir}/../src/main/resources/scripts/demo_test_configuration/model3/selected_configurations
+                                </argument>
+                                <argument>
+                                    outputScript=${project.basedir}/src/test/resources/model3.kevs
+                                </argument>
+                                <argument>
+                                    outputModel=${project.basedir}/src/test/resources/model3.kev
+                                </argument>
+                                <argument>modelUpdater=true</argument>
                             </arguments>
                         </configuration>
                     </execution>

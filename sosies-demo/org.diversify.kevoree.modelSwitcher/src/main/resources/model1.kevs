@@ -1,18 +1,17 @@
 repo 'http://oss.sonatype.org/content/groups/public/'
 repo 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/'
-include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest
-include mvn:org.kevoree.library.java:org.kevoree.library.java.hazelcast:latest
-include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lxc:latest
-include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:latest
-include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.system:latest
-include mvn:org.kevoree.library.java:org.kevoree.library.java.hazelcast:latest
-include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:latest
-include mvn:org.kevoree.komponents:http-netty:latest
+repo 'http://maven.reacloud.com/repository/reacloud/snapshots/'
+include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:3.5.1
+include mvn:org.kevoree.library.java:org.kevoree.library.java.hazelcast:3.5.1
+include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lxc:3.5.1
+include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:3.5.1
+include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.system:3.5.1
+include mvn:org.kevoree.library.java:org.kevoree.library.java.hazelcast:3.5.1
+include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:3.5.1
 include mvn:org.diversify.demo:kevoree-utils-xtend:latest
 include mvn:org.diversify:org.diversify.kevoree.nginx:latest
 include mvn:org.diversify:org.diversify.kevoree.loadBalancer:latest
-include mvn:org.diversify:org.diversify.kevoree.manager:latest
-add broadcast : BroadcastNettyHttpGroup
+include mvn:org.diversify:org.diversify.kevoree.sosie:latest
 add sync : WSGroup
 add nginxChannel : UselessChannel
 add lbMonitorChannelReceiveSosieInformation : DistributedBroadcast
@@ -20,47 +19,36 @@ add request : AsyncBroadcast
 add response : AsyncBroadcast
 add diversifyfog4Child2 : JavaNode
 set diversifyfog4Child2.log = 'trace'
-attach diversifyfog4Child2 broadcast
 attach diversifyfog4Child2 sync
 add diversifyfog4Child1 : JavaNode
 set diversifyfog4Child1.log = 'trace'
-attach diversifyfog4Child1 broadcast
 attach diversifyfog4Child1 sync
 add diversifyfog4Child0 : JavaNode
 set diversifyfog4Child0.log = 'trace'
-attach diversifyfog4Child0 broadcast
 attach diversifyfog4Child0 sync
 add diversifyfog1Child1 : JavaNode
 set diversifyfog1Child1.log = 'trace'
-attach diversifyfog1Child1 broadcast
 attach diversifyfog1Child1 sync
 add diversifyfog1Child0 : JavaNode
 set diversifyfog1Child0.log = 'trace'
-attach diversifyfog1Child0 broadcast
 attach diversifyfog1Child0 sync
 add diversifyfog5Child1 : JavaNode
 set diversifyfog5Child1.log = 'trace'
-attach diversifyfog5Child1 broadcast
 attach diversifyfog5Child1 sync
 add diversifyfog5Child0 : JavaNode
 set diversifyfog5Child0.log = 'trace'
-attach diversifyfog5Child0 broadcast
 attach diversifyfog5Child0 sync
 add diversifyfog7Child1 : JavaNode
 set diversifyfog7Child1.log = 'trace'
-attach diversifyfog7Child1 broadcast
 attach diversifyfog7Child1 sync
 add diversifyfog7Child0 : JavaNode
 set diversifyfog7Child0.log = 'trace'
-attach diversifyfog7Child0 broadcast
 attach diversifyfog7Child0 sync
 add diversifyfog9Child1 : JavaNode
 set diversifyfog9Child1.log = 'trace'
-attach diversifyfog9Child1 broadcast
 attach diversifyfog9Child1 sync
 add diversifyfog9Child0 : JavaNode
 set diversifyfog9Child0.log = 'trace'
-attach diversifyfog9Child0 broadcast
 attach diversifyfog9Child0 sync
 add diversifyfog4Child0.nginx : NginxConfigurator
 bind diversifyfog4Child0.nginx.useless nginxChannel
@@ -73,6 +61,13 @@ server {
    access_log /tmp/loadbalancerclient/proxy.log proxy; #proxy refers to the log format defined in nginx.conf
    location / {
        proxy_pass http://backend;
+       # These are the option for websockets (need nginx >= v1.3.13)
+       proxy_set_header X-Real-IP $remote_addr;
+       proxy_set_header Host $host;
+       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+       proxy_http_version 1.1;
+       proxy_set_header Upgrade $http_upgrade;
+       proxy_set_header Connection "upgrade";
    }
    location /client {
        root /tmp/loadbalancerclient;
@@ -93,9 +88,45 @@ set diversifyfog4Child0.nginx.started = 'false'
 add diversifyfog4Child0.softwareInstaller : ScriptRunner
 set diversifyfog4Child0.softwareInstaller.startScript = 'apt-get update
 apt-get install nginx redis-server git --no-install-recommends -y
-cat /etc/nginx/nginx.conf | sed "s/error_log \\/var\\/log\\/nginx\\/error.log;/error_log \\/var\\/log\\/nginx\\/error.log;\\nlog_format proxy \'[\\$time_local]; \\$remote_addr; \\$upstream_addr; \\$upstream_response_time; \\$request; \\$remote_user;\'/g" > /tmp/nginx.conf
-cp /tmp/nginx.conf /etc/nginx/nginx.conf
-rm -rf /tmp/nginx.conf
+cat > /etc/nginx/nginx.conf << EOF
+user www-data;
+worker_processes 4;
+pid /run/nginx.pid;
+events {
+worker_connections 768;
+# multi_accept on;
+}
+http {
+set_real_ip_from 10.0.0.0/8;
+real_ip_header X-Forwarded-For;
+##
+# Basic Settings
+##
+sendfile on;
+tcp_nopush on;
+tcp_nodelay on;
+keepalive_timeout 65;
+types_hash_max_size 2048;
+# server_tokens off;
+# server_names_hash_bucket_size 64;
+# server_name_in_redirect off;
+include /etc/nginx/mime.types;
+default_type application/octet-stream;
+##
+# Logging Settings
+##
+access_log /var/log/nginx/access.log;
+error_log /var/log/nginx/error.log;
+log_format proxy \'[\\$time_local]; \\$remote_addr; \\$upstream_addr; \\$upstream_response_time; \\$request; \\$remote_user;\'
+##
+# Gzip Settings
+##
+gzip on;
+gzip_disable "msie6";
+include /etc/nginx/conf.d/*.conf;
+include /etc/nginx/sites-enabled/*;
+}
+EOF
 rm -rf /etc/nginx/sites-enabled/default
 cat > \'/etc/redis/redis.conf\' << EOF
 daemonize yes
@@ -104,7 +135,7 @@ port 6379
 # If you want you can bind a single interface, if the bind option is not
 # specified all the interfaces will listen for incoming connections.
 #
-bind 10.0.4.1
+bind {redis-ip}
 timeout 0
 tcp-keepalive 60
 loglevel notice
@@ -146,23 +177,26 @@ hz 50
 aof-rewrite-incremental-fsync yes
 EOF
 /etc/init.d/redis-server restart
-'
+wget "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip" --content-disposition -O "/tmp/sosie.zip"
+tar -xvf "/tmp/sosie.zip" -C "/tmp/"
+rm -rf "/tmp/sosie.zip"
+cd "/tmp/"
+rm -rf mdms
+git config --system http.sslVerify false
+git clone https://github.com/maxleiko/mdms-ringojs.git mdms
+redis-cli -h {redis-ip} -p 6379 FLUSHDB
+rm "/tmp/mdms/config.json"
+cat > "/tmp/mdms/config.json" << EOF
+{
+    "redis-server": "{redis-ip}",
+    "redis-port":   6379
+}
+EOF
+/tmp/ringojs-0.10/bin/ringo /tmp/mdms/tools/fakedb.js'
 set diversifyfog4Child0.softwareInstaller.started = 'false'
 add diversifyfog4Child0.lbMonitor : KevoreeLBMonitor
+set diversifyfog4Child0.lbMonitor.serverName = 'cloud.diversify-project.eu'
 bind diversifyfog4Child0.lbMonitor.receiveSosieInformation lbMonitorChannelReceiveSosieInformation
-add diversifyfog4Child0.webserver : NettyHTTPServer
-set diversifyfog4Child0.webserver.port = '7999'
-add diversifyfog4Child0.restarter : DemoManager
-set diversifyfog4Child0.restarter.componentTypes = 'SosieRunner'
-add diversifyfog4Child0.favicon : FaviconHandler
-set diversifyfog4Child0.favicon.urlPattern = '/favicon.*'
-set diversifyfog4Child0.favicon.favicon = 'favicon.png'
-bind diversifyfog4Child0.webserver.request request
-bind diversifyfog4Child0.webserver.response response
-bind diversifyfog4Child0.favicon.request request
-bind diversifyfog4Child0.favicon.content response
-bind diversifyfog4Child0.restarter.request request
-bind diversifyfog4Child0.restarter.content response
 include mvn:org.diversify:org.diversify.kevoree.sosie:latest
 add diversifyfog4Child2.REGULARdiversifyfog4Child20 : SosieRunner
 set diversifyfog4Child2.REGULARdiversifyfog4Child20.started = 'false'
@@ -171,6 +205,10 @@ set diversifyfog4Child2.REGULARdiversifyfog4Child20.port = '8080'
 set diversifyfog4Child2.REGULARdiversifyfog4Child20.redisServer = '10.0.4.1'
 bind diversifyfog4Child2.REGULARdiversifyfog4Child20.useless nginxChannel
 bind diversifyfog4Child2.REGULARdiversifyfog4Child20.sendSosieInformation lbMonitorChannelReceiveSosieInformation
+add diversifyfog4Child2.softwareInstaller : ScriptRunner
+set diversifyfog4Child2.softwareInstaller.startScript = 'apt-get update
+apt-get install git --no-install-recommends -y'
+set diversifyfog4Child2.softwareInstaller.started = 'false'
 add diversifyfog4Child1.REGULARdiversifyfog4Child11 : SosieRunner
 set diversifyfog4Child1.REGULARdiversifyfog4Child11.started = 'false'
 set diversifyfog4Child1.REGULARdiversifyfog4Child11.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
@@ -178,6 +216,10 @@ set diversifyfog4Child1.REGULARdiversifyfog4Child11.port = '8080'
 set diversifyfog4Child1.REGULARdiversifyfog4Child11.redisServer = '10.0.4.1'
 bind diversifyfog4Child1.REGULARdiversifyfog4Child11.useless nginxChannel
 bind diversifyfog4Child1.REGULARdiversifyfog4Child11.sendSosieInformation lbMonitorChannelReceiveSosieInformation
+add diversifyfog4Child1.softwareInstaller : ScriptRunner
+set diversifyfog4Child1.softwareInstaller.startScript = 'apt-get update
+apt-get install git --no-install-recommends -y'
+set diversifyfog4Child1.softwareInstaller.started = 'false'
 add diversifyfog1Child1.REGULARdiversifyfog1Child12 : SosieRunner
 set diversifyfog1Child1.REGULARdiversifyfog1Child12.started = 'false'
 set diversifyfog1Child1.REGULARdiversifyfog1Child12.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
@@ -185,6 +227,10 @@ set diversifyfog1Child1.REGULARdiversifyfog1Child12.port = '8080'
 set diversifyfog1Child1.REGULARdiversifyfog1Child12.redisServer = '10.0.4.1'
 bind diversifyfog1Child1.REGULARdiversifyfog1Child12.useless nginxChannel
 bind diversifyfog1Child1.REGULARdiversifyfog1Child12.sendSosieInformation lbMonitorChannelReceiveSosieInformation
+add diversifyfog1Child1.softwareInstaller : ScriptRunner
+set diversifyfog1Child1.softwareInstaller.startScript = 'apt-get update
+apt-get install git --no-install-recommends -y'
+set diversifyfog1Child1.softwareInstaller.started = 'false'
 add diversifyfog1Child0.REGULARdiversifyfog1Child03 : SosieRunner
 set diversifyfog1Child0.REGULARdiversifyfog1Child03.started = 'false'
 set diversifyfog1Child0.REGULARdiversifyfog1Child03.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
@@ -192,6 +238,10 @@ set diversifyfog1Child0.REGULARdiversifyfog1Child03.port = '8080'
 set diversifyfog1Child0.REGULARdiversifyfog1Child03.redisServer = '10.0.4.1'
 bind diversifyfog1Child0.REGULARdiversifyfog1Child03.useless nginxChannel
 bind diversifyfog1Child0.REGULARdiversifyfog1Child03.sendSosieInformation lbMonitorChannelReceiveSosieInformation
+add diversifyfog1Child0.softwareInstaller : ScriptRunner
+set diversifyfog1Child0.softwareInstaller.startScript = 'apt-get update
+apt-get install git --no-install-recommends -y'
+set diversifyfog1Child0.softwareInstaller.started = 'false'
 add diversifyfog5Child1.REGULARdiversifyfog5Child14 : SosieRunner
 set diversifyfog5Child1.REGULARdiversifyfog5Child14.started = 'false'
 set diversifyfog5Child1.REGULARdiversifyfog5Child14.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
@@ -199,6 +249,10 @@ set diversifyfog5Child1.REGULARdiversifyfog5Child14.port = '8080'
 set diversifyfog5Child1.REGULARdiversifyfog5Child14.redisServer = '10.0.4.1'
 bind diversifyfog5Child1.REGULARdiversifyfog5Child14.useless nginxChannel
 bind diversifyfog5Child1.REGULARdiversifyfog5Child14.sendSosieInformation lbMonitorChannelReceiveSosieInformation
+add diversifyfog5Child1.softwareInstaller : ScriptRunner
+set diversifyfog5Child1.softwareInstaller.startScript = 'apt-get update
+apt-get install git --no-install-recommends -y'
+set diversifyfog5Child1.softwareInstaller.started = 'false'
 add diversifyfog5Child0.REGULARdiversifyfog5Child05 : SosieRunner
 set diversifyfog5Child0.REGULARdiversifyfog5Child05.started = 'false'
 set diversifyfog5Child0.REGULARdiversifyfog5Child05.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
@@ -206,6 +260,10 @@ set diversifyfog5Child0.REGULARdiversifyfog5Child05.port = '8080'
 set diversifyfog5Child0.REGULARdiversifyfog5Child05.redisServer = '10.0.4.1'
 bind diversifyfog5Child0.REGULARdiversifyfog5Child05.useless nginxChannel
 bind diversifyfog5Child0.REGULARdiversifyfog5Child05.sendSosieInformation lbMonitorChannelReceiveSosieInformation
+add diversifyfog5Child0.softwareInstaller : ScriptRunner
+set diversifyfog5Child0.softwareInstaller.startScript = 'apt-get update
+apt-get install git --no-install-recommends -y'
+set diversifyfog5Child0.softwareInstaller.started = 'false'
 add diversifyfog7Child1.REGULARdiversifyfog7Child16 : SosieRunner
 set diversifyfog7Child1.REGULARdiversifyfog7Child16.started = 'false'
 set diversifyfog7Child1.REGULARdiversifyfog7Child16.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
@@ -213,6 +271,10 @@ set diversifyfog7Child1.REGULARdiversifyfog7Child16.port = '8080'
 set diversifyfog7Child1.REGULARdiversifyfog7Child16.redisServer = '10.0.4.1'
 bind diversifyfog7Child1.REGULARdiversifyfog7Child16.useless nginxChannel
 bind diversifyfog7Child1.REGULARdiversifyfog7Child16.sendSosieInformation lbMonitorChannelReceiveSosieInformation
+add diversifyfog7Child1.softwareInstaller : ScriptRunner
+set diversifyfog7Child1.softwareInstaller.startScript = 'apt-get update
+apt-get install git --no-install-recommends -y'
+set diversifyfog7Child1.softwareInstaller.started = 'false'
 add diversifyfog7Child0.REGULARdiversifyfog7Child07 : SosieRunner
 set diversifyfog7Child0.REGULARdiversifyfog7Child07.started = 'false'
 set diversifyfog7Child0.REGULARdiversifyfog7Child07.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
@@ -220,6 +282,10 @@ set diversifyfog7Child0.REGULARdiversifyfog7Child07.port = '8080'
 set diversifyfog7Child0.REGULARdiversifyfog7Child07.redisServer = '10.0.4.1'
 bind diversifyfog7Child0.REGULARdiversifyfog7Child07.useless nginxChannel
 bind diversifyfog7Child0.REGULARdiversifyfog7Child07.sendSosieInformation lbMonitorChannelReceiveSosieInformation
+add diversifyfog7Child0.softwareInstaller : ScriptRunner
+set diversifyfog7Child0.softwareInstaller.startScript = 'apt-get update
+apt-get install git --no-install-recommends -y'
+set diversifyfog7Child0.softwareInstaller.started = 'false'
 add diversifyfog9Child1.REGULARdiversifyfog9Child18 : SosieRunner
 set diversifyfog9Child1.REGULARdiversifyfog9Child18.started = 'false'
 set diversifyfog9Child1.REGULARdiversifyfog9Child18.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
@@ -227,6 +293,10 @@ set diversifyfog9Child1.REGULARdiversifyfog9Child18.port = '8080'
 set diversifyfog9Child1.REGULARdiversifyfog9Child18.redisServer = '10.0.4.1'
 bind diversifyfog9Child1.REGULARdiversifyfog9Child18.useless nginxChannel
 bind diversifyfog9Child1.REGULARdiversifyfog9Child18.sendSosieInformation lbMonitorChannelReceiveSosieInformation
+add diversifyfog9Child1.softwareInstaller : ScriptRunner
+set diversifyfog9Child1.softwareInstaller.startScript = 'apt-get update
+apt-get install git --no-install-recommends -y'
+set diversifyfog9Child1.softwareInstaller.started = 'false'
 add diversifyfog9Child0.REGULARdiversifyfog9Child09 : SosieRunner
 set diversifyfog9Child0.REGULARdiversifyfog9Child09.started = 'false'
 set diversifyfog9Child0.REGULARdiversifyfog9Child09.sosieUrl = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip'
@@ -234,3 +304,7 @@ set diversifyfog9Child0.REGULARdiversifyfog9Child09.port = '8080'
 set diversifyfog9Child0.REGULARdiversifyfog9Child09.redisServer = '10.0.4.1'
 bind diversifyfog9Child0.REGULARdiversifyfog9Child09.useless nginxChannel
 bind diversifyfog9Child0.REGULARdiversifyfog9Child09.sendSosieInformation lbMonitorChannelReceiveSosieInformation
+add diversifyfog9Child0.softwareInstaller : ScriptRunner
+set diversifyfog9Child0.softwareInstaller.startScript = 'apt-get update
+apt-get install git --no-install-recommends -y'
+set diversifyfog9Child0.softwareInstaller.started = 'false'

@@ -1,0 +1,19 @@
+repo 'http://oss.sonatype.org/content/groups/public/'
+repo 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/'
+include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:3.5.1
+include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lxc:3.5.1
+include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:3.5.1
+attach node0 sync
+set sync.port/node0 = '9000'
+add node0.diversifynode0Child2 : JavaNode
+network diversifynode0Child2.ip.lan 131.254.14.25
+attach diversifynode0Child2 sync
+set sync.port/diversifynode0Child2 = '9001'
+add node0.diversifynode0Child1 : JavaNode
+network diversifynode0Child1.ip.lan 131.254.14.25
+attach diversifynode0Child1 sync
+set sync.port/diversifynode0Child1 = '9002'
+add node0.diversifynode0Child0 : JavaNode
+network diversifynode0Child0.ip.lan 131.254.14.25
+attach diversifynode0Child0 sync
+set sync.port/diversifynode0Child0 = '9003'
