@@ -59,8 +59,12 @@ public class SosieRunner {
         boolean needUpdate = this.sosieUrl != null && ((ComponentInstance) (((ContainerNode) modelService.getCurrentModel().getModel().findNodesByID(context.getNodeName())).findComponentsByID(context.getInstanceName()))).getStarted();
         this.sosieUrl = sosieUrl;
         if (needUpdate) {
+            try  {
             stop();
             start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -168,7 +172,7 @@ public class SosieRunner {
                 StringBuilder info = new StringBuilder();
                 info.append("Position: ");
                 info.append(fragmentPosition.get("Position"));
-                info.append("\nStatementType: ");
+                info.append(",StatementType: ");
                 info.append(((String) fragmentPosition.get("Type")).replace("Ct", "").replace("Impl", "")).append(" -> ");
                 info.append(((String) fragmentReplace.get("Type")).replace("Ct", "").replace("Impl", ""));
 

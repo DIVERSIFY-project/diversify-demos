@@ -1,12 +1,14 @@
 package org.diversify.kevoree.components;
 
-import org.kevoree.*;
-import org.kevoree.annotation.ComponentType;
+import org.kevoree.ComponentInstance;
+import org.kevoree.ContainerNode;
+import org.kevoree.ContainerRoot;
 import org.kevoree.annotation.*;
 import org.kevoree.api.ModelService;
 import org.kevoree.api.handler.ModelListenerAdapter;
-import org.kevoree.api.handler.UpdateCallback;
+import org.kevoree.komponents.helpers.SynchronizedUpdateCallback;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
@@ -25,7 +27,7 @@ public class SosieRandomModifier {
 
     @Param(optional = true, defaultValue = "10")
     private int threshold;
-    @Param(optional = true)
+    @Param(optional = false)
     private String availableSosies;
 
     @KevoreeInject
@@ -59,9 +61,10 @@ public class SosieRandomModifier {
 
     @Input
     public synchronized void notificationRequest(Object o) {
+        nbRequest++;
         if (threshold <= nbRequest) {
             nbRequest = 0;
-
+            executor.submit(engine);
         }
     }
 
@@ -70,8 +73,10 @@ public class SosieRandomModifier {
 
         private String[] availableSosies;
         private Random random;
-        private int previousSelectedIndex;
+        private int selectedIndex;
         private List<ComponentInstance> sosieRunners;
+
+        private SynchronizedUpdateCallback callback;
 
         AdaptationEngine(String availableSosies) throws Exception {
             if (availableSosies.contains("\n")) {
@@ -79,13 +84,15 @@ public class SosieRandomModifier {
             } else if (availableSosies.contains(";")) {
                 this.availableSosies = availableSosies.split(";");
             } else {
-                throw new Exception("Unable to create AdaptationEngine on SosieRandomModifier because you only provide one sosie to randomly applied. More sosies are needed !");
+                throw new Exception("Unable to create AdaptationEngine on SosieRandomModifier because you only provide one sosie to randomly apply. More sosies are needed !");
             }
-
+            random = new Random();
+            sosieRunners = new ArrayList<ComponentInstance>();
+            callback = new SynchronizedUpdateCallback();
         }
 
         @Override
-        public void modelUpdated() {
+        public synchronized void modelUpdated() {
             sosieRunners.clear();
             ContainerRoot model = modelService.getCurrentModel().getModel();
             for (ContainerNode n : model.getNodes()) {
@@ -98,49 +105,23 @@ public class SosieRandomModifier {
         }
 
         @Override
-        public void run() {
+        public synchronized void run() {
             // pick a SosieRunner component
             int sosieNumber = random.nextInt(sosieRunners.size());
             ComponentInstance sosie = sosieRunners.get(sosieNumber);
 
-            final StringBuilder script1 = new StringBuilder();
             final StringBuilder script2 = new StringBuilder();
-            final StringBuilder script3 = new StringBuilder();
-            script1.append("set ").append(((ContainerNode) sosie.eContainer()).getName()).append(".").append(sosie.getName()).append(".started = 'false'\n");
-            script3.append("set ").append(((ContainerNode) sosie.eContainer()).getName()).append(".").append(sosie.getName()).append(".started = 'true'\n");
-            for (Port p : sosie.getProvided()) {
-                for (MBinding b : p.getBindings()) {
-                    script1.append("unbind ").append(((ContainerNode) sosie.eContainer()).getName()).append(".").append(sosie.getName()).append(" ").append(b.getHub().getName()).append("\n");
-                    script3.append("bind ").append(((ContainerNode) sosie.eContainer()).getName()).append(".").append(sosie.getName()).append(" ").append(b.getHub().getName()).append("\n");
-                }
+
+            script2.append("set ").append(((ContainerNode) sosie.eContainer()).getName()).append(".").append(sosie.getName()).append(".sosieUrl = '").append(availableSosies[selectedIndex]).append("'\n");
+
+            // update its sosie
+            callback.initialize();
+            modelService.submitScript(script2.toString(), callback);
+            callback.waitForResult(10000);
+            selectedIndex++;
+            if (selectedIndex >= availableSosies.length) {
+                selectedIndex = 0;
             }
-
-            previousSelectedIndex++;
-            script2.append("set ").append(((ContainerNode) sosie.eContainer()).getName()).append(".").append(sosie.getName()).append(".sosieUrl = ").append(availableSosies[previousSelectedIndex]).append("\n");
-
-            // stop it and unbind it
-            modelService.submitScript(script1.toString(), new UpdateCallback() {
-                @Override
-                public void run(Boolean aBoolean) {
-                    if (aBoolean) {
-                        // update its sosie
-                        modelService.submitScript(script2.toString(), new UpdateCallback() {
-                            @Override
-                            public void run(Boolean aBoolean) {
-                                if (aBoolean) {
-                                    // bind it to its previous channel and start it
-                                    modelService.submitScript(script3.toString(), new UpdateCallback() {
-                                        @Override
-                                        public void run(Boolean aBoolean) {
-
-                                        }
-                                    });
-                                }
-                            }
-                        });
-                    }
-                }
-            });
         }
     }
 
