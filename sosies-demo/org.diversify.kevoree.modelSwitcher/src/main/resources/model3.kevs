@@ -8,6 +8,7 @@ include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:3.5.1
 include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.system:3.5.1
 include mvn:org.kevoree.library.java:org.kevoree.library.java.hazelcast:3.5.1
 include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:3.5.1
+include mvn:org.kevoree.komponents:http-netty:latest
 include mvn:org.diversify.demo:kevoree-utils-xtend:latest
 include mvn:org.diversify:org.diversify.kevoree.nginx:latest
 include mvn:org.diversify:org.diversify.kevoree.loadBalancer:latest
@@ -15,8 +16,6 @@ include mvn:org.diversify:org.diversify.kevoree.sosie:latest
 add sync : WSGroup
 add nginxChannel : UselessChannel
 add lbMonitorChannelReceiveSosieInformation : DistributedBroadcast
-add request : AsyncBroadcast
-add response : AsyncBroadcast
 add diversifyfog4Child2 : JavaNode
 set diversifyfog4Child2.log = 'trace'
 attach diversifyfog4Child2 sync
@@ -82,6 +81,9 @@ server {
        proxy_http_version 1.1;
        proxy_set_header Upgrade $http_upgrade;
        proxy_set_header Connection "upgrade";
+       proxy_connect_timeout 43200000;
+       proxy_read_timeout 43200000;
+       proxy_send_timeout 43200000;
    }
 }'
 set diversifyfog4Child0.nginx.started = 'false'
@@ -197,7 +199,7 @@ set diversifyfog4Child0.softwareInstaller.started = 'false'
 add diversifyfog4Child0.lbMonitor : KevoreeLBMonitor
 set diversifyfog4Child0.lbMonitor.serverName = 'cloud.diversify-project.eu'
 bind diversifyfog4Child0.lbMonitor.receiveSosieInformation lbMonitorChannelReceiveSosieInformation
-add notificationOnRequest : DistributedBroadcast
+add notificationOnRequest : AsyncBroadcast
 add diversifyfog4Child0.sosieRandomModifier : SosieRandomModifier
 set diversifyfog4Child0.sosieRandomModifier.threshold = '35'
 set diversifyfog4Child0.sosieRandomModifier.availableSosies = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino15/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino15.zip
