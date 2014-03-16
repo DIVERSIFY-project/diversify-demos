@@ -43,6 +43,7 @@ public class SosieRandomModifier {
             executor = java.util.concurrent.Executors.newSingleThreadExecutor();
             engine = new AdaptationEngine(availableSosies);
             modelService.registerModelListener(engine);
+            running = true;
         }
     }
 
@@ -61,12 +62,17 @@ public class SosieRandomModifier {
 
     @Input
     public synchronized void notificationRequest(Object o) {
-        nbRequest++;
-        if (threshold <= nbRequest) {
-            nbRequest = 0;
-            executor.submit(engine);
+        if (running) {
+            nbRequest++;
+            if (threshold <= nbRequest) {
+                nbRequest = 0;
+                running = false;
+                executor.submit(engine);
+            }
         }
     }
+
+    private boolean running;
 
 
     class AdaptationEngine extends ModelListenerAdapter implements Runnable {
@@ -121,6 +127,7 @@ public class SosieRandomModifier {
             selectedIndex++;
             if (selectedIndex >= availableSosies.length) {
                 selectedIndex = 0;
+                running = true;
             }
         }
     }

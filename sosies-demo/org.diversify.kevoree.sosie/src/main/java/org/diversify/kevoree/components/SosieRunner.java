@@ -1,5 +1,6 @@
 package org.diversify.kevoree.components;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
 import org.kevoree.ComponentInstance;
@@ -11,6 +12,7 @@ import org.kevoree.api.BootstrapService;
 import org.kevoree.api.Context;
 import org.kevoree.api.ModelService;
 import org.kevoree.api.Port;
+import org.kevoree.api.handler.ModelListenerAdapter;
 import org.kevoree.komponents.helpers.ProcessStreamFileLogger;
 import org.kevoree.log.Log;
 
@@ -59,9 +61,9 @@ public class SosieRunner {
         boolean needUpdate = this.sosieUrl != null && ((ComponentInstance) (((ContainerNode) modelService.getCurrentModel().getModel().findNodesByID(context.getNodeName())).findComponentsByID(context.getInstanceName()))).getStarted();
         this.sosieUrl = sosieUrl;
         if (needUpdate) {
-            try  {
-            stop();
-            start();
+            try {
+                stop();
+                start();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -100,9 +102,7 @@ public class SosieRunner {
                     process = null;
                     throw new Exception("Unable to run runner script. Exit Status: " + exitStatus + " for '" + runnerPath + " run " + directory.getAbsolutePath() + " " + directory.getAbsolutePath() + File.separator + sosieName + " " + port + " " + redisServer + " " + redisServerPort + "'");
                 } catch (IllegalThreadStateException ignored) {
-                    // send information about the sosie
-                    sendInformation();
-
+                    modelService.registerModelListener(new ModelListenerImpl());
                     Log.info("Sosie '{}' is started", context.getInstanceName());
                 }
             } else {
@@ -140,63 +140,79 @@ public class SosieRunner {
     public void useless() {
     }
 
-    private void sendInformation() throws Exception {
-        if (sosieName.contains("rhino")) {
-            String rhinoVersion = sosieName.substring(sosieName.indexOf("rhino"));
 
-            standardOutput = new File(directory.getAbsolutePath() + File.separator + context.getInstanceName() + ".log");
-            standardOutput.createNewFile();
-            process = new ProcessBuilder().directory(directory).command("bash", runnerPath, "get", rhinoRepoUrl + "org.diversify/rhino/1-" + rhinoVersion + "/rhino-1-" + rhinoVersion + ".zip", directory.getAbsolutePath()).redirectErrorStream(true).start();
-            new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput, true)).start();
-            if (process.waitFor() == 0) {
-                process = null;
-                standardOutput.delete();
+    class ModelListenerImpl extends ModelListenerAdapter {
 
-                FileInputStream inputStream = new FileInputStream(new File(directory.getAbsolutePath() + File.separator + rhinoVersion + File.separator + "diversificationPoint" + rhinoVersion.replace("rhino", "")));
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        @Override
+        public synchronized void modelUpdated() {
+            modelService.unregisterModelListener(this);
+            try {
+                if (sosieName.contains("rhino")) {
+                    String rhinoVersion = sosieName.substring(sosieName.indexOf("rhino"));
 
-                byte[] bytes = new byte[2048];
-                int length = inputStream.read(bytes);
+                    standardOutput = new File(directory.getAbsolutePath() + File.separator + context.getInstanceName() + ".log");
+                    standardOutput.createNewFile();
+                    process = new ProcessBuilder().directory(directory).command("bash", runnerPath, "get", rhinoRepoUrl + "org.diversify/rhino/1-" + rhinoVersion + "/rhino-1-" + rhinoVersion + ".zip", directory.getAbsolutePath()).redirectErrorStream(true).start();
+                    new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput, true)).start();
+                    if (process.waitFor() == 0) {
+                        process = null;
+                        standardOutput.delete();
 
-                while (length != -1) {
-                    outputStream.write(bytes, 0, length);
-                    length = inputStream.read(bytes);
+                        FileInputStream inputStream = new FileInputStream(new File(directory.getAbsolutePath() + File.separator + rhinoVersion + File.separator + "diversificationPoint" + rhinoVersion.replace("rhino", "")));
+                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+                        byte[] bytes = new byte[2048];
+                        int length = inputStream.read(bytes);
+
+                        while (length != -1) {
+                            outputStream.write(bytes, 0, length);
+                            length = inputStream.read(bytes);
+                        }
+
+                        JSONObject jsonReader = new JSONObject(new String(outputStream.toByteArray()));
+
+                        JSONObject fragmentPosition = ((JSONObject) jsonReader.get("CodeFragmentPosition"));
+                        JSONObject fragmentReplace = ((JSONObject) jsonReader.get("CodeFragmentReplace"));
+
+
+                        StringBuilder info = new StringBuilder();
+                        info.append("Position: ");
+                        info.append(fragmentPosition.get("Position"));
+                        info.append(",StatementType: ");
+                        info.append(((String) fragmentPosition.get("Type")).replace("Ct", "").replace("Impl", "")).append(" -> ");
+                        info.append(((String) fragmentReplace.get("Type")).replace("Ct", "").replace("Impl", ""));
+
+
+                        String message = new JSONStringer().object().key("node").value(getIps().get(0).replace(".", "_") + "_" + port).key("information").value(info.toString()).endObject().toString();
+
+                        Log.info("Sending information about sosie: {}", message);
+                        sendSosieInformation.send(message);
+                    } else {
+                        Log.info("Unable to download Rhino sosie " + rhinoVersion + " for " + context.getInstanceName() + " on " + context.getNodeName());
+                    }
+                } else {
+                    String message = new JSONStringer().object().key("node").value(getIps().get(0).replace(".", "_") + "_" + port).key("information").value("Regular version of rhino and ringo").endObject().toString();
+
+                    Log.info("Sending information about sosie: {}", message);
+                    sendSosieInformation.send(message);
                 }
-
-                JSONObject jsonReader = new JSONObject(new String(outputStream.toByteArray()));
-
-                JSONObject fragmentPosition = ((JSONObject) jsonReader.get("CodeFragmentPosition"));
-                JSONObject fragmentReplace = ((JSONObject) jsonReader.get("CodeFragmentReplace"));
-
-
-                StringBuilder info = new StringBuilder();
-                info.append("Position: ");
-                info.append(fragmentPosition.get("Position"));
-                info.append(",StatementType: ");
-                info.append(((String) fragmentPosition.get("Type")).replace("Ct", "").replace("Impl", "")).append(" -> ");
-                info.append(((String) fragmentReplace.get("Type")).replace("Ct", "").replace("Impl", ""));
-
-
-                String message = new JSONStringer().object().key("node").value(getIps().get(0).replace(".", "_") + "_" + port).key("information").value(info.toString()).endObject().toString();
-
-                Log.info("Sending information about sosie: {}", message);
-                sendSosieInformation.send(message);
-            } else {
-                throw new Exception("Unable to download Rhino sosie " + rhinoVersion + " for " + context.getInstanceName() + " on " + context.getNodeName());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } else {
-            String message = new JSONStringer().object().key("node").value(getIps().get(0).replace(".", "_") + "_" + port).key("information").value("Regular version of rhino and ringo").endObject().toString();
-
-            Log.info("Sending information about sosie: {}", message);
-            sendSosieInformation.send(message);
         }
     }
 
 
     private List<String> getIps() {
         List<String> ips = new ArrayList<String>();
-        if (modelService.getPendingModel() != null) {
-            ContainerNode node = modelService.getPendingModel().findNodesByID(context.getNodeName());
+        if (modelService.getCurrentModel().getModel() != null) {
+            ContainerNode node = modelService.getCurrentModel().getModel().findNodesByID(context.getNodeName());
             if (node != null) {
                 for (NetworkInfo networkInfo : node.getNetworkInformation()) {
                     for (NetworkProperty networkProperty : networkInfo.getValues()) {
