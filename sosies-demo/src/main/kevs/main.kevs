@@ -1,13 +1,14 @@
 repo "http://oss.sonatype.org/content/groups/public/"
 repo "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/"
+repo 'http://maven.reacloud.com/repository/reacloud/snapshots/'
 
-include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:3.4.2-SNAPSHOT
-include mvn:org.kevoree.library.java:org.kevoree.library.java.toys:3.4.2-SNAPSHOT
-include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:3.4.2-SNAPSHOT
-include mvn:org.kevoree.library.java:org.kevoree.library.java.web:3.4.2-SNAPSHOT
-include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:3.4.2-SNAPSHOT
-include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:3.4.2-SNAPSHOT
-include mvn:org.kevoree.library.java:org.kevoree.library.java.helloworld:3.4.2-SNAPSHOT
+include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:3.5.1
+include mvn:org.kevoree.library.java:org.kevoree.library.java.toys:3.5.1
+include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:3.5.1
+include mvn:org.kevoree.library.java:org.kevoree.library.java.web:3.5.1
+include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:3.5.1
+include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:3.5.1
+include mvn:org.kevoree.library.java:org.kevoree.library.java.helloworld:3.5.1
 
 include mvn:org.diversify.demo:nginxconf-generator:latest
 include mvn:org.diversify.demo:kevoree-utils-xtend:latest
@@ -17,7 +18,7 @@ include mvn:org.diversify:org.diversify.kevoree.loadBalancer:latest
 
 
 add node0 : JavaNode
-set node0.log = "info"
+set node0.log = "trace"
 set node0.started = "true"
 
 add sync : WSGroup
@@ -25,7 +26,7 @@ set sync.port/node0 = "9000"
 attach node0 sync
 
 add node0.nginx : NginxLoadBalancerComponent
-network node0.ip.lan 192.168.1.100
+network node0.ip.lan 131.254.14.25
 //network node0.ip.lan 127.0.0.1
 
 
@@ -33,44 +34,34 @@ add node0.sosie1 : SosieRunner
 set node0.sosie1.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip"
 set node0.sosie1.port = '8282'
 
+add node0.sosieModifier : SosieRandomModifier
+set node0.sosieModifier.threshold = '25'
+set node0.sosieModifier.availableSosies = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino15/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino15.zip
+http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino16/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino16.zip
+http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino4/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino4.zip
+http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino5/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino5.zip
+http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino8/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino8.zip
+http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino15/composed-sosie-1-indirection_on_Streamrhino15.zip
+http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino16/composed-sosie-1-indirection_on_Streamrhino16.zip
+http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino4/composed-sosie-1-indirection_on_Streamrhino4.zip
+http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino5/composed-sosie-1-indirection_on_Streamrhino5.zip
+http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip
+http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/ringo/1-REGULAR/ringo-1-REGULAR.zip
+'
+
 add channel : UselessChannel
 bind node0.sosie1.useless channel
 bind node0.nginx.outputPort channel
 
 add node0.lbMonitor : KevoreeLBMonitor
-set node0.lbMonitor.serverName = '192.168.1.100'
+set node0.lbMonitor.serverName = '131.254.14.25'
 
-include mvn:org.kevoree.library.java:org.kevoree.library.java.hazelcast:3.4.2-SNAPSHOT
+include mvn:org.kevoree.library.java:org.kevoree.library.java.hazelcast:3.5.1
 
 add lbMonitorChannelReceiveSosieInformation : DistributedBroadcast
 bind node0.sosie1.sendSosieInformation lbMonitorChannelReceiveSosieInformation
 bind node0.lbMonitor.receiveSosieInformation lbMonitorChannelReceiveSosieInformation
 
-
-include mvn:org.kevoree.komponents:http-netty:latest
-include mvn:org.diversify:org.diversify.kevoree.restarter:latest
-
-
-add node0.webserver : NettyHTTPServer
-set node0.webserver.port = '7999'
-
-
-add node0.restarter : DemoManager
-set node0.restarter.componentType = 'SosieRunner'
-
-
-add node0.favicon : FaviconHandler
-set node0.favicon.urlPattern = "/favicon.*"
-set node0.favicon.favicon = "favicon.png"
-
-add request : AsyncBroadcast
-add response : AsyncBroadcast
-
-bind node0.webserver.request request
-bind node0.webserver.response response
-
-bind node0.favicon.request request
-bind node0.favicon.content response
-
-bind node0.restarter.request request
-bind node0.restarter.content response
+add notificationOnRequest : AsyncBroadcast
+bind node0.sosieModifier.notificationRequest notificationOnRequest
+bind node0.lbMonitor.notifyRequest notificationOnRequest
