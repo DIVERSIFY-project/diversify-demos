@@ -155,6 +155,7 @@ class ModelGeneratorFromModel {
         scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.hazelcast:$kevoreeLibraryVersion\n")
         scriptBuilder.append("include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:$kevoreeLibraryVersion\n")
 
+        scriptBuilder.append("include mvn:org.kevoree.komponents:http-netty:latest\n")
 
         scriptBuilder.append("include mvn:org.diversify.demo:kevoree-utils-xtend:latest\n")
         scriptBuilder.append("include mvn:org.diversify:org.diversify.kevoree.nginx:latest\n")
@@ -162,10 +163,12 @@ class ModelGeneratorFromModel {
         scriptBuilder.append("include mvn:org.diversify:org.diversify.kevoree.sosie:latest\n");
 
         scriptBuilder.append("add ").append("sync : WSGroup\n")
+        // FIXME
+//        scriptBuilder.append("add ").append("internalSync : BroadcastNettyHttpGroup\n")
         scriptBuilder.append("add nginxChannel : UselessChannel\n")
+        // FIXME
         scriptBuilder.append("add lbMonitorChannelReceiveSosieInformation : DistributedBroadcast\n")
-        scriptBuilder.append("add request : AsyncBroadcast\n")
-        scriptBuilder.append("add response : AsyncBroadcast\n")
+//        scriptBuilder.append("add lbMonitorChannelReceiveSosieInformation : BroadcastNettyHttpChannelMessage\n")
 
 
         var port = 9001
@@ -185,6 +188,10 @@ class ModelGeneratorFromModel {
                     scriptBuilder.append("network ").append("diversify").append(configuration[0]).append("Child").append(i).append(".ip.lan ").append(configuration[2]).append("\n")
                 }
                 scriptBuilder.append("attach ").append("diversify").append(configuration[0]).append("Child").append(i).append(" sync\n")
+                // FIXME
+//                scriptBuilder.append("attach ").append("diversify").append(configuration[0]).append("Child").append(i).append(" internalSync\n")
+//                scriptBuilder.append("set ").append("internalSync.port/").append("diversify").append(configuration[0]).append("Child").append(i).append(" = '").append(9001).append("'\n")
+
                 // ack to define network information when we use JavaNode as hosting node
                 if (configuration[1].equalsIgnoreCase("javanode")) {
                     scriptBuilder.append("set ").append("sync.port/").append("diversify").append(configuration[0]).append("Child").append(i).append(" = '").append(port).append("'\n")
@@ -234,6 +241,9 @@ class ModelGeneratorFromModel {
                 "       proxy_http_version 1.1;\n" +
                 "       proxy_set_header Upgrade \$http_upgrade;\n" +
                 "       proxy_set_header Connection \"upgrade\";\n" +
+                "       proxy_connect_timeout 43200000;\n" +
+                "       proxy_read_timeout 43200000;\n" +
+                "       proxy_send_timeout 43200000;\n" +
                 "   }\n" +
                 "}'\n")
                 scriptBuilder.append("set ").append("diversify").append(configuration[0]).append("Child0").append(".nginx.started = 'false'\n")
@@ -359,9 +369,12 @@ class ModelGeneratorFromModel {
                 scriptBuilder.append("set ").append("diversify").append(configuration[0]).append("Child0").append(".lbMonitor.serverName = 'cloud.diversify-project.eu'\n")
                 // here we can specify the port and logFile for lbMonitor
                 scriptBuilder.append("bind ").append("diversify").append(configuration[0]).append("Child0").append(".lbMonitor.receiveSosieInformation lbMonitorChannelReceiveSosieInformation\n")
+                // FIXME
+//                scriptBuilder.append("set ").append("lbMonitorChannelReceiveSosieInformation.port/").append("diversify").append(configuration[0]).append("Child0").append(" = '").append(7999).append("'\n")
 
                 if (modelUpdate) {
-                    scriptBuilder.append("add notificationOnRequest : DistributedBroadcast\n")
+                    scriptBuilder.append("add notificationOnRequest : AsyncBroadcast\n")
+
                     scriptBuilder.append("add ").append("diversify").append(configuration[0]).append("Child0").append(".sosieRandomModifier : SosieRandomModifier\n")
                     scriptBuilder.append("set ").append("diversify").append(configuration[0]).append("Child0").append(".sosieRandomModifier.threshold = '35'\n")
                     scriptBuilder.append("set ").append("diversify").append(configuration[0]).append("Child0").append(".sosieRandomModifier.availableSosies = 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-factory_and_indirection_on_RhinoEnginerhino15/composed-sosie-1-factory_and_indirection_on_RhinoEnginerhino15.zip\n" +
@@ -440,7 +453,7 @@ class ModelGeneratorFromModel {
 
                 scriptBuilder.append("set ").append(nodeName).append(".").append(sosieName).append(nodeName).append(i).append(".sosieUrl = '").append(line).append("'\n")
 
-                var port = 0
+                var port: Int
                 if (javaParentNodes.contains(nodeName)) {
                     val parentNodeName = nodeName.substring(0, nodeName.indexOf("Child"))
                     if (portMap.get(parentNodeName) == null) {
@@ -463,6 +476,25 @@ class ModelGeneratorFromModel {
 
                 scriptBuilder.append("bind ").append(nodeName).append(".").append(sosieName).append(nodeName).append(i).append(".useless nginxChannel\n")
                 scriptBuilder.append("bind ").append(nodeName).append(".").append(sosieName).append(nodeName).append(i).append(".sendSosieInformation lbMonitorChannelReceiveSosieInformation\n")
+
+                // FIXME
+                /*if (javaParentNodes.contains(nodeName)) {
+                    val parentNodeName = nodeName.substring(0, nodeName.indexOf("Child"))
+                    if (portMap.get(parentNodeName) == null) {
+                        portMap.put(parentNodeName, 8080)
+                    } else {
+                        portMap.put(parentNodeName, portMap.remove(parentNodeName)!! + 1)
+                    }
+                    port = portMap.get(parentNodeName)!!
+                } else {
+                    if (portMap.get(nodeName) == null) {
+                        portMap.put(nodeName, 8080)
+                    } else {
+                        portMap.put(nodeName, portMap.remove(nodeName)!! + 1)
+                    }
+                    port = portMap.get(nodeName)!!
+                }
+                scriptBuilder.append("set ").append("lbMonitorChannelReceiveSosieInformation.port/").append(nodeName).append(" = '").append(port).append("'\n")*/
 
                 scriptBuilder.append("add ").append(nodeName).append(".softwareInstaller : ScriptRunner\n")
                 scriptBuilder.append("set ").append(nodeName).append(".softwareInstaller.startScript = 'apt-get update\n" +
