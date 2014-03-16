@@ -102,6 +102,7 @@ fun process(models: Array<String>, deploy: Boolean) {
     var line = reader.readLine()
     if (line.equals("yes")) {
         sendModelToBootNodes(model1)
+        sendModelWithDelayForRoot(model1Configured)
         println("Is it OK ? [yes, no]:")
         line = reader.readLine()
         while (!line.equals("yes")) {
@@ -118,16 +119,10 @@ fun process(models: Array<String>, deploy: Boolean) {
             System.exit(0)
         } else {
             if (line.equals("1")) {
-                sendModel(model1)
-                sendModelWithDelayForRoot(model1Configured)
                 sendModel(model1Started)
             } else if (line.equals("2")) {
-                sendModel(model2)
-                sendModelWithDelayForRoot(model2Configured)
                 sendModel(model2Started)
             } else if (line.equals("3")) {
-                sendModel(model3)
-                sendModelWithDelayForRoot(model3Configured)
                 sendModel(model3Started)
             } else {
 
@@ -331,6 +326,9 @@ fun startSosies(model: ContainerRoot): ContainerRoot {
         node.components.forEach { component ->
             if (component.typeDefinition!!.name.equals("SosieRunner")) {
                 script.append("set ").append(node.name).append(".").append(component.name).append(".started = 'true'\n");
+            }
+            if (component.name.equals("nginx")) {
+                script.append("set ").append(node.name!!).append(".").append(component.name!!).append(".started = 'true'\n");
             }
         }
     }
