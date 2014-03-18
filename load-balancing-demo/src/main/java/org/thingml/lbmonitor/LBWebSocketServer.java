@@ -5,12 +5,14 @@
  */
 package org.thingml.lbmonitor;
 
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
-import java.util.Collection;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
+
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+import java.nio.channels.NotYetConnectedException;
+import java.util.Collection;
 
 /**
  *
@@ -22,9 +24,7 @@ public class LBWebSocketServer extends WebSocketServer {
         super(new InetSocketAddress(port));
     }
 
-    public LBWebSocketServer(InetSocketAddress address) {
-        super(address);
-    }
+
 
     @Override
     public void onOpen(WebSocket ws, ClientHandshake ch) {
@@ -60,7 +60,9 @@ public class LBWebSocketServer extends WebSocketServer {
         Collection<WebSocket> con = connections();
         synchronized (con) {
             for (WebSocket c : con) {
+                try {
                 c.send(text);
+                } catch (NotYetConnectedException ignored) {}
             }
         }
     }

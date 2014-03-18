@@ -1,0 +1,13 @@
+<assembly>
+    <id>webContent</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <fileSets>
+        <fileSet>
+            <directory>src/main/javascript/</directory>
+            <outputDirectory>/client</outputDirectory>
+        </fileSet>
+    </fileSets>
+</assembly>

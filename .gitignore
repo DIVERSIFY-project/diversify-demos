@@ -9,3 +9,7 @@
 **nbactions.xml
 **maven-eclipse.xml
 archive/
+**.metadata/
+**.settings/
+**src/main/generated-sources
+**src/main/xtend-gen

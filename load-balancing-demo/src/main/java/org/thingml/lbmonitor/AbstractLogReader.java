@@ -14,7 +14,7 @@ import java.util.logging.Logger;
  * @author ffl
  */
 public abstract class AbstractLogReader implements Runnable {
-    boolean stop = false;
+    protected boolean stop = false;
     LBWebSocketServer server;
     Thread thread;
 

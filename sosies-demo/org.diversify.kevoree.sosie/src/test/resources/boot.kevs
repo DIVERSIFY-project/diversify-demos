@@ -1,0 +1,18 @@
+repo "http://oss.sonatype.org/content/groups/public/"
+repo "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/"
+
+include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest
+
+include mvn:org.diversify:org.diversify.kevoree.sosie:latest
+
+add node0 : JavaNode
+set node0.log = 'debug'
+
+add sync : WSGroup
+attach node0 sync
+
+//add node0.sosie1 : SosieRunner
+//set node0.sosie1.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip"
+//set node0.sosie1.port = '8282'
+//set node0.sosie1.started = 'false'

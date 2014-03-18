@@ -1,0 +1,6 @@
+Ubuntu 11.10 LTS Build 54654
+Oracle JDK 6 JAVA
+Ringo
+Rino
+MDMS
+Database version 16

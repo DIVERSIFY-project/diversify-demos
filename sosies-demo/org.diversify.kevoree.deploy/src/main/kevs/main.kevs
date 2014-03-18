@@ -1,0 +1,10 @@
+//sample of KevScript configuration
+repo "http://repo1.maven.org/maven2"
+include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:release
+include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:release
+add node0 : JavaNode
+set node0.log = "trace"
+network node0.ip.lan 131.254.14.25
+add sync : WSGroup
+attach node0 sync
+set sync.port/node0 = '9000'

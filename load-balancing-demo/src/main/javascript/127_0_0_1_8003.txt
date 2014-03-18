@@ -1,0 +1,6 @@
+Ubuntu 12.04 LTS Build 3289
+Oracle JDK 7 JAVA
+Ringo
+Rino Sosie 3356
+MDMS
+Database version 16

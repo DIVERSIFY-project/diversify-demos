@@ -25,6 +25,9 @@ public class LogReader extends AbstractLogReader {
 
     public void run() {
 
+    	
+    	
+    	
         BufferedInputStream reader;
         StringBuilder buffer = new StringBuilder();
         

@@ -1,0 +1,16 @@
+repo 'http://oss.sonatype.org/content/groups/public/'
+repo 'http://sd-35000.dedibox.fr:8080/archiva/repository/internal/'
+include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:3.5.1
+include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lxc:3.5.1
+include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:3.5.1
+add fog4.diversifyfog4Child2 : JavaNode
+add fog4.diversifyfog4Child1 : JavaNode
+add fog4.diversifyfog4Child0 : JavaNode
+add fog1.diversifyfog1Child1 : JavaNode
+add fog1.diversifyfog1Child0 : JavaNode
+add fog5.diversifyfog5Child1 : JavaNode
+add fog5.diversifyfog5Child0 : JavaNode
+add fog7.diversifyfog7Child1 : JavaNode
+add fog7.diversifyfog7Child0 : JavaNode
+add fog9.diversifyfog9Child1 : JavaNode
+add fog9.diversifyfog9Child0 : JavaNode
